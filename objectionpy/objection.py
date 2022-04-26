@@ -15,6 +15,23 @@ Frame = frames.Frame
 
 
 @dataclass
+class Options:
+    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
+    defaultTextSpeed: int = 28
+    blipFrequency: int = 56
+    autoplaySpeed: int = 500
+    continueSoundUrl: str = "/Audio/Case/Continue_Trilogy.wav"
+
+    MAX_PAIRS = 100
+    MAX_GROUPS = 100
+    MAX_ALIASES = 100
+    MAX_GROUP_FRAMES = 1000
+    MAX_FRAME_ACTIONS = 10
+    MAX_EVIDENCE = 50
+    MAX_PROFILES = 50
+
+
+@dataclass
 class Group:
     name: str
     type: enums.GroupType
@@ -52,21 +69,6 @@ class Group:
 class _ObjectionBase:
     type: enums.ObjectionType
 
-    @dataclass
-    class Options:
-        dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
-        defaultTextSpeed: int = 28
-        blipFrequency: int = 56
-        autoplaySpeed: int = 500
-        continueSoundUrl: str = "/Audio/Case/Continue_Trilogy.wav"
-
-        MAX_PAIRS = 100
-        MAX_GROUPS = 100
-        MAX_ALIASES = 100
-        MAX_GROUP_FRAMES = 1000
-        MAX_FRAME_ACTIONS = 10
-        MAX_EVIDENCE = 50
-        MAX_PROFILES = 50
     options: Options
 
     aliases: dict[str, str]
@@ -74,7 +76,7 @@ class _ObjectionBase:
     _nextFrameIID: int
 
     def __init__(self, options: Optional[Options] = None) -> None:
-        self.options = options if options is not None else self.Options()
+        self.options = options if options is not None else Options()
         self.aliases = {}
         self._groups = []
 
@@ -350,7 +352,7 @@ class _ObjectionBase:
 class Scene(_ObjectionBase):
     type = enums.ObjectionType.SCENE
 
-    def __init__(self, options: Optional[_ObjectionBase.Options] = None) -> None:
+    def __init__(self, options: Optional[Options] = None) -> None:
         super().__init__(options)
         mainGroup = Group(
             'Main',
@@ -376,7 +378,7 @@ class Case(_ObjectionBase):
     evidence: list[RecordItem]
     profiles: list[RecordItem]
 
-    def __init__(self, options: Optional[_ObjectionBase.Options] = None) -> None:
+    def __init__(self, options: Optional[Options] = None) -> None:
         super().__init__(options)
         self.evidence = []
         self.profiles = []
