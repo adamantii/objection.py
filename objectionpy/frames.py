@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from copy import deepcopy
 from typing import Callable, Optional, TYPE_CHECKING
 from . import enums, assets
 if TYPE_CHECKING:
@@ -110,9 +109,6 @@ class Frame:
     caseAction: None = None
 
     onCompile: Optional[Callable[[dict], dict]] = None
-
-    def copy(self) -> 'Frame':
-        return deepcopy(self)
 
 
 @dataclass
