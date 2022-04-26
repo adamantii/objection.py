@@ -1,4 +1,4 @@
-from objectionpy import assets, enums
+from . import assets, enums
 
 
 _defaultBackgrounds = {

@@ -5,7 +5,7 @@ from warnings import warn
 from typing import Optional
 from requests import post, get
 from json import JSONDecodeError
-from objectionpy import enums, _utils
+from . import enums, _utils
 
 
 class Asset:
@@ -210,16 +210,17 @@ class Evidence(Asset):
         self.icon = '[#evdi' + str(self.id) + ']'
 
 
-@dataclass
 class AssetBank:
-    characters: dict[str, Character] = field(default_factory=dict)
-    backgrounds: dict[str, Background] = field(default_factory=dict)
-    music: dict[str, Music] = field(default_factory=dict)
-    sounds: dict[str, Sound] = field(default_factory=dict)
-    popups: dict[str, Popup] = field(default_factory=dict)
-    evidence: dict[str, Evidence] = field(default_factory=dict)
+    characters: dict[str, Character]
+    backgrounds: dict[str, Background]
+    music: dict[str, Music]
+    sounds: dict[str, Sound]
+    popups: dict[str, Popup]
+    evidence: dict[str, Evidence]
 
-    def __post_init__(self, assetDict: dict[str, Asset] = {}) -> None:
+    def __init__(self, assetDict: dict[str, Asset] = {}) -> None:
+        for key in self.__annotations__.keys():
+            setattr(self, key, {})
         self.loadAssets(assetDict)
 
     def loadAssets(self, assetDict: dict[str, Asset]):

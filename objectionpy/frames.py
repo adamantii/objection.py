@@ -1,18 +1,23 @@
-from objectionpy import objection
 from dataclasses import dataclass, field
-from typing import Callable, Optional
 from copy import deepcopy
-from objectionpy import enums, assets
-
+from typing import Callable, Optional, TYPE_CHECKING
+from . import enums, assets
+if TYPE_CHECKING:
+    from .objection import Case
 
 @dataclass
 class FrameCharacter:
     character: assets.Character
-    poseId: Optional[int]
+    poseId: Optional[int] = None
+    poseSubstr: Optional[str] = None
     flip: bool = False
     pairOffset: tuple[int, int] = (0, 0)
     isActive: Optional[bool] = None
     isFront: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.poseId is None and self.poseSubstr is not None:
+            self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
 
     @property
     def isNone(self) -> bool:
@@ -50,10 +55,10 @@ class Transition:
 
 
 @dataclass
-class FrameProperties:
+class Properties:
     talk: bool = True
     poseAnim: bool = True
-    moveNext: bool = False
+    goNext: bool = False
     merge: bool = False
     offScreen: bool = False
     centerText: bool = False
@@ -91,14 +96,14 @@ class Frame:
     customName: Optional[str] = None
     bubble: Optional[int] = None
     background: Optional[assets.Background] = None
-    backgroundFlip: bool = False
+    backgroundFlip: Optional[bool] = None
     wideLeft: Optional[float] = None
     popup: Optional[assets.Popup] = None
 
     fade: Optional[Fade] = None
     filter: Optional[Filter] = None
     transition: Optional[Transition] = None
-    properties: FrameProperties = field(default_factory=FrameProperties)
+    properties: Properties = field(default_factory=Properties)
     options: OptionModifiers = field(default_factory=OptionModifiers)
 
     tag: Optional[str] = None  # The frame's identifier for case actions
@@ -112,7 +117,7 @@ class Frame:
 
 @dataclass
 class Contradiction:
-    evidence: objection.Case.RecordItem
+    evidence: 'Case.RecordItem'
     targetTag: str
 
 
@@ -125,7 +130,7 @@ class CEFrame(Frame):
 noneCharacter = FrameCharacter(
     assets.Character(None, loaded=True),
     None,
-    False,
+    flip=False,
     isActive=False,
     isFront=False,
 )

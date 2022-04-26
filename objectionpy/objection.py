@@ -3,9 +3,8 @@ from functools import _lru_cache_wrapper, cache
 from json import dumps
 from base64 import b64encode
 from typing import Optional, Sized
-from unicodedata import name
 from warnings import warn
-from objectionpy import enums, assets, frames, _utils
+from . import enums, _utils, frames
 
 
 PACKAGE_VERSION = 'v0.0'
@@ -22,13 +21,13 @@ class Options:
     autoplaySpeed: int = 500
     continueSoundUrl: str = "/Audio/Case/Continue_Trilogy.wav"
 
-    MAX_PAIRS = 100
-    MAX_GROUPS = 100
-    MAX_ALIASES = 100
-    MAX_GROUP_FRAMES = 1000
-    MAX_FRAME_ACTIONS = 10
-    MAX_EVIDENCE = 50
-    MAX_PROFILES = 50
+    MAX_PAIRS: int = 100
+    MAX_GROUPS: int = 100
+    MAX_ALIASES: int = 100
+    MAX_GROUP_FRAMES: int = 1000
+    MAX_FRAME_ACTIONS: int = 10
+    MAX_EVIDENCE: int = 50
+    MAX_PROFILES: int = 50
 
 
 @dataclass
@@ -96,11 +95,14 @@ class _ObjectionBase:
         frontChar = chars[_utils._maxIndex(
             [*map(lambda char: char._getIndividualValue(char.isFront) if not char.isNone else -2, chars)])]
 
-        flip = (
-            ('1' if frame.backgroundFlip else '0') +
-            ('1' if activeChar.flip else '0') +
-            ('1' if secondaryChar.flip else '0')
-        )
+        secondaryFlip = '1' if secondaryChar.flip else '0'
+        activeFlip = '1' if activeChar.flip else '0'
+        if frame.backgroundFlip is None:
+            backgroundFlip = '0' if not secondaryChar.isNone else activeFlip
+        else:
+            backgroundFlip = '1' if frame.backgroundFlip else '0'
+        flip = backgroundFlip + activeFlip + secondaryFlip
+
         frameObject = {
             "id": -1,
             "iid": self._nextFrameIID,
@@ -112,7 +114,7 @@ class _ObjectionBase:
             "username": frame.customName if frame.customName is not None else "",
             "mergeNext": frame.properties.merge,
             "doNotTalk": not frame.properties.talk,
-            "goNext": frame.properties.moveNext,
+            "goNext": frame.properties.goNext,
             "poseAnimation": frame.properties.poseAnim,
             "flipped": flip,
             "popupId": frame.popup if frame.popup is not None else None,
@@ -346,7 +348,7 @@ class _ObjectionBase:
 
     @classmethod
     def makeObjectionFile(cls, objectionObject: dict) -> str:
-        return str(b64encode(bytes(dumps(objectionObject), encoding='utf-8')))
+        return b64encode(bytes(dumps(objectionObject), encoding='utf-8')).decode('utf-8')
 
 
 class Scene(_ObjectionBase):
