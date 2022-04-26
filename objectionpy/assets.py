@@ -1,4 +1,5 @@
 from functools import cache, lru_cache
+from dataclasses import dataclass, field
 import re
 from warnings import warn
 from typing import Optional
@@ -207,6 +208,55 @@ class Evidence(Asset):
         super().__init__(id)
         self.tag = '[#evd' + str(self.id) + ']'
         self.icon = '[#evdi' + str(self.id) + ']'
+
+
+@dataclass
+class AssetBank:
+    characters: dict[str, Character] = field(default_factory=dict)
+    backgrounds: dict[str, Background] = field(default_factory=dict)
+    music: dict[str, Music] = field(default_factory=dict)
+    sounds: dict[str, Sound] = field(default_factory=dict)
+    popups: dict[str, Popup] = field(default_factory=dict)
+    evidence: dict[str, Evidence] = field(default_factory=dict)
+
+    def __post_init__(self, assetDict: dict[str, Asset] = {}) -> None:
+        self.loadAssets(assetDict)
+
+    def loadAssets(self, assetDict: dict[str, Asset]):
+        for name, asset in assetDict.items():
+            if type(asset) is Character:
+                self.characters[name] = asset
+            elif type(asset) is Background:
+                self.backgrounds[name] = asset
+            elif type(asset) is Music:
+                self.music[name] = asset
+            elif type(asset) is Sound:
+                self.sounds[name] = asset
+            elif type(asset) is Popup:
+                self.popups[name] = asset
+            elif type(asset) is Evidence:
+                self.evidence[name] = asset
+            else:
+                raise TypeError('Unknown asset type ' + type(asset).__name__)
+
+    def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
+        if assetType is Character:
+            targetDict = self.characters
+        elif assetType is Background:
+            targetDict = self.backgrounds
+        elif assetType is Music:
+            targetDict = self.music
+        elif assetType is Sound:
+            targetDict = self.sounds
+        elif assetType is Popup:
+            targetDict = self.popups
+        elif assetType is Evidence:
+            targetDict = self.evidence
+        else:
+            raise TypeError('Unknown asset type ' + assetType.__name__)
+
+        for name, id in ids.items():
+            targetDict[name] = assetType(id)
 
 
 class AssetWarning(Warning):

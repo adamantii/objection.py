@@ -15,55 +15,6 @@ Frame = frames.Frame
 
 
 @dataclass
-class AssetBank:
-    characters: dict[str, assets.Character] = field(default_factory=dict)
-    backgrounds: dict[str, assets.Background] = field(default_factory=dict)
-    music: dict[str, assets.Music] = field(default_factory=dict)
-    sounds: dict[str, assets.Sound] = field(default_factory=dict)
-    popups: dict[str, assets.Popup] = field(default_factory=dict)
-    evidence: dict[str, assets.Evidence] = field(default_factory=dict)
-
-    def __post_init__(self, assetDict: dict[str, assets.Asset] = {}) -> None:
-        self.loadAssets(assetDict)
-
-    def loadAssets(self, assetDict: dict[str, assets.Asset]):
-        for name, asset in assetDict.items():
-            if type(asset) is assets.Character:
-                self.characters[name] = asset
-            elif type(asset) is assets.Background:
-                self.backgrounds[name] = asset
-            elif type(asset) is assets.Music:
-                self.music[name] = asset
-            elif type(asset) is assets.Sound:
-                self.sounds[name] = asset
-            elif type(asset) is assets.Popup:
-                self.popups[name] = asset
-            elif type(asset) is assets.Evidence:
-                self.evidence[name] = asset
-            else:
-                raise TypeError('Unknown asset type ' + type(asset).__name__)
-
-    def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
-        if assetType is assets.Character:
-            targetDict = self.characters
-        elif assetType is assets.Background:
-            targetDict = self.backgrounds
-        elif assetType is assets.Music:
-            targetDict = self.music
-        elif assetType is assets.Sound:
-            targetDict = self.sounds
-        elif assetType is assets.Popup:
-            targetDict = self.popups
-        elif assetType is assets.Evidence:
-            targetDict = self.evidence
-        else:
-            raise TypeError('Unknown asset type ' + assetType.__name__)
-
-        for name, id in ids.items():
-            targetDict[name] = assetType(id)
-
-
-@dataclass
 class Group:
     name: str
     type: enums.GroupType
