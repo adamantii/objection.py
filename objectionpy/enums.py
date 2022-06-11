@@ -106,3 +106,7 @@ class PresetDialogueBox(Enum):
     AJ = 2
     THE_GREAT_ACE_ATTORNEY = 3
     TGAA = 3
+
+class RecordType(Enum):
+    EVIDENCE = 0
+    PROFILE = 1

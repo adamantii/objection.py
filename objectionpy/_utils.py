@@ -1,4 +1,5 @@
-from typing import Iterable, Optional
+from multiprocessing.sharedctypes import Value
+from typing import Any, Iterable, Optional
 
 
 def _reprFunc(obj, attributes: Iterable) -> str:
@@ -10,5 +11,11 @@ def _reprFunc(obj, attributes: Iterable) -> str:
     return result
 
 
-def _maxIndex(lst: list) -> int:
-    return lst.index(max(lst))
+def _maxIndex(list: list) -> int:
+    return list.index(max(list))
+
+def _tupleMapGet(list: list[tuple[Any, Any]], firstValue):
+    for tuple in list:
+        if tuple[0] == firstValue:
+            return tuple[1]
+    raise ValueError(repr(firstValue) + ' is not in tuple map')

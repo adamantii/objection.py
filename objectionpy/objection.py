@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from functools import _lru_cache_wrapper, cache
 from json import dumps
 from base64 import b64encode
-from typing import Optional, Sized
+from typing import Any, Optional, Sized, Union
 from warnings import warn
 from . import enums, _utils, frames
 
@@ -33,7 +33,7 @@ class Options:
 @dataclass
 class Group:
     name: str
-    type: enums.GroupType
+    type: enums.GroupType = enums.GroupType.NORMAL
     tag: str = ''
     frames: list[Frame] = field(default_factory=list)
     _ceCounselFrames: list[Frame] = field(default_factory=list, init=False)
@@ -83,7 +83,7 @@ class _ObjectionBase:
     def _verifyFrameChar(cls, char: Optional[frames.FrameCharacter]) -> frames.FrameCharacter:
         return char if char is not None else frames.noneCharacter
 
-    def _compileFrame(self, frame: Frame, requestPair: _lru_cache_wrapper, frameList: list[Frame], frameTags: dict, groupTags: dict):
+    def _compileFrame(self, frame: Frame, requestPair: _lru_cache_wrapper, frameList: list[Frame]):
         chars = (
             self._verifyFrameChar(frame.char),
             self._verifyFrameChar(frame.pairChar),
@@ -126,15 +126,15 @@ class _ObjectionBase:
             "caseAction": {},
             "pairId": None,
         }
-        frameTags[frame.tag] = frameObject
+        self._frameTags[frame.caseTag] = frameObject
         self._nextFrameIID += 1
 
         if frame.transition:
             frameObject['transition']['duration'] = frame.transition.duration
             frameObject['transition']['easing'] = frame.transition.easing.value
             frameObject['transition']['left'] = 0
-        if frame.wideLeft is not None:
-            frameObject['transition']['left'] = int(frame.wideLeft * 100)
+        if frame.wideX is not None:
+            frameObject['transition']['left'] = int(frame.wideX * 100)
 
         if frame.filter:
             frameObject['filter'] = {
@@ -275,7 +275,7 @@ class _ObjectionBase:
             },
             'aliases': [],
             'options': {},
-            'type': 'scene' if self.type == enums.ObjectionType.SCENE else 'case' if self.type == enums.ObjectionType.CASE else 'unknown',
+            'type': 'scene' if self.type is enums.ObjectionType.SCENE else 'case' if self.type is enums.ObjectionType.CASE else 'unknown',
         }
 
         objectionObject['options']['chatbox'] = self.options.dialogueBox.value
@@ -315,10 +315,10 @@ class _ObjectionBase:
             return pair
 
         self._nextFrameIID = 1
-        groupMap = []
-        frameMap = []
-        groupTags = {}
-        frameTags = {}
+        self._groupMap = []
+        self._frameMap = []
+        self._groupTags = {}
+        self._frameTags = {}
         for i, group in enumerate(self._groups):
             groupObject = {
                 "iid": i + 1,
@@ -327,15 +327,14 @@ class _ObjectionBase:
                 "frames": [],
             }
 
-            groupTags[group.tag] = groupObject
+            self._groupTags[group.tag] = groupObject
 
             for frame in group.frames:
-                frameObject = self._compileFrame(
-                    frame, requestPair=requestPair, frameList=groupObject['frames'], frameTags=frameTags, groupTags=groupTags)
-                frameMap.append((frame, frameObject))
+                frameObject = self._compileFrame(frame, requestPair=requestPair, frameList=groupObject['frames'])
+                self._frameMap.append((frame, frameObject))
                 groupObject['frames'].append(frameObject)
 
-            groupMap.append((group, groupObject))
+            self._groupMap.append((group, groupObject))
             objectionObject['groups'].append(groupObject)
             LimitWarning.checkList(groupObject['frames'], self.options.MAX_GROUP_FRAMES,
                                    'frames in a group (group iid=' + str(groupObject['iid']) + ')')
@@ -372,11 +371,21 @@ class Case(_ObjectionBase):
 
     @dataclass
     class RecordItem:
+        type: enums.RecordType
         name: str
         iconUrl: str
         checkUrl: str = ''
         description: str = ''
         hidden: bool = False
+
+        def _getIid(self, objMap: list[tuple]) -> str:
+            recordObject = _utils._tupleMapGet(objMap, self)
+            prefix: str
+            if (self.type is enums.RecordType.EVIDENCE): prefix = 'e-'
+            elif (self.type is enums.RecordType.PROFILE): prefix = 'p-'
+            else: raise TypeError('Unknown record item type ' + self.type.name)
+
+            return prefix + str(recordObject["iid"])
     evidence: list[RecordItem]
     profiles: list[RecordItem]
 
@@ -389,35 +398,206 @@ class Case(_ObjectionBase):
     def groups(self) -> list[Group]:
         return self._groups
 
+    def _getByTagOrObj(
+        self,
+        identifier: Union[str, Any],
+        objMap: list[tuple],
+        tagMap: dict,
+        errorText: str
+    ) -> dict:
+        if (type(identifier) is str):
+            return tagMap[identifier]
+        else:
+            try:
+                return _utils._tupleMapGet(objMap, identifier)
+            except StopIteration:
+                raise ValueError(errorText)
+
+    def _getFrameObject(self, frameParam: Union[str, Frame]) -> dict:
+        return self._getByTagOrObj(frameParam, objMap=self._frameMap, tagMap=self._frameTags, errorText='Parsed frame object wasn\' found')
+    
+    def _getGroupObject(self, groupParam: Union[str, Group]) -> dict:
+        return self._getByTagOrObj(groupParam, objMap=self._groupMap, tagMap=self._groupTags, errorText='Parsed group object wasn\' found')
+
     def compile(self):
         objectionObject = super().compile()
 
+        recordMap = []
         for items, recordName in (self.evidence, 'evidence'), (self.profiles, 'profiles'):
             for i, item in enumerate(items):
                 targetRecord = objectionObject['courtRecord'][recordName]
-                targetRecord.append({
+                recordObject = {
                     "iid": i + 1,
                     "name": item.name,
                     "iconUrl": item.iconUrl,
                     "url": item.checkUrl,
                     "description": item.description,
                     "hide": item.hidden,
-                })
+                }
+                targetRecord.append(recordObject)
+                recordMap.append((item, recordObject))
         LimitWarning.checkList(
             objectionObject['courtRecord']['evidence'], self.options.MAX_EVIDENCE, 'evidence')
         LimitWarning.checkList(
             objectionObject['courtRecord']['profiles'], self.options.MAX_PROFILES, 'profiles')
+
+        frame: Frame
+        frameObject: dict
+        for frame, frameObject in self._frameMap:
+            action = frame.caseAction
+            if action is None: continue
+            actionId: int = -1
+            actionValue: Any = None
+
+            if isinstance(action, frames.CaseActions.ToggleEvidence):
+                actionId = 16
+                actionValue = {
+                    "show": [],
+                    "hide": [],
+                }
+                item: Case.RecordItem
+                for item in action.show:
+                    actionValue["show"].append(item._getIid(recordMap))
+                for item in action.hide:
+                    actionValue["hide"].append(item._getIid(recordMap))
+
+            elif isinstance(action, frames.CaseActions.ToggleFrames):
+                actionId = 3
+                actionValue = {
+                    "show": "",
+                    "hide": "",
+                }
+                for frameParam in action.show:
+                    targetFrameObject: dict = self._getFrameObject(frameParam)
+                    actionValue["show"] += str(targetFrameObject["iid"]) + ' '
+                for frameParam in action.hide:
+                    targetFrameObject: dict = self._getFrameObject(frameParam)
+                    actionValue["hide"] += str(targetFrameObject["iid"]) + ' '
+                for key in ("show", "hide"):
+                    if (len(actionValue[key]) > 0):
+                        actionValue[key] = actionValue[key].strip()
+            
+            elif isinstance(action, frames.CaseActions.GoToFrame):
+                actionId = 4
+                actionValue = str(self._getFrameObject(action.frame)["iid"])
+            
+            elif isinstance(action, frames.CaseActions.SetGameOverGroup):
+                actionId = 15
+                actionValue = str(self._getGroupObject(action.group)["iid"])
+            
+            elif isinstance(action, frames.CaseActions.EndGame):
+                actionId = 5
+            
+            elif isinstance(action, (frames.CaseActions.HealthSet, frames.CaseActions.HealthAdd, frames.CaseActions.HealthRemove)):
+                actionId = 6
+                actionValue = {
+                    "amount": int(action.amount * 100)
+                }
+                if isinstance(action, frames.CaseActions.HealthSet): actionValue["type"] = 0
+                elif isinstance(action, frames.CaseActions.HealthAdd): actionValue["type"] = 1
+                elif isinstance(action, frames.CaseActions.HealthRemove): actionValue["type"] = 2
+            
+            elif isinstance(action, frames.CaseActions.FlashingHealth):
+                actionId = 7
+                actionValue = str(int(action.amount * 100))
+            
+            elif isinstance(action, frames.CaseActions.PromptPresent):
+                actionId = 8
+                actionValue = {
+                    "evidence": action.presentEvidence,
+                    "profiles": action.presentProfiles,
+                    "falseFid": str(self._getFrameObject(action.failFrame)["iid"]),
+                    "items": [],
+                }
+
+                for recordItem, frameParam in action.choices:
+                    actionValue["items"].append({
+                        "eid": recordItem._getIid(recordMap),
+                        "fid": str(self._getFrameObject(frameParam)["iid"]),
+                    })
+
+            elif isinstance(action, frames.CaseActions.PromptChoice):
+                actionId = 9
+                actionValue = []
+                for choiceText, frameParam in action.choices:
+                    actionValue.append({
+                        "text": choiceText,
+                        "fid": str(self._getFrameObject(frameParam)["iid"]),
+                    })
+
+            elif isinstance(action, (frames.CaseActions.PromptInt, frames.CaseActions.PromptStr)):
+                actionId = 12
+                actionValue = {
+                    "name": action.varName,
+                    "type": "int",
+                }
+                if isinstance(action, frames.CaseActions.PromptStr):
+                    actionValue["lowercase"] = action.toLower
+                    actionValue["type"] = "string"
+                    if not action.allowSpaces:
+                        actionValue["type"] = "word"
+
+            elif isinstance(action, frames.CaseActions.PromptCursor):
+                actionId = 17
+                actionValue = {
+                    "imageUrl": action.imageUrl,
+                    "prompt": action.prompt,
+                    "color": str(action.cursorColor),
+                    "falseFid": str(self._getFrameObject(action.failFrame)["iid"]),
+                    "areas": []
+                }
+
+                for cursorRect, frameParam in action.choices:
+                    actionValue["areas"].append({
+                        "fid": str(self._getFrameObject(frameParam)["iid"]),
+                        "shape": {
+                            "top": cursorRect.top,
+                            "left": cursorRect.left,
+                            "width": cursorRect.width,
+                            "height": cursorRect.height,
+                        },
+                    })
+
+            elif isinstance(action, frames.CaseActions.VarSet):
+                actionId = 10
+                actionValue = {
+                    "name": action.varName,
+                    "value": action.value,
+                }
+
+            elif isinstance(action, frames.CaseActions.VarAdd):
+                actionId = 11
+                actionValue = {
+                    "name": action.varName,
+                    "value": str(action.value),
+                }
+
+            elif isinstance(action, frames.CaseActions.VarEval):
+                actionId = 14
+                actionValue = {
+                    "expression": action.expression,
+                    "trueFid": str(self._getFrameObject(action.trueFrame)["iid"]),
+                    "falseFid": str(self._getFrameObject(action.falseFrame)["iid"]),
+                }
+            
+            if actionId == -1: raise TypeError('unknown case action')
+            
+            actionObject = {
+                "id": actionId,
+                "value": actionValue,
+            }
+            frameObject['caseAction'] = actionObject
 
         return objectionObject
 
 
 class LimitWarning(Warning):
     @classmethod
-    def warn(cls, limit: int, limitTarget: str):
+    def warn(cls, limit: int, limitTarget: str, value: int):
         warn(
-            f'exceeded limit of {limit} {limitTarget} - objection.lol support is not guaranteed', LimitWarning)
+            f'exceeded limit of {limit} {limitTarget} (at {value}) - objection.lol support is not guaranteed', LimitWarning)
 
     @classmethod
     def checkList(cls, lst: Sized, limit: Optional[int], limitTarget: str):
         if limit is not None and len(lst) > limit:
-            cls.warn(limit, limitTarget)
+            cls.warn(limit, limitTarget, len(lst))

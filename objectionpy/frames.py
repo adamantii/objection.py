@@ -1,8 +1,21 @@
 from dataclasses import dataclass, field
-from typing import Callable, Optional, TYPE_CHECKING
+from re import fullmatch
+from typing import Callable, Optional, Union, TYPE_CHECKING
 from . import enums, assets
 if TYPE_CHECKING:
-    from .objection import Case
+    from .objection import Case, Group
+
+
+class Color:
+    def __init__(self, string: str) -> None:
+        if (fullmatch('#[a-fA-F0-9]{3}', string)): string = '#' + string[1] + string[1] + string[2] + string[2] + string[3] + string[3]
+        if (not fullmatch('#[a-fA-F0-9]{6}', string)): raise ValueError('Invalid color ' + string + ', must be in hex #aaa or #ababab form')
+        self.string = string.upper()
+    
+    def __repr__(self) -> str:
+        return self.string
+
+
 
 @dataclass
 class FrameCharacter:
@@ -37,7 +50,7 @@ class Fade:
     target: enums.FadeTarget
     duration: int
     easing: enums.Easing = enums.Easing.LINEAR
-    color: Optional[str] = None
+    color: Optional[Color] = None
 
 
 @dataclass
@@ -75,6 +88,14 @@ class GalleryModifier:
 
 
 @dataclass
+class CursorRect:
+    top: int
+    left: int
+    width: int
+    height: int
+
+
+@dataclass
 class OptionModifiers:
     autoplaySpeed: Optional[int] = None
     dialogueBox: Optional[enums.PresetDialogueBox] = None
@@ -84,6 +105,118 @@ class OptionModifiers:
     defaultTextSpeed: Optional[int] = None
     blipFrequency: Optional[int] = None
     frameSkip: Optional[bool] = None
+
+
+class CaseActions:
+    def __init__(self) -> None:
+        raise NotImplementedError('')
+
+    class _CaseAction:
+        pass
+
+    @dataclass
+    class ToggleEvidence(_CaseAction):
+        show: list['Case.RecordItem'] = field(default_factory=list)
+        hide: list['Case.RecordItem'] = field(default_factory=list)
+
+    @dataclass
+    class ToggleFrames(_CaseAction):
+        show: list[Union[str, 'Frame']] = field(default_factory=list)
+        hide: list[Union[str, 'Frame']] = field(default_factory=list)
+
+    @dataclass
+    class GoToFrame(_CaseAction):
+        frame: Union[str, 'Frame']
+
+    @dataclass
+    class SetGameOverGroup(_CaseAction):
+        group: Union[str, 'Group']
+
+    class EndGame(_CaseAction):
+        pass
+
+    @dataclass
+    class HealthSet(_CaseAction):
+        amount: float # 0 to 1 fraction
+
+    @dataclass
+    class HealthAdd(_CaseAction):
+        amount: float
+
+    @dataclass
+    class HealthRemove(_CaseAction):
+        amount: float
+
+    @dataclass
+    class FlashingHealth(_CaseAction):
+        amount: float
+
+    @dataclass
+    class PromptPresent(_CaseAction):
+        failFrame: Union[str, 'Frame']
+        choices: list[
+            tuple[
+                'Case.RecordItem',
+                Union[str, 'Frame']
+            ]
+        ] = field(default_factory=list)
+
+        presentEvidence: bool = False
+        presentProfiles: bool = False
+
+    @dataclass
+    class PromptChoice(_CaseAction):
+        choices: list[
+            tuple[
+                str, Union[str, 'Frame']
+            ]
+        ] = field(default_factory=list)
+
+        def __post_init__(self):
+            if len(self.choices) > 4:
+                raise IndexError(self.__class__.__name__ + ' cannot have over 4 choices')
+            elif len(self.choices) == 0:
+                raise IndexError(self.__class__.__name__ + ' has 0 choices')
+
+    @dataclass
+    class PromptInt(_CaseAction):
+        varName: str
+
+    @dataclass
+    class PromptStr(_CaseAction):
+        varName: str
+        allowSpaces: bool = True
+        toLower: bool = False
+
+    @dataclass
+    class PromptCursor(_CaseAction):
+        imageUrl: str
+        prompt: str
+        failFrame: Union[str, 'Frame']
+        cursorColor: Color = Color('#F00')
+
+        choices: list[
+            tuple[
+                CursorRect,
+                Union[str, 'Frame']
+            ]
+        ] = field(default_factory=list)
+
+    @dataclass
+    class VarSet(_CaseAction):
+        varName: str
+        value: Union[int, str]
+
+    @dataclass
+    class VarAdd(_CaseAction):
+        varName: str
+        value: int
+
+    @dataclass
+    class VarEval(_CaseAction):
+        expression: str
+        trueFrame: Union[str, 'Frame']
+        falseFrame: Union[str, 'Frame']
 
 
 @dataclass
@@ -96,7 +229,7 @@ class Frame:
     bubble: Optional[int] = None
     background: Optional[assets.Background] = None
     backgroundFlip: Optional[bool] = None
-    wideLeft: Optional[float] = None
+    wideX: Optional[float] = None
     popup: Optional[assets.Popup] = None
 
     fade: Optional[Fade] = None
@@ -105,22 +238,21 @@ class Frame:
     properties: Properties = field(default_factory=Properties)
     options: OptionModifiers = field(default_factory=OptionModifiers)
 
-    tag: Optional[str] = None  # The frame's identifier for case actions
-    caseAction: None = None
+    caseTag: Optional[str] = None
+    caseAction: Optional[CaseActions._CaseAction] = None
 
-    onCompile: Optional[Callable[[dict], dict]] = None
-
-
-@dataclass
-class Contradiction:
-    evidence: 'Case.RecordItem'
-    targetTag: str
+    onCompile: Optional[Callable[[dict], dict]] = None # Optional function if it's absolutely necessary to work with the raw compiled frame dict
 
 
 @dataclass
 class CEFrame(Frame):
     pressFrames: list[Frame] = field(default_factory=list)
-    contradictions: list[Contradiction] = field(default_factory=list)
+    contradictions: list[
+            tuple[
+                'Case.RecordItem',
+                Union[str, 'Frame']
+            ]
+        ] = field(default_factory=list)
 
 
 noneCharacter = FrameCharacter(
