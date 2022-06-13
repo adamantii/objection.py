@@ -13626,7 +13626,7 @@ class Characters:
             }
         )
 
-    class gallery:
+    class Gallery:
         PW = _builtinCharacter(
             28,
             "Gallery",
