@@ -107,8 +107,9 @@ class OptionModifiers:
     frameSkip: Optional[bool] = None
 
     def __post_init__(self):
-        if len(self.galleryRemove) > 0 or self.galleryAssign.defense or self.galleryAssign.prosecution or self.galleryAssign.counsel or self.galleryAssign.witness or self.galleryAssign.judge:
-            raise NotImplementedError('Gallery assign & remove modifiers have not yet been implemented')
+        for character in self.galleryAssign.__dict__.values():
+            if character and not character.isPreset:
+                raise FutureWarning('Gallery assign modifiers not yet implemented to work for custom characters')
 
 
 class CaseActions:
