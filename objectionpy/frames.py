@@ -106,6 +106,10 @@ class OptionModifiers:
     blipFrequency: Optional[int] = None
     frameSkip: Optional[bool] = None
 
+    def __post_init__(self):
+        if len(self.galleryRemove) > 0 or self.galleryAssign.defense or self.galleryAssign.prosecution or self.galleryAssign.counsel or self.galleryAssign.witness or self.galleryAssign.judge:
+            raise NotImplementedError('Gallery assign & remove modifiers have not yet been implemented')
+
 
 class CaseActions:
     def __init__(self) -> None:
