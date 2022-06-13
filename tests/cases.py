@@ -376,5 +376,5 @@ goGroupReal.frames.append(Frame(
     text = """The case should have ended by now. If you're reading this, the last action failed miserably.""",
 ))
 
-with open('./caseActions.objection', 'w') as f:
+with open('./cases.objection', 'w') as f:
     f.write(case.makeObjectionFile(case.compile()))

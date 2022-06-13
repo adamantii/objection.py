@@ -3,6 +3,7 @@ from functools import _lru_cache_wrapper, cache
 from json import dumps
 from base64 import b64encode
 from typing import Any, Optional, Sized, Union
+from unicodedata import name
 from warnings import warn
 
 from numpy import isin
@@ -317,14 +318,20 @@ class _ObjectionBase:
         self._requestPair = requestPair
 
         self._nextFrameIID = 1
+        self._nextGeneratedGroupName = 1
         self._groupMap = []
         self._frameMap = []
         self._groupTags = {}
         self._frameTags = {}
         for i, group in enumerate(self._groups):
+            name = group.name
+            if not name:
+                name = 'Generated ' + str(self._nextGeneratedGroupName)
+                self._nextGeneratedGroupName += 1
+            
             groupObject = {
                 "iid": i + 1,
-                "name": group.name,
+                "name": name,
                 "type": group.type.value,
                 "frames": [],
             }
