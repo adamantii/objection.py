@@ -16,7 +16,7 @@ Frame = frames.Frame
 
 
 @dataclass
-class ObjectionOptions:
+class Options:
     dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
     defaultTextSpeed: int = 28
     blipFrequency: int = 56
@@ -62,14 +62,14 @@ class GameOverGroup(Group):
 class _ObjectionBase:
     type: enums.ObjectionType
 
-    options: ObjectionOptions
+    options: Options
 
     aliases: dict[str, str]
     _groups: list[Group]
     _nextFrameIID: int
 
-    def __init__(self, options: Optional[ObjectionOptions] = None) -> None:
-        self.options = options if options is not None else ObjectionOptions()
+    def __init__(self, options: Optional[Options] = None) -> None:
+        self.options = options if options is not None else Options()
         self.aliases = {}
         self._groups = []
 
@@ -378,7 +378,7 @@ class _ObjectionBase:
 class Scene(_ObjectionBase):
     type = enums.ObjectionType.SCENE
 
-    def __init__(self, options: Optional[ObjectionOptions] = None) -> None:
+    def __init__(self, options: Optional[Options] = None) -> None:
         super().__init__(options)
         mainGroup = Group(name='Main')
 
@@ -413,7 +413,7 @@ class Case(_ObjectionBase):
     evidence: list[RecordItem]
     profiles: list[RecordItem]
 
-    def __init__(self, options: Optional[ObjectionOptions] = None) -> None:
+    def __init__(self, options: Optional[Options] = None) -> None:
         super().__init__(options)
         self.evidence = []
         self.profiles = []

@@ -2,7 +2,7 @@ from objectionpy import preset, enums, assets
 from objectionpy.objection import *
 from objectionpy.frames import *
 
-case = Case(ObjectionOptions(
+case = Case(Options(
     dialogueBox = enums.PresetDialogueBox.TRILOGY,
 ))
 
