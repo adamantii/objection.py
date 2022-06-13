@@ -13735,6 +13735,14 @@ class Characters:
         )
 
 
+class SpeechBubbles:
+    Objection = 1
+    HoldIt = 2
+    TakeThat = 3
+    Gotcha = 4
+    Eureka = 5
+
+
 class Backgrounds:
     class Wide:
         PWCourtroom = assets.Background(72269)
