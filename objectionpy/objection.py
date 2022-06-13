@@ -4,6 +4,8 @@ from json import dumps
 from base64 import b64encode
 from typing import Any, Optional, Sized, Union
 from warnings import warn
+
+from numpy import isin
 from . import enums, _utils, frames
 
 
@@ -14,7 +16,7 @@ Frame = frames.Frame
 
 
 @dataclass
-class Options:
+class ObjectionOptions:
     dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
     defaultTextSpeed: int = 28
     blipFrequency: int = 56
@@ -32,50 +34,42 @@ class Options:
 
 @dataclass
 class Group:
-    name: str
-    type: enums.GroupType = enums.GroupType.NORMAL
-    tag: str = ''
+    type: enums.GroupType = field(default=enums.GroupType.NORMAL, init=False)
+    objection: Optional['_ObjectionBase'] = None
+    name: Optional[str] = None
+    caseTag: Optional[str] = None
     frames: list[Frame] = field(default_factory=list)
-    _ceCounselFrames: list[Frame] = field(default_factory=list, init=False)
-    _ceFailureFrames: list[Frame] = field(default_factory=list, init=False)
 
-    def _exceptIfNotCEType(self):
-        if self.type is not enums.GroupType.CROSS_EXAMINATION:
-            raise TypeError(
-                'counsel and failure frame sequences are only available in cross-examination groups')
+    def __post_init__(self):
+        try:
+            self.objection.groups.append(self) # type: ignore
+        except AttributeError:
+            pass
 
-    @property
-    def ceCounselFrames(self):
-        self._exceptIfNotCEType()
-        return self._ceCounselFrames
 
-    @ceCounselFrames.setter
-    def ceCounselFrames(self, value):
-        self._exceptIfNotCEType()
-        self._ceCounselFrames = value
+@dataclass
+class CEGroup(Group):
+    type: enums.GroupType = field(
+        default=enums.GroupType.CROSS_EXAMINATION, init=False)
+    counselSequence: list[Frame] = field(default_factory=list, init=False)
+    failureSequence: list[Frame] = field(default_factory=list, init=False)
 
-    @property
-    def ceFailureFrames(self):
-        self._exceptIfNotCEType()
-        return self._ceFailureFrames
 
-    @ceFailureFrames.setter
-    def ceFailureFrames(self, value):
-        self._exceptIfNotCEType()
-        self._ceFailureFrames = value
+class GameOverGroup(Group):
+    type = enums.GroupType.GAME_OVER
 
 
 class _ObjectionBase:
     type: enums.ObjectionType
 
-    options: Options
+    options: ObjectionOptions
 
     aliases: dict[str, str]
     _groups: list[Group]
     _nextFrameIID: int
 
-    def __init__(self, options: Optional[Options] = None) -> None:
-        self.options = options if options is not None else Options()
+    def __init__(self, options: Optional[ObjectionOptions] = None) -> None:
+        self.options = options if options is not None else ObjectionOptions()
         self.aliases = {}
         self._groups = []
 
@@ -83,7 +77,7 @@ class _ObjectionBase:
     def _verifyFrameChar(cls, char: Optional[frames.FrameCharacter]) -> frames.FrameCharacter:
         return char if char is not None else frames.noneCharacter
 
-    def _compileFrame(self, frame: Frame, requestPair: _lru_cache_wrapper, frameList: list[Frame]):
+    def _compileFrame(self, frame: Frame, frameList: list[Frame]):
         chars = (
             self._verifyFrameChar(frame.char),
             self._verifyFrameChar(frame.pairChar),
@@ -126,7 +120,10 @@ class _ObjectionBase:
             "caseAction": {},
             "pairId": None,
         }
-        self._frameTags[frame.caseTag] = frameObject
+        if (frame.caseTag):
+            if (frame.caseTag in self._frameTags):
+                raise ObjectionError('Duplicate frame tag "' + frame.caseTag + '"')
+            self._frameTags[frame.caseTag] = frameObject
         self._nextFrameIID += 1
 
         if frame.transition:
@@ -251,9 +248,11 @@ class _ObjectionBase:
             pairChars = [activeChar, secondaryChar]
             pairChars.sort(
                 key=lambda char: char.character.id if char.character.id is not None else 0, reverse=True)
-            pair = requestPair(pairChars[0].character.id, pairChars[1].character.id, pairChars[0].pairOffset,
+            pair = self._requestPair(pairChars[0].character.id, pairChars[1].character.id, pairChars[0].pairOffset,
                                pairChars[1].pairOffset, True if chars[0] is frontChar else False)
             frameObject['pairId'] = pair['pairId']
+
+        self._frameMap.append((frame, frameObject))
 
         if frame.onCompile is not None:
             frameObject = frame.onCompile(frameObject)
@@ -262,6 +261,7 @@ class _ObjectionBase:
                                'frame actions (frame iid=' + str(frameObject['iid']) + ')')
 
         return frameObject
+
 
     def compile(self) -> dict:
         objectionObject = {
@@ -313,6 +313,8 @@ class _ObjectionBase:
             objectionObject['pairs'].append(pair)
             nextPairID += 1
             return pair
+        
+        self._requestPair = requestPair
 
         self._nextFrameIID = 1
         self._groupMap = []
@@ -327,12 +329,35 @@ class _ObjectionBase:
                 "frames": [],
             }
 
-            self._groupTags[group.tag] = groupObject
+            if (group.caseTag):
+                if (group.caseTag in self._groupTags):
+                    raise ObjectionError(
+                        'Duplicate group tag "' + group.caseTag + '"')
+                self._groupTags[group.caseTag] = groupObject
 
             for frame in group.frames:
-                frameObject = self._compileFrame(frame, requestPair=requestPair, frameList=groupObject['frames'])
-                self._frameMap.append((frame, frameObject))
+                if isinstance(frame, frames.CEFrame) and not isinstance(group, CEGroup):
+                    raise ObjectionError('CEFrame found in non-CE group')
+                frameObject = self._compileFrame(frame, frameList=groupObject['frames'])
                 groupObject['frames'].append(frameObject)
+
+            if isinstance(group, CEGroup):
+                if len(group.counselSequence) > 0:
+                    groupObject["counselFrames"] = []
+                    for frame in group.counselSequence:
+                        if isinstance(frame, frames.CEFrame):
+                            raise ObjectionError('CEFrame found within counsel sequence')
+                        groupObject["counselFrames"].append(
+                            self._compileFrame(frame, frameList=groupObject["counselFrames"])
+                        )
+                if len(group.failureSequence) > 0:
+                    groupObject["failureFrames"] = []
+                    for frame in group.failureSequence:
+                        if isinstance(frame, frames.CEFrame):
+                            raise ObjectionError('CEFrame found within failure sequence')
+                        groupObject["failureFrames"].append(
+                            self._compileFrame(frame, frameList=groupObject["failureFrames"])
+                        )
 
             self._groupMap.append((group, groupObject))
             objectionObject['groups'].append(groupObject)
@@ -353,13 +378,9 @@ class _ObjectionBase:
 class Scene(_ObjectionBase):
     type = enums.ObjectionType.SCENE
 
-    def __init__(self, options: Optional[Options] = None) -> None:
+    def __init__(self, options: Optional[ObjectionOptions] = None) -> None:
         super().__init__(options)
-        mainGroup = Group(
-            'Main',
-            enums.GroupType.NORMAL,
-        )
-        self._groups.append(mainGroup)
+        mainGroup = Group(name='Main')
 
     @property
     def frames(self) -> list[Frame]:
@@ -381,15 +402,18 @@ class Case(_ObjectionBase):
         def _getIid(self, objMap: list[tuple]) -> str:
             recordObject = _utils._tupleMapGet(objMap, self)
             prefix: str
-            if (self.type is enums.RecordType.EVIDENCE): prefix = 'e-'
-            elif (self.type is enums.RecordType.PROFILE): prefix = 'p-'
-            else: raise TypeError('Unknown record item type ' + self.type.name)
+            if (self.type is enums.RecordType.EVIDENCE):
+                prefix = 'e-'
+            elif (self.type is enums.RecordType.PROFILE):
+                prefix = 'p-'
+            else:
+                raise TypeError('Unknown record item type ' + self.type.name)
 
             return prefix + str(recordObject["iid"])
     evidence: list[RecordItem]
     profiles: list[RecordItem]
 
-    def __init__(self, options: Optional[Options] = None) -> None:
+    def __init__(self, options: Optional[ObjectionOptions] = None) -> None:
         super().__init__(options)
         self.evidence = []
         self.profiles = []
@@ -415,17 +439,18 @@ class Case(_ObjectionBase):
 
     def _getFrameObject(self, frameParam: Union[str, Frame]) -> dict:
         return self._getByTagOrObj(frameParam, objMap=self._frameMap, tagMap=self._frameTags, errorText='Parsed frame object wasn\' found')
-    
+
     def _getGroupObject(self, groupParam: Union[str, Group]) -> dict:
         return self._getByTagOrObj(groupParam, objMap=self._groupMap, tagMap=self._groupTags, errorText='Parsed group object wasn\' found')
 
     def compile(self):
-        objectionObject = super().compile()
-
-        recordMap = []
-        for items, recordName in (self.evidence, 'evidence'), (self.profiles, 'profiles'):
+        self._recordMap = []
+        courtRecord = {
+            'evidence': [],
+            'profiles': [],
+        }
+        for items, recordKey in (self.evidence, 'evidence'), (self.profiles, 'profiles'):
             for i, item in enumerate(items):
-                targetRecord = objectionObject['courtRecord'][recordName]
                 recordObject = {
                     "iid": i + 1,
                     "name": item.name,
@@ -434,18 +459,40 @@ class Case(_ObjectionBase):
                     "description": item.description,
                     "hide": item.hidden,
                 }
-                targetRecord.append(recordObject)
-                recordMap.append((item, recordObject))
+                courtRecord[recordKey].append(recordObject)
+                self._recordMap.append((item, recordObject))
         LimitWarning.checkList(
-            objectionObject['courtRecord']['evidence'], self.options.MAX_EVIDENCE, 'evidence')
+            courtRecord['evidence'], self.options.MAX_EVIDENCE, 'evidence')
         LimitWarning.checkList(
-            objectionObject['courtRecord']['profiles'], self.options.MAX_PROFILES, 'profiles')
+            courtRecord['profiles'], self.options.MAX_PROFILES, 'profiles')
+        
+        objectionObject = super().compile()
+        objectionObject['courtRecord'] = courtRecord
 
         frame: Frame
         frameObject: dict
         for frame, frameObject in self._frameMap:
+            if isinstance(frame, frames.CEFrame):
+                if len(frame.pressSequence) > 0:
+                    frameObject["pressFrames"] = []
+                    for pressFrame in frame.pressSequence:
+                        if isinstance(pressFrame, frames.CEFrame):
+                            raise ObjectionError('CEFrame found within press sequence')
+                        frameObject["pressFrames"].append(
+                            self._compileFrame(pressFrame, frameList=frameObject["pressFrames"])
+                        )
+
+                if len(frame.contradictions) > 0:
+                    frameObject["contradictions"] = []
+                    for recordItem, frameParam in frame.contradictions:
+                        frameObject["contradictions"].append({
+                            "eid": recordItem._getIid(self._recordMap),
+                            "fid": str(self._getFrameObject(frameParam)["iid"]),
+                        })
+            
             action = frame.caseAction
-            if action is None: continue
+            if action is None:
+                continue
             actionId: int = -1
             actionValue: Any = None
 
@@ -457,9 +504,9 @@ class Case(_ObjectionBase):
                 }
                 item: Case.RecordItem
                 for item in action.show:
-                    actionValue["show"].append(item._getIid(recordMap))
+                    actionValue["show"].append(item._getIid(self._recordMap))
                 for item in action.hide:
-                    actionValue["hide"].append(item._getIid(recordMap))
+                    actionValue["hide"].append(item._getIid(self._recordMap))
 
             elif isinstance(action, frames.CaseActions.ToggleFrames):
                 actionId = 3
@@ -476,31 +523,34 @@ class Case(_ObjectionBase):
                 for key in ("show", "hide"):
                     if (len(actionValue[key]) > 0):
                         actionValue[key] = actionValue[key].strip()
-            
+
             elif isinstance(action, frames.CaseActions.GoToFrame):
                 actionId = 4
                 actionValue = str(self._getFrameObject(action.frame)["iid"])
-            
+
             elif isinstance(action, frames.CaseActions.SetGameOverGroup):
                 actionId = 15
                 actionValue = str(self._getGroupObject(action.group)["iid"])
-            
+
             elif isinstance(action, frames.CaseActions.EndGame):
                 actionId = 5
-            
+
             elif isinstance(action, (frames.CaseActions.HealthSet, frames.CaseActions.HealthAdd, frames.CaseActions.HealthRemove)):
                 actionId = 6
                 actionValue = {
                     "amount": int(action.amount * 100)
                 }
-                if isinstance(action, frames.CaseActions.HealthSet): actionValue["type"] = 0
-                elif isinstance(action, frames.CaseActions.HealthAdd): actionValue["type"] = 1
-                elif isinstance(action, frames.CaseActions.HealthRemove): actionValue["type"] = 2
-            
+                if isinstance(action, frames.CaseActions.HealthSet):
+                    actionValue["type"] = 0
+                elif isinstance(action, frames.CaseActions.HealthAdd):
+                    actionValue["type"] = 1
+                elif isinstance(action, frames.CaseActions.HealthRemove):
+                    actionValue["type"] = 2
+
             elif isinstance(action, frames.CaseActions.FlashingHealth):
                 actionId = 7
                 actionValue = str(int(action.amount * 100))
-            
+
             elif isinstance(action, frames.CaseActions.PromptPresent):
                 actionId = 8
                 actionValue = {
@@ -512,7 +562,7 @@ class Case(_ObjectionBase):
 
                 for recordItem, frameParam in action.choices:
                     actionValue["items"].append({
-                        "eid": recordItem._getIid(recordMap),
+                        "eid": recordItem._getIid(self._recordMap),
                         "fid": str(self._getFrameObject(frameParam)["iid"]),
                     })
 
@@ -579,9 +629,10 @@ class Case(_ObjectionBase):
                     "trueFid": str(self._getFrameObject(action.trueFrame)["iid"]),
                     "falseFid": str(self._getFrameObject(action.falseFrame)["iid"]),
                 }
-            
-            if actionId == -1: raise TypeError('unknown case action')
-            
+
+            if actionId == -1:
+                raise TypeError('unknown case action')
+
             actionObject = {
                 "id": actionId,
                 "value": actionValue,
@@ -601,3 +652,7 @@ class LimitWarning(Warning):
     def checkList(cls, lst: Sized, limit: Optional[int], limitTarget: str):
         if limit is not None and len(lst) > limit:
             cls.warn(limit, limitTarget, len(lst))
+
+
+class ObjectionError(Exception):
+    pass

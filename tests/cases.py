@@ -2,12 +2,11 @@ from objectionpy import preset, enums, assets
 from objectionpy.objection import *
 from objectionpy.frames import *
 
-case = Case(Options(
+case = Case(ObjectionOptions(
     dialogueBox = enums.PresetDialogueBox.TRILOGY,
 ))
 
-mainGroup = Group('Main')
-case.groups.append(mainGroup)
+mainGroup = Group(case, 'Main')
 
 case.evidence.append(Case.RecordItem(
     name='Test Evidence',
@@ -262,8 +261,7 @@ mainGroup.frames.append(Frame(
     )
 ))
 
-goGroupFake = Group(name='Fake Game Over')
-case.groups.append(goGroupFake)
+goGroupFake = GameOverGroup(case, 'Fake Game Over')
 goGroupFake.frames.append(Frame(
     char = FrameCharacter(
         character=preset.Characters.Defense.PhoenixWright,
@@ -271,12 +269,11 @@ goGroupFake.frames.append(Frame(
     ),
     text = """This is the wrong game over group. If you're reading this, the last action failed miserably."""
 ))
-goGroupReal = Group(name='Real Game Over')
-case.groups.append(goGroupReal)
+goGroupReal = GameOverGroup(case, 'Real Game Over')
 
 mainGroup.frames.append(Frame(
     char = thonk,
-    text = f"""Evaluation: the test variable no longer equals 15. Now, to conclude, this frame should change the game over group.""",
+    text = f"""Evaluation: the test variable no longer equals 15. Now, this frame should change the game over group.""",
     caseTag='eval-truent',
     caseAction=CaseActions.SetGameOverGroup(
         group=goGroupReal
@@ -288,7 +285,7 @@ mainGroup.frames.append(Frame(
         character=preset.Characters.Defense.PhoenixWright,
         poseSubstr='read',
     ),
-    text = f"""A second demonstration of the health-setting action will be shown as your health will now be demolished.""",
+    text = f"""To test that, a second demonstration of the health-setting action will be shown as your health will be demolished.[#p1000]""",
     caseAction=CaseActions.HealthSet(
         amount=0
     )
@@ -299,11 +296,76 @@ goGroupReal.frames.append(Frame(
     text = """This is the correct game over group. The last action succeeded."""
 ))
 goGroupReal.frames.append(Frame(
+    char = thonk,
+    text = """Now, we will test cross-examination groups."""
+))
+goGroupReal.frames.append(Frame(
+    char = thonk,
+    text = """[#/r]Cross-examination[/#]""",
+    
+    properties=Properties(
+        presetPopup=enums.PresetPopup.CROSS_EXAMINATION,
+        centerText=True,
+    ),
+    options=OptionModifiers(
+        dialogueBoxVisible=False,
+    ),
+))
+goGroupReal.frames.append(Frame(
+    char = thonk,
+    caseAction=CaseActions.GoToFrame('cross-exam')
+))
+
+ceGroup = CEGroup(case)
+ceGroup.frames.append(CEFrame(
+    char = thonk,
+    text = """This is the first half of the testimony.""",
+    caseTag='cross-exam',
+    pressSequence=[
+        Frame(
+            char = thonk,
+            text = """This is a test press frame.""",
+            bubble=preset.SpeechBubbles.HoldIt,
+        )
+    ],
+))
+ceGroup.frames.append(CEFrame(
+    char = thonk,
+    text = """This is the second half of the testimony.""",
+    pressSequence=[
+        Frame(
+            char = thonk,
+            text = """You should present the profile on this second statement.""",
+            bubble=preset.SpeechBubbles.HoldIt,
+        )
+    ],
+    contradictions=[
+        (case.profiles[0], 'cross-exam-contra')
+    ],
+))
+
+ceGroup.counselSequence.append(Frame(
+    char = thonk,
+    text = """This is a test counsel frame.""",
+))
+ceGroup.failureSequence.append(Frame(
+    char = thonk,
+    text = """This is a test failure frame.""",
+    bubble=preset.SpeechBubbles.Objection,
+))
+
+goGroupReal.frames.append(Frame(
+    char = thonk,
+    text = """Good job, you have found the contradiction.""",
+    bubble=preset.SpeechBubbles.Objection,
+    caseTag='cross-exam-contra',
+))
+goGroupReal.frames.append(Frame(
     char = FrameCharacter(
         character=preset.Characters.Defense.PhoenixWright,
         poseSubstr='stand',
     ),
-    text = """Now,[#p500] this frame should end this case.""",
+    text = """Now,[#p500] for the final case action,[#p500] this frame should end this case.""",
     caseAction=CaseActions.EndGame()
 ))
 goGroupReal.frames.append(Frame(

@@ -246,7 +246,7 @@ class Frame:
 
 @dataclass
 class CEFrame(Frame):
-    pressFrames: list[Frame] = field(default_factory=list)
+    pressSequence: list[Frame] = field(default_factory=list)
     contradictions: list[
             tuple[
                 'Case.RecordItem',
