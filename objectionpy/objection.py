@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from functools import cache
 from json import loads, dumps
 from base64 import b64decode, b64encode
-from multiprocessing.sharedctypes import Value
 from warnings import warn
 from typing import Any, Optional, Sized, Union, TypeVar, TYPE_CHECKING
 from . import enums, _utils, frames, assets, preset
@@ -12,7 +11,7 @@ if TYPE_CHECKING:
     EnumT = TypeVar('EnumT')
 
 
-PACKAGE_VERSION = 'v0.0'
+PACKAGE_VERSION = 'v0.0.1'
 LATEST_OBJECTION_VERSION = 4
 
 Frame = frames.Frame
