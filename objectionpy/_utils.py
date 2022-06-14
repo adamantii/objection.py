@@ -18,4 +18,4 @@ def _tupleMapGet(list: list[tuple[Any, Any]], firstValue):
     for tuple in list:
         if tuple[0] == firstValue:
             return tuple[1]
-    raise ValueError(repr(firstValue) + ' is not in tuple map')
+    raise KeyError(repr(firstValue) + ' is not in tuple map')
