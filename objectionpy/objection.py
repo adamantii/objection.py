@@ -127,10 +127,12 @@ class _ObjectionBase:
             "frameFades": [],
             "frameActions": [],
             "caseAction": {},
-            "hide": frame.hidden,
             "pairId": None,
         }
-        if (frame.caseTag):
+        if frame.hidden:
+            frameDict['hide'] = True
+
+        if frame.caseTag:
             if (frame.caseTag in self._frameTags):
                 raise ObjectionError('Duplicate frame tag "' + frame.caseTag + '"')
             self._frameTags[frame.caseTag] = frameDict
@@ -408,7 +410,7 @@ class Scene(_ObjectionBase):
 
         compiledFrames = self._groupMap[0][1]['frames']
         for frameDict in [*compiledFrames]:
-            if frameDict['hide']:
+            if frameDict.get('hide'):
                 compiledFrames.remove(frameDict)
 
         return objectionDict
