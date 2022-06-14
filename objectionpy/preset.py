@@ -83,6 +83,18 @@ def _builtinCharacter(
     return character
 
 
+def collectionValues(collection: type) -> list:
+    values = []
+    for key, value in collection.__dict__.items():
+        if key[:2] == '__':
+            continue
+        elif type(value) is type:
+            values += collectionValues(value)
+        else:
+            values.append(value)
+    return values
+
+
 class Characters:
     class Defense:
         PhoenixWright = _builtinCharacter(

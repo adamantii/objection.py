@@ -4,5 +4,4 @@ A modular library for programmatically creating [objection.lol](https://objectio
 
 ### TODO
 
-- Complete: galleryRemove & galleryAssign options
-- Add: import .objection files
+- Complete: galleryAssign option for custom characters
