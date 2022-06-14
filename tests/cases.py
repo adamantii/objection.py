@@ -307,11 +307,8 @@ goGroupReal.frames.append(Frame(
 goGroupReal.frames.append(Frame(
     char = thonk,
     text = """[#/r]Cross-examination[/#]""",
-    
-    properties=Properties(
-        presetPopup=enums.PresetPopup.CROSS_EXAMINATION,
-        centerText=True,
-    ),
+    presetPopup=enums.PresetPopup.CROSS_EXAMINATION,
+    centerText=True,
     options=OptionModifiers(
         dialogueBoxVisible=False,
     ),

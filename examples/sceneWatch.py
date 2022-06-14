@@ -56,10 +56,8 @@ scene.frames.append(Frame(
         poseSubstr='determined',
     ),
     text = f"""I,[#p200] uhh...[#p400] """,
-    properties = Properties(
-        merge = True,
-        goNext = True,
-    )
+    merge = True,
+    goNext = True,
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
@@ -75,9 +73,7 @@ scene.frames.append(Frame(
         flip=True,
     ),
     text = f"""[#fl]{preset.Sound.Yell2}[#sm]Then what is the point?!""",
-    properties=Properties(
-        poseAnim=False,
-    )
+    poseAnim=False,
 ))
 
 with open('./sceneWatch.objection', 'w') as f:

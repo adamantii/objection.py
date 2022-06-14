@@ -115,10 +115,10 @@ class _ObjectionBase:
             "pairPoseId": secondaryChar.poseId,
             "bubbleType": frame.bubble if frame.bubble is not None else 0,
             "username": frame.customName if frame.customName is not None else "",
-            "mergeNext": frame.properties.merge,
-            "doNotTalk": not frame.properties.talk,
-            "goNext": frame.properties.goNext,
-            "poseAnimation": frame.properties.poseAnim,
+            "mergeNext": frame.merge,
+            "doNotTalk": not frame.talk,
+            "goNext": frame.goNext,
+            "poseAnimation": frame.poseAnim,
             "flipped": flip,
             "popupId": frame.popup if frame.popup is not None else None,
             "backgroundId": frame.background.id if frame.background is not None else activeChar.character.backgroundId,
@@ -161,16 +161,16 @@ class _ObjectionBase:
                 "duration": frame.fade.duration,
             })
 
-        if frame.properties.offScreen:
+        if frame.offScreen:
             frameDict['frameActions'].append({
                 'actionId': 6,
             })
-        if frame.properties.centerText:
+        if frame.centerText:
             frameDict['frameActions'].append({
                 'actionId': 9,
             })
 
-        presetPopup = frame.properties.presetPopup
+        presetPopup = frame.presetPopup
         if presetPopup is not None:
             if presetPopup.value > 0:
                 frameDict['frameActions'].append({
@@ -183,7 +183,7 @@ class _ObjectionBase:
                     'actionParam': '1',
                 })
 
-        presetBlip = frame.properties.presetBlip
+        presetBlip = frame.presetBlip
         if presetBlip is not None:
             if presetBlip.value > 0:
                 frameDict['frameActions'].append({
@@ -777,7 +777,7 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
             isFront=not pair['front'] if pairedIs1 else pair['front'],
         )
 
-    frame = frameClass(
+    frame: Frame = frameClass(
         char=char,
         pairChar=pairChar,
         text=frameDict['text'],
@@ -787,6 +787,16 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
         backgroundFlip=bool(int(flipString[0])),
         wideX=frameDict['transition']['left']/100 if frameDict['transition'] and 'left' in frameDict['transition'] else None,
         popup=assets.Popup(frameDict['popupId']) if frameDict['popupId'] else None,
+
+        talk=not frameDict['doNotTalk'],
+        poseAnim=frameDict['poseAnimation'],
+        goNext=frameDict['goNext'],
+        merge=frameDict['mergeNext'],
+        offScreen=_getFrameDictAction(frameDict, 6) is not None,
+        centerText=_getFrameDictAction(frameDict, 9) is not None,
+        presetBlip=_getEnumByValue(enums.PresetBlip, int(_getFrameDictAction(frameDict, 4)), enums.PresetBlip.KATONK) if _getFrameDictAction(frameDict, 4) else None,
+        presetPopup=_getEnumByValue(enums.PresetPopup, int(_getFrameDictAction(frameDict, 7)), enums.PresetPopup.CROSS_EXAMINATION) if _getFrameDictAction(frameDict, 7) else None,
+
         fade=frames.Fade(
             direction=_getEnumByValue(enums.FadeDirection, frameDict['frameFades'][0].get('direction'), enums.FadeDirection.IN),
             target=_getEnumByValue(enums.FadeTarget, frameDict['frameFades'][0].get('target'), enums.FadeTarget.BACKGROUND),
@@ -803,16 +813,6 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
             duration=frameDict['transition'].get('duration'),
             easing=_getEnumByValue(enums.Easing, frameDict['transition'].get('easing'), enums.Easing.EASE),
         ) if frameDict['transition'] else None,
-        properties=frames.Properties(
-            talk=not frameDict['doNotTalk'],
-            poseAnim=frameDict['poseAnimation'],
-            goNext=frameDict['goNext'],
-            merge=frameDict['mergeNext'],
-            offScreen=_getFrameDictAction(frameDict, 6) is not None,
-            centerText=_getFrameDictAction(frameDict, 9) is not None,
-            presetBlip=_getEnumByValue(enums.PresetBlip, int(_getFrameDictAction(frameDict, 4)), enums.PresetBlip.KATONK) if _getFrameDictAction(frameDict, 4) else None,
-            presetPopup=_getEnumByValue(enums.PresetPopup, int(_getFrameDictAction(frameDict, 7)), enums.PresetPopup.CROSS_EXAMINATION) if _getFrameDictAction(frameDict, 7) else None,
-        ),
         options=frames.OptionModifiers(
             autoplaySpeed=_getFrameDictAction(frameDict, 15),
             dialogueBox=_getEnumByValue(enums.PresetDialogueBox, _getFrameDictAction(frameDict, 12), enums.PresetDialogueBox.CLASSIC),
@@ -823,13 +823,13 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
         )
     )
     if _getFrameDictAction(frameDict, 5) is not None:
-        if frame.properties.presetBlip is not None:
-            frame.properties.presetBlip = enums.PresetBlip.MUTE
+        if frame.presetBlip is not None:
+            frame.presetBlip = enums.PresetBlip.MUTE
         else:
             warn(f"Conflicting speech blip Set and Mute actions at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
     if _getFrameDictAction(frameDict, 8) is not None:
-        if frame.properties.presetPopup is not None:
-            frame.properties.presetPopup = enums.PresetPopup.TESTIMONY_LABEL_HIDE
+        if frame.presetPopup is not None:
+            frame.presetPopup = enums.PresetPopup.TESTIMONY_LABEL_HIDE
         else:
             warn(f"Unsupported combination of popup Display and Remove actions at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
     

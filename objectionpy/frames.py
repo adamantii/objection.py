@@ -237,10 +237,18 @@ class Frame:
     wideX: Optional[float] = None
     popup: Optional[assets.Popup] = None
 
+    talk: bool = True
+    poseAnim: bool = True
+    goNext: bool = False
+    merge: bool = False
+    offScreen: bool = False
+    centerText: bool = False
+    presetPopup: Optional[enums.PresetPopup] = None
+    presetBlip: Optional[enums.PresetBlip] = None
+
     fade: Optional[Fade] = None
     filter: Optional[Filter] = None
     transition: Optional[Transition] = None
-    properties: Properties = field(default_factory=Properties)
     options: OptionModifiers = field(default_factory=OptionModifiers)
 
     caseTag: Optional[str] = None
