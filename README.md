@@ -29,7 +29,7 @@ scene.frames.append(Frame(
         duration = 1000,
         color = Color('#000'),
     ),
-    text = f'{preset.Sound.Yell}[#fl][#sl]Objection!',
+    text = f'{preset.Sound.Yell}Objection!',
 ))
 scene.compile()
 ```
