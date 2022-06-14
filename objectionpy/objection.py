@@ -712,7 +712,7 @@ def _getEnumByValue(enum: 'EnumMeta', value: Any, enumType: 'EnumT') -> 'EnumT':
     raise KeyError(f'Value "{value}" not found in {enum}')
 
 
-def _getFrameDictAction(frameDict: dict, actionId: int) -> Any:
+def _getFrameDictAction(frameDict: dict, actionId: int, suppressWarnings: bool) -> Any:
     actions = frameDict.get('frameActions')
     if actions:
         param: Any = None
@@ -720,7 +720,7 @@ def _getFrameDictAction(frameDict: dict, actionId: int) -> Any:
         for action in actions:
             if action['actionId'] == actionId:
                 if found:
-                    warn(f"Duplicate case action of id {actionId} found at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
+                    if suppressWarnings: warn(f"Duplicate case action of id {actionId} found at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
                     continue
                 param = action.get('actionParam')
                 if (param is None):
@@ -729,7 +729,7 @@ def _getFrameDictAction(frameDict: dict, actionId: int) -> Any:
         return param
 
 
-def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: list, frameIIDs: dict) -> Frame:
+def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: list, frameIIDs: dict, suppressWarnings: bool) -> Frame:
     pair: Optional[dict] = None
     pairedIs1: bool = False
     for pairDict in pairList:
@@ -794,10 +794,10 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
         poseAnim=frameDict['poseAnimation'],
         goNext=frameDict['goNext'],
         merge=frameDict['mergeNext'],
-        offScreen=_getFrameDictAction(frameDict, 6) is not None,
-        centerText=_getFrameDictAction(frameDict, 9) is not None,
-        presetBlip=_getEnumByValue(enums.PresetBlip, int(_getFrameDictAction(frameDict, 4)), enums.PresetBlip.KATONK) if _getFrameDictAction(frameDict, 4) else None,
-        presetPopup=_getEnumByValue(enums.PresetPopup, int(_getFrameDictAction(frameDict, 7)), enums.PresetPopup.CROSS_EXAMINATION) if _getFrameDictAction(frameDict, 7) else None,
+        offScreen=_getFrameDictAction(frameDict, 6, suppressWarnings) is not None,
+        centerText=_getFrameDictAction(frameDict, 9, suppressWarnings) is not None,
+        presetBlip=_getEnumByValue(enums.PresetBlip, int(_getFrameDictAction(frameDict, 4, suppressWarnings)), enums.PresetBlip.KATONK) if _getFrameDictAction(frameDict, 4, suppressWarnings) else None,
+        presetPopup=_getEnumByValue(enums.PresetPopup, int(_getFrameDictAction(frameDict, 7, suppressWarnings)), enums.PresetPopup.CROSS_EXAMINATION) if _getFrameDictAction(frameDict, 7, suppressWarnings) else None,
 
         fade=frames.Fade(
             direction=_getEnumByValue(enums.FadeDirection, frameDict['frameFades'][0].get('direction'), enums.FadeDirection.IN),
@@ -816,29 +816,29 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
             easing=_getEnumByValue(enums.Easing, frameDict['transition'].get('easing'), enums.Easing.EASE),
         ) if frameDict['transition'] else None,
         options=frames.OptionModifiers(
-            autoplaySpeed=_getFrameDictAction(frameDict, 15),
-            dialogueBox=_getEnumByValue(enums.PresetDialogueBox, _getFrameDictAction(frameDict, 12), enums.PresetDialogueBox.CLASSIC),
-            dialogueBoxVisible=bool(int(_getFrameDictAction(frameDict, 1))) if _getFrameDictAction(frameDict, 1) else None,
-            defaultTextSpeed=_getFrameDictAction(frameDict, 13),
-            blipFrequency=_getFrameDictAction(frameDict, 14),
-            frameSkip=bool(int(_getFrameDictAction(frameDict, 16))) if _getFrameDictAction(frameDict, 16) else None,
+            autoplaySpeed=_getFrameDictAction(frameDict, 15, suppressWarnings),
+            dialogueBox=_getEnumByValue(enums.PresetDialogueBox, _getFrameDictAction(frameDict, 12, suppressWarnings), enums.PresetDialogueBox.CLASSIC),
+            dialogueBoxVisible=bool(int(_getFrameDictAction(frameDict, 1, suppressWarnings))) if _getFrameDictAction(frameDict, 1, suppressWarnings) else None,
+            defaultTextSpeed=_getFrameDictAction(frameDict, 13, suppressWarnings),
+            blipFrequency=_getFrameDictAction(frameDict, 14, suppressWarnings),
+            frameSkip=bool(int(_getFrameDictAction(frameDict, 16, suppressWarnings))) if _getFrameDictAction(frameDict, 16, suppressWarnings) else None,
         )
     )
-    if _getFrameDictAction(frameDict, 5) is not None:
+    if _getFrameDictAction(frameDict, 5, suppressWarnings) is not None:
         if frame.presetBlip is not None:
             frame.presetBlip = enums.PresetBlip.MUTE
         else:
-            warn(f"Conflicting speech blip Set and Mute actions at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
-    if _getFrameDictAction(frameDict, 8) is not None:
+            if suppressWarnings: warn(f"Conflicting speech blip Set and Mute actions at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
+    if _getFrameDictAction(frameDict, 8, suppressWarnings) is not None:
         if frame.presetPopup is not None:
             frame.presetPopup = enums.PresetPopup.TESTIMONY_LABEL_HIDE
         else:
-            warn(f"Unsupported combination of popup Display and Remove actions at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
+            if suppressWarnings: warn(f"Unsupported combination of popup Display and Remove actions at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
     
     for action in frameDict['frameActions']:
         id, param = action['actionId'], action.get('actionParam')
         if id == 2 or id == 10:
-            warn(f"Importing Gallery Assign actions is not yet supported at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
+            if suppressWarnings: warn(f"Importing Gallery Assign actions is not yet supported at frame {frameDict['iid']} (\"{frameDict['text']}\")", IOWarning)
         elif id == 3 or id == 11:
             location = _getEnumByValue(enums.CharacterLocation, param, enums.CharacterLocation.DEFENSE)
             if location not in frame.options.galleryRemove:
@@ -849,7 +849,7 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
     return frame
 
 
-def loadJSONDict(objectionDict: dict) -> Union[Scene, Case]:
+def loadJSONDict(objectionDict: dict, suppressWarnings: bool = False) -> Union[Scene, Case]:
     if objectionDict['version'] != LATEST_OBJECTION_VERSION:
         raise IOError(f"Objection version {objectionDict['version']} cannot be loaded. Objection.py currently supports version {LATEST_OBJECTION_VERSION}. If your autopsy- sorry, if your objection is outdated, load file into objection.lol and re-download to update its version")
     
@@ -910,15 +910,15 @@ def loadJSONDict(objectionDict: dict) -> Union[Scene, Case]:
         mainFrameClass = frames.Frame
         if type(group) is CEGroup:
             for frameDict in groupDict['counselFrames']:
-                frame = _loadJSONFrame(frameDict, frames.Frame, objectionDict['pairs'], frameMap, frameIIDs)
+                frame = _loadJSONFrame(frameDict, frames.Frame, objectionDict['pairs'], frameMap, frameIIDs, suppressWarnings)
                 group.counselSequence.append(frame)
             for frameDict in groupDict['failureFrames']:
-                frame = _loadJSONFrame(frameDict, frames.Frame, objectionDict['pairs'], frameMap, frameIIDs)
+                frame = _loadJSONFrame(frameDict, frames.Frame, objectionDict['pairs'], frameMap, frameIIDs, suppressWarnings)
                 group.failureSequence.append(frame)
             mainFrameClass = frames.CEFrame
 
         for frameDict in groupDict['frames']:
-            frame = _loadJSONFrame(frameDict, mainFrameClass, objectionDict['pairs'], frameMap, frameIIDs)
+            frame = _loadJSONFrame(frameDict, mainFrameClass, objectionDict['pairs'], frameMap, frameIIDs, suppressWarnings)
             group.frames.append(frame)
     
     if type(objection) is Case:
@@ -1026,7 +1026,7 @@ def loadJSONDict(objectionDict: dict) -> Union[Scene, Case]:
                             ))
                     if 'pressFrames' in frameDict:
                         for pressDict in frameDict['pressFrames']:
-                            pressFrame = _loadJSONFrame(pressDict, Frame, objectionDict['pairs'], frameMap, frameIIDs)
+                            pressFrame = _loadJSONFrame(pressDict, Frame, objectionDict['pairs'], frameMap, frameIIDs, suppressWarnings)
                             frame.pressSequence.append(pressFrame)
     
     return objection
