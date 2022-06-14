@@ -245,6 +245,7 @@ class Frame:
 
     caseTag: Optional[str] = None
     caseAction: Optional[CaseActions._CaseAction] = None
+    hidden: bool = False
 
     onCompile: Optional[Callable[[dict], dict]] = None # Optional function if it's absolutely necessary to work with the raw compiled frame dict
 

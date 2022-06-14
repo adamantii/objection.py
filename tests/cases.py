@@ -28,7 +28,12 @@ thonk = FrameCharacter(
 
 mainGroup.frames.append(Frame(
     char = thonk,
-    text = f"""{preset.Music.Trial}This case is a test of all objection.lol case actions."""
+    text = f"""{preset.Music.Trial}This case is a test of objection.lol case features."""
+))
+mainGroup.frames.append(Frame(
+    char = thonk,
+    text = f"This frame is meant to be hidden using the 'Hide' feature. If you see this, the 'Hide' feature failed miserably.",
+    hidden = True,
 ))
 mainGroup.frames.append(Frame(
     char = thonk,

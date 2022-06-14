@@ -1,7 +1,9 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 from functools import cache
 from json import loads, dumps
 from base64 import b64decode, b64encode
+from multiprocessing.sharedctypes import Value
 from warnings import warn
 from typing import Any, Optional, Sized, Union, TypeVar, TYPE_CHECKING
 from . import enums, _utils, frames, assets, preset
@@ -79,6 +81,12 @@ class _ObjectionBase:
         return char if char is not None else frames.noneCharacter
 
     def _compileFrame(self, frame: Frame, frameList: list[Frame]):
+        try:
+            _utils._tupleMapGet(self._frameMap, frame)
+            frame = deepcopy(frame) # Makes a copy if map get didn't fail
+        except KeyError:
+            pass
+
         chars = (
             self._verifyFrameChar(frame.char),
             self._verifyFrameChar(frame.pairChar),
@@ -119,6 +127,7 @@ class _ObjectionBase:
             "frameFades": [],
             "frameActions": [],
             "caseAction": {},
+            "hide": frame.hidden,
             "pairId": None,
         }
         if (frame.caseTag):
@@ -388,10 +397,21 @@ class Scene(_ObjectionBase):
     def __init__(self, options: Optional[Options] = None) -> None:
         super().__init__(options)
         mainGroup = Group(name='Main')
+        self._groups.append(mainGroup)
 
     @property
     def frames(self) -> list[Frame]:
         return self._groups[0].frames
+    
+    def compile(self) -> dict:
+        objectionDict = super().compile()
+
+        compiledFrames = self._groupMap[0][1]['frames']
+        for frameDict in [*compiledFrames]:
+            if frameDict['hide']:
+                compiledFrames.remove(frameDict)
+
+        return objectionDict
 
 
 class Case(_ObjectionBase):
@@ -441,8 +461,8 @@ class Case(_ObjectionBase):
         else:
             try:
                 return _utils._tupleMapGet(objMap, identifier)
-            except StopIteration:
-                raise ValueError(errorText)
+            except KeyError:
+                raise KeyError(errorText)
 
     def _getFrameDict(self, frameParam: Union[str, Frame]) -> dict:
         return self._getByTagOrObj(frameParam, objMap=self._frameMap, tagMap=self._frameTags, errorText='Parsed frame object wasn\' found')
@@ -622,7 +642,7 @@ class Case(_ObjectionBase):
         }
         frameDict['caseAction'] = actionObject
 
-    def compile(self):
+    def compile(self) -> dict:
         self._recordMap = []
         courtRecord = {
             'evidence': [],
