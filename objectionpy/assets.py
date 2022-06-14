@@ -1,5 +1,4 @@
 from functools import cache, lru_cache
-from dataclasses import dataclass, field
 import re
 from warnings import warn
 from typing import Optional
