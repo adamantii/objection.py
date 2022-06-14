@@ -6,12 +6,12 @@ from base64 import b64decode, b64encode
 from warnings import warn
 from typing import Any, Optional, Sized, Union, TypeVar, TYPE_CHECKING
 from . import enums, _utils, frames, assets, preset
+from .version import __version__
 if TYPE_CHECKING:
     from enum import EnumMeta
     EnumT = TypeVar('EnumT')
 
 
-PACKAGE_VERSION = 'v0.0.1'
 LATEST_OBJECTION_VERSION = 4
 
 Frame = frames.Frame
@@ -276,7 +276,7 @@ class _ObjectionBase:
 
     def compile(self) -> dict:
         objectionDict = {
-            'credit': 'made with objection.py ' + PACKAGE_VERSION,
+            'credit': 'made with objection.py v' + __version__,
             'version': LATEST_OBJECTION_VERSION,
             'pairs': [],
             'groups': [],
