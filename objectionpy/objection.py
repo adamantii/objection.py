@@ -159,7 +159,7 @@ class _ObjectionBase:
                 "fade": frame.fade.direction.value,
                 "target": frame.fade.target.value,
                 "easing": frame.fade.easing.value,
-                "color": frame.fade.color,
+                "color": str(frame.fade.color),
                 "duration": frame.fade.duration,
             })
 
