@@ -89,8 +89,8 @@ class GalleryModifier:
 
 @dataclass
 class CursorRect:
-    top: int
     left: int
+    top: int
     width: int
     height: int
 
