@@ -5,7 +5,7 @@ here = pathlib.Path(__file__).parent.resolve()
 
 setup(
     name="objectionpy",
-    version="0.0.2",
+    version="0.0.3",
     author="Adamanti",
     author_email="adam@sallome.com",
     url="https://github.com/adamantii/objection.py",
