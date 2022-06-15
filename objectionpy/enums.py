@@ -1,20 +1,23 @@
+"""Enums used by the library."""
+
 from enum import Enum
 
 
 class ObjectionType(Enum):
+    """"""
     SCENE = 0
     CASE = 1
 
 
 class GroupType(Enum):
+    """"""
     NORMAL = "n"
-    CROSS_EXAMINATION = "ce"
     CE = "ce"
     GAME_OVER = "go"
-    GO = "go"
 
 
 class CharacterLocation(Enum):
+    """"""
     DEFENSE = 'defense'
     PROSECUTION = 'prosecution'
     COUNSEL = 'counsel'
@@ -24,12 +27,14 @@ class CharacterLocation(Enum):
 
 
 class FadeDirection(Enum):
+    """"""
     OUT = 0
     IN = 1
     OUT_IN = 2
 
 
 class FadeTarget(Enum):
+    """"""
     BACKGROUND = 0
     CHARACTER = 1
     SCENE = 2
@@ -39,6 +44,7 @@ class FadeTarget(Enum):
 
 
 class Easing(Enum):
+    """"""
     LINEAR = "linear"
     SPRING = "spring"
     EASE = "ease"
@@ -69,6 +75,7 @@ class Easing(Enum):
 
 
 class FilterType(Enum):
+    """"""
     GRAYSCALE = 'grayscale'
     INVERT = 'invert'
     SEPIA = 'sepia'
@@ -76,12 +83,14 @@ class FilterType(Enum):
 
 
 class FilterTarget(Enum):
+    """"""
     BACKGROUND = 0
     CHARACTERS = 1
     EVERYTHING = 2
 
 
 class PresetPopup(Enum):
+    """"""
     WITNESS_TESTIMONY = 1
     CROSS_EXAMINATION = 2
     TESTIMONY_LABEL = 3
@@ -91,6 +100,7 @@ class PresetPopup(Enum):
 
 
 class PresetBlip(Enum):
+    """"""
     MALE = 1
     FEMALE = 2
     TYPEWRITER = 3
@@ -100,6 +110,7 @@ class PresetBlip(Enum):
 
 
 class PresetDialogueBox(Enum):
+    """"""
     CLASSIC = 0
     TRILOGY = 1
     APOLLO_JUSTICE = 2
@@ -108,5 +119,6 @@ class PresetDialogueBox(Enum):
     TGAA = 3
 
 class RecordType(Enum):
+    """"""
     EVIDENCE = 0
     PROFILE = 1

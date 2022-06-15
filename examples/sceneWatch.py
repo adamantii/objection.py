@@ -22,14 +22,14 @@ projAssets.loadAssetIDs(
 
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['skye'],
+        character=projAssets.chars['skye'],
         poseSubstr='confident',
     ),
     text = f"""[#ts50]...[#ts35][#fm]{preset.Sound.Lightbulb}{projAssets.music['larry 2009']}I'm lovin' my new watch!"""
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['edgeworth'],
+        character=projAssets.chars['edgeworth'],
         poseSubstr='crossed',
         flip=True,
     ),
@@ -37,14 +37,14 @@ scene.frames.append(Frame(
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['skye'],
+        character=projAssets.chars['skye'],
         poseSubstr='write',
     ),
     text = f"""Just look at this design![#p300] {preset.Sound.Realization}[#fs][#ss][#ts45]So minimalist!.."""
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['edgeworth'],
+        character=projAssets.chars['edgeworth'],
         poseSubstr='point',
         flip=True,
     ),
@@ -52,7 +52,7 @@ scene.frames.append(Frame(
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['skye'],
+        character=projAssets.chars['skye'],
         poseSubstr='determined',
     ),
     text = f"""I,[#p200] uhh...[#p400] """,
@@ -61,14 +61,14 @@ scene.frames.append(Frame(
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['skye'],
+        character=projAssets.chars['skye'],
         poseSubstr='confident',
     ),
     text = f"""{preset.Sound.Yell}[#fl][#sm]I've got no idea![#p300]"""
 ))
 scene.frames.append(Frame(
     char = FrameCharacter(
-        character=projAssets.characters['edgeworth'],
+        character=projAssets.chars['edgeworth'],
         poseSubstr='damage',
         flip=True,
     ),

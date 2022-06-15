@@ -1,3 +1,9 @@
+"""
+Stores all preset objection.lol assets for easy access.
+
+All asset names were converted into alphanumeric CamelCase.
+"""
+
 from . import assets, enums
 
 
@@ -49,7 +55,7 @@ def _builtinCharacter(
     poses: list,
     customBubbles: dict[str, str] = {},
 ) -> assets.Character:
-    character = assets.Character(id, loaded=True)
+    character = assets.Character(id, _loaded=True)
 
     character.name = name
     character.namePlate = namePlate
@@ -84,6 +90,18 @@ def _builtinCharacter(
 
 
 def collectionValues(collection: type) -> list:
+    """
+    Get all values in an asset collection class.
+
+    If the class has nested classes, it retrieves assets from the nested classes.
+
+    Args:
+        - `collection : type`
+            - Class containing pre-set assets to be retrieved.
+
+    Returns:
+        List of assets in the collection class.
+    """
     values = []
     for key, value in collection.__dict__.items():
         if key[:2] == '__':

@@ -1,3 +1,11 @@
+"""
+Module for working with objection.lol assets.
+
+Every asset can be obtained using its id. If any of its properties are accessed, the object requests the asset data using the objection.lol.
+
+Also home to the AssetBank class - a container for organizing project assets.
+"""
+
 from functools import cache, lru_cache
 import re
 from warnings import warn
@@ -7,7 +15,7 @@ from json import JSONDecodeError
 from . import enums, _utils
 
 
-class Asset:
+class _Asset:
     id: int
     exists: bool = True
     _loaded: bool = False
@@ -38,7 +46,7 @@ class Asset:
             "_requestData must be implemented by " + cls.__name__ + " subclasses")
 
 
-class GetAsset(Asset):
+class _GetAsset(_Asset):
     _getUrl: str
     _tag: str
     name: str
@@ -60,7 +68,7 @@ class GetAsset(Asset):
         return self.tag
 
 
-class PostAsset(Asset):
+class _PostAsset(_Asset):
     _postUrl: str
     name: str
 
@@ -81,29 +89,29 @@ class PostAsset(Asset):
             return False, None
 
 
-class Sound(GetAsset):
+class Sound(_GetAsset):
     _getUrl = 'https://api.objection.lol/assets/sound/get?id='
     _assetKeys = ('name', 'url', 'volume', 'fileSize')
     _tag = 'bgs'
 
 
-class Music(GetAsset):
+class Music(_GetAsset):
     _getUrl = 'https://api.objection.lol/assets/music/get?id='
     _assetKeys = ('name', 'url', 'volume', 'fileSize')
     _tag = 'bgm'
 
 
-class Popup(PostAsset):
+class Popup(_PostAsset):
     _postUrl = 'https://api.objection.lol/assets/popup/getpopups'
     _assetKeys = ('name', 'url', 'alignment', 'center', 'posY', 'resize')
 
 
-class Background(PostAsset):
+class Background(_PostAsset):
     _postUrl = 'https://api.objection.lol/assets/background/getbackgrounds'
     _assetKeys = ('name', 'url', 'deskUrl', 'isWide')
 
 
-class Character(PostAsset):
+class Character(_PostAsset):
     _postUrl = 'https://api.objection.lol/character/getcharacters'
     _assetKeys = ('alignment', 'backgroundId', 'blipUrl', 'bubbles', 'galleryAJImageUrl', 'galleryImageUrl',
                   'iconUrl', 'limitWidth', 'name', 'namePlate', 'offsetX', 'offsetY', 'poses', 'side')
@@ -125,11 +133,11 @@ class Character(PostAsset):
     side: enums.CharacterLocation = enums.CharacterLocation.WITNESS
     _aj: bool = False
 
-    def __init__(self, id, loaded=False):
+    def __init__(self, id, _loaded=False):
         self.bubbles = []
         self.poses = []
         super().__init__(id)
-        if loaded:
+        if _loaded:
             self._loaded = True
             self.exists = True
 
@@ -186,7 +194,7 @@ class Character(PostAsset):
         return -1
 
 
-class Evidence(Asset):
+class Evidence(_Asset):
     _getUrl = 'https://api.objection.lol/assets/evidence/get?id='
     _assetKeys = ('url',)
     _reprKeys = ('id', 'url')
@@ -210,22 +218,33 @@ class Evidence(Asset):
 
 
 class AssetBank:
-    characters: dict[str, Character]
+    """Container for organizing project assets."""
+    chars: dict[str, Character]
     backgrounds: dict[str, Background]
     music: dict[str, Music]
     sounds: dict[str, Sound]
     popups: dict[str, Popup]
     evidence: dict[str, Evidence]
 
-    def __init__(self, assetDict: dict[str, Asset] = {}) -> None:
+    def __init__(self, assetDict: dict[str, _Asset] = {}) -> None:
         for key in self.__annotations__.keys():
             setattr(self, key, {})
         self.loadAssets(assetDict)
 
-    def loadAssets(self, assetDict: dict[str, Asset]):
+    def loadAssets(self, assetDict: dict[str, _Asset]):
+        """
+        Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
+
+        Args:
+            - `assetDict : dict`
+                - Dictionary of asset objects.
+
+        Raises:
+            TypeError: An object of an invalid type was provided.
+        """
         for name, asset in assetDict.items():
             if type(asset) is Character:
-                self.characters[name] = asset
+                self.chars[name] = asset
             elif type(asset) is Background:
                 self.backgrounds[name] = asset
             elif type(asset) is Music:
@@ -240,8 +259,20 @@ class AssetBank:
                 raise TypeError('Unknown asset type ' + type(asset).__name__)
 
     def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
+        """
+        Add assets of a single type using IDs into the AssetBank.
+
+        Args:
+            - `assetType : type`
+                - Type of asset to add.
+            - `ids : dict[str, int]`
+                - Dictionary of asset IDs used to automatically get the assets.
+
+        Raises:
+            TypeError: An invalid type was provided.
+        """
         if assetType is Character:
-            targetDict = self.characters
+            targetDict = self.chars
         elif assetType is Background:
             targetDict = self.backgrounds
         elif assetType is Music:

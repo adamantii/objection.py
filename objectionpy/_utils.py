@@ -1,3 +1,5 @@
+"""Utility functions used across other files."""
+
 from typing import Any, Iterable, Optional
 
 

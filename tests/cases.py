@@ -203,7 +203,7 @@ mainGroup.frames.append(Frame(
     text = f""""[var:test]" was so excessively exuberant, we were forced to lowercase it. Anyway, please point at the odd item in the room.[#p1000][#evd537209]""",
     caseTag='cursor',
     caseAction=CaseActions.PromptCursor(
-        imageUrl="https://cdn.discordapp.com/attachments/870053209362800651/935489824259981322/unknown.png",
+        previewImageUrl="https://cdn.discordapp.com/attachments/870053209362800651/935489824259981322/unknown.png",
         prompt="Point at the item that's not meant to be there.",
         failFrame="cursor-fail",
         choices=[

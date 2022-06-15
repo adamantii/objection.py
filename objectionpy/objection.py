@@ -1,3 +1,5 @@
+"""Main module containing everything related to objection exporting, importing, and structure (except for frame-related components)."""
+
 from copy import deepcopy
 from dataclasses import dataclass, field
 from functools import cache
@@ -6,7 +8,7 @@ from base64 import b64decode, b64encode
 from warnings import warn
 from typing import Any, Optional, Sized, Union, TypeVar, TYPE_CHECKING
 from . import enums, _utils, frames, assets, preset
-from .version import __version__
+from ._version import __version__
 if TYPE_CHECKING:
     from enum import EnumMeta
     EnumT = TypeVar('EnumT')
@@ -19,6 +21,11 @@ Frame = frames.Frame
 
 @dataclass
 class Options:
+    """
+    The default options of an objection.
+    
+    Most can be modified with OptionModifiers in Frames.
+    """
     dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
     defaultTextSpeed: int = 28
     blipFrequency: int = 56
@@ -36,7 +43,20 @@ class Options:
 
 @dataclass
 class Group:
-    type: enums.GroupType = field(default=enums.GroupType.NORMAL, init=False)
+    """
+    Container for frames used in Cases.
+
+    Attributes:
+        - `objection : Optional[_ObjectionBase]`
+            - The case to automatically append to on the group's initialization.
+        - `name : str`
+            - Group name.
+        - `caseTag : str`
+            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
+        - `frames : list[Frame]`
+            - The group's frame list. May be of type Frame or CEFrame.
+    """
+    _type: enums.GroupType = field(default=enums.GroupType.NORMAL, init=False)
     objection: Optional['_ObjectionBase'] = None
     name: Optional[str] = None
     caseTag: Optional[str] = None
@@ -48,21 +68,62 @@ class Group:
         except AttributeError:
             pass
 
-
 @dataclass
 class CEGroup(Group):
-    type: enums.GroupType = field(
-        default=enums.GroupType.CROSS_EXAMINATION, init=False)
+    """
+    Special container for cross-examination sequences.
+
+    Can contain both Frame and CEFrame.
+
+    Attributes:
+        - `objection : Optional[_ObjectionBase]`
+            - The case to automatically append to on the group's initialization.
+        - `name : str`
+            - Group name.
+        - `caseTag : str`
+            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
+        - `frames : list[Frame]`
+            - The group's frame list. May be of type Frame or CEFrame.
+        - `counselSequence : list[Frame]`
+            - A sequence of frames played after the last statement of the cross-examination, before looping back to the first.
+        - `failureSequence : list[Frame]`
+            - A sequence of frames played when failing to present a correct contradiction.
+    """
+    _type: enums.GroupType = field(
+        default=enums.GroupType.CE, init=False)
     counselSequence: list[Frame] = field(default_factory=list, init=False)
     failureSequence: list[Frame] = field(default_factory=list, init=False)
 
-
 class GameOverGroup(Group):
-    type = enums.GroupType.GAME_OVER
+    """
+    Special container whose frames are played when the player's health reaches 0.
+
+    Attributes:
+        - `objection : Optional[_ObjectionBase]`
+            - The case to automatically append to on the group's initialization.
+        - `name : str`
+            - Group name.
+        - `caseTag : str`
+            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
+        - `frames : list[Frame]`
+            - The group's frame list. May be of type Frame or CEFrame.
+    """
+    _type = enums.GroupType.GAME_OVER
 
 
 class _ObjectionBase:
-    type: enums.ObjectionType
+    """
+    Base objection class.
+    
+    Should not be initialized. Use Scene or Case instead.
+
+    Attributes:
+        - `options : Options`
+            - Default objection options.
+        - `aliases : dict[str, str]`
+            - Dictionary of aliases, mapping original name to alias.
+    """
+    _type: enums.ObjectionType
 
     options: Options
 
@@ -275,6 +336,17 @@ class _ObjectionBase:
 
 
     def compile(self) -> dict:
+        """
+        Compile objection.
+
+        Raises:
+            - `ObjectionError`
+                - Duplicate case tag was found.
+                - CEFrame was found in the wrong group.
+
+        Returns:
+            JSON-serializable dictionary in the .objection format.
+        """
         objectionDict = {
             'credit': 'made with objection.py v' + __version__,
             'version': LATEST_OBJECTION_VERSION,
@@ -286,7 +358,7 @@ class _ObjectionBase:
             },
             'aliases': [],
             'options': {},
-            'type': 'scene' if self.type is enums.ObjectionType.SCENE else 'case' if self.type is enums.ObjectionType.CASE else 'unknown',
+            'type': 'scene' if self._type is enums.ObjectionType.SCENE else 'case' if self._type is enums.ObjectionType.CASE else 'unknown',
         }
 
         objectionDict['options']['chatbox'] = self.options.dialogueBox.value
@@ -342,7 +414,7 @@ class _ObjectionBase:
             groupDict = {
                 "iid": i + 1,
                 "name": name,
-                "type": group.type.value,
+                "type": group._type.value,
                 "frames": [],
             }
 
@@ -393,6 +465,20 @@ class _ObjectionBase:
 
 
 class Scene(_ObjectionBase):
+    """
+    Objection scene - a linear series of frames that can be recorded or played in a browser.
+    
+    Primarily modified by editing frames in Scene.frames.
+    
+    Attributes:
+        - `options : Options`
+            - Default objection options.
+        - `aliases : dict[str, str]`
+            - Dictionary of aliases, mapping original name to alias.
+        - `frames : list[Frames]`
+            - The scene's frame list. Primary way of modifying scenes.
+    """
+
     type = enums.ObjectionType.SCENE
 
     def __init__(self, options: Optional[Options] = None) -> None:
@@ -416,6 +502,19 @@ class Scene(_ObjectionBase):
 
 
 class Case(_ObjectionBase):
+    """
+    Objection case - interactive game playable only on a browser, with certain extra features.
+    
+    Attributes:
+        - `options : Options`
+            - Default objection options.
+        - `aliases : dict[str, str]`
+            - Dictionary of aliases, mapping original name to alias.
+        - `evidence : list[RecordItem]`
+        - `profiles : list[RecordItem]`
+        - `groups : list[Group]`
+            - The case's group list. Primary way of modifying cases.
+    """
     type = enums.ObjectionType.CASE
 
     @dataclass
@@ -594,7 +693,7 @@ class Case(_ObjectionBase):
         elif isinstance(action, frames.CaseActions.PromptCursor):
             actionId = 17
             actionValue = {
-                "imageUrl": action.imageUrl,
+                "imageUrl": action.previewImageUrl,
                 "prompt": action.prompt,
                 "color": str(action.cursorColor),
                 "falseFid": str(self._getFrameDict(action.failFrame)["iid"]),
@@ -680,6 +779,10 @@ class Case(_ObjectionBase):
 
 
 class LimitWarning(Warning):
+    """
+    Displayed when the limit of an individual objection component is exceeded.
+    
+    By default, they match the limits of the objection.lol GUI, but can be modified in the objection's Options."""
     @classmethod
     def warn(cls, limit: int, limitTarget: str, value: int):
         warn(
@@ -694,6 +797,7 @@ class IOWarning(Warning):
     pass
 
 class ObjectionError(Exception):
+    """Error of unspecified type during objection compilation."""
     pass
 
 
@@ -747,7 +851,7 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
                     charAsset = char
                     break
     else:
-        charAsset = assets.Character(frameDict['characterId'], loaded=(frameDict['characterId'] is None))
+        charAsset = assets.Character(frameDict['characterId'], _loaded=(frameDict['characterId'] is None))
     char = frames.FrameCharacter(
         character=charAsset,
         poseId=frameDict['poseId'],
@@ -849,6 +953,22 @@ def _loadJSONFrame(frameDict: dict, frameClass: type, pairList: list, frameMap: 
 
 
 def loadJSONDict(objectionDict: dict, suppressWarnings: bool = False) -> Union[Scene, Case]:
+    """
+    Load objectionpy objection from existing .objection in form of a JSON string.
+
+    Args:
+        - `objectionDict : dict`
+            - Parsed JSON dictionary of an objection.lol .objection
+        - `suppressWarnings : bool`
+            - Defaults to False.
+
+    Raises:
+        - `IOError`
+            - A JSON object's type is unknown or unsupported
+
+    Returns:
+        Scene or case parsed from the .objection JSON.
+    """
     if objectionDict['version'] != LATEST_OBJECTION_VERSION:
         raise IOError(f"Objection version {objectionDict['version']} cannot be loaded. Objection.py currently supports version {LATEST_OBJECTION_VERSION}. If your autopsy- sorry, if your objection is outdated, load file into objection.lol and re-download to update its version")
     
@@ -979,7 +1099,7 @@ def loadJSONDict(objectionDict: dict, suppressWarnings: bool = False) -> Union[S
                     elif id == 17:
                         frame.caseAction = frames.CaseActions.PromptCursor(
                             failFrame=frameIIDs[int(param['falseFid'])],
-                            imageUrl=param['imageUrl'],
+                            previewImageUrl=param['imageUrl'],
                             prompt=param['prompt'],
                             cursorColor=frames.Color(param['color']),
                         )
@@ -1030,8 +1150,40 @@ def loadJSONDict(objectionDict: dict, suppressWarnings: bool = False) -> Union[S
     
     return objection
 
-def loadJSONStr(objection: str) -> Union[Scene, Case]:
+def loadJSONStr(objection: str, suppressWarnings: bool = False) -> Union[Scene, Case]:
+    """
+    Load objectionpy objection from existing .objection in form of a JSON string.
+
+    Args:
+        - `objection : str`
+            - JSON string of an objection.lol .objection
+        - `suppressWarnings : bool`
+            - Defaults to False.
+
+    Raises:
+        - `IOError`
+            - A JSON object's type is unknown or unsupported
+
+    Returns:
+        Scene or case parsed from the .objection JSON.
+    """
     return loadJSONDict(loads(objection))
 
-def loadB64(objection: str) -> Union[Scene, Case]:
+def loadB64(objection: str, suppressWarnings: bool = False) -> Union[Scene, Case]:
+    """
+    Load objectionpy objection from existing .objection in form of base64-encoded JSON.
+
+    Args:
+        - `objection : str`
+            - Base64-encoded JSON string of an objection.lol .objection
+        - `suppressWarnings : bool`
+            - Defaults to False.
+
+    Raises:
+        - `IOError`
+            - A JSON object's type is unknown or unsupported
+
+    Returns:
+        Scene or case parsed from the .objection JSON.
+    """
     return loadJSONStr(b64decode(objection).decode("utf-8"))
