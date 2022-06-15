@@ -1,9 +1,7 @@
 """
 Module for working with objection.lol assets.
 
-Every asset can be obtained using its id. If any of its properties are accessed, the object requests the asset data using the objection.lol.
-
-Also home to the AssetBank class - a container for organizing project assets.
+Each asset can be obtained using its id. Also includes the AssetBank class - a container for organizing project assets.
 """
 
 from functools import cache, lru_cache
@@ -16,6 +14,11 @@ from . import enums, _utils
 
 
 class _Asset:
+    """
+    An objection.lol asset, created by ID.
+
+    By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.
+    """
     id: int
     exists: bool = True
     _loaded: bool = False
@@ -163,6 +166,17 @@ class Character(_PostAsset):
         return list(map(lambda pose: self._poseLookupKey(pose['name']), self.poses))
 
     def lookupPoseSubstr(self, lookupSubstr: str) -> int:
+        """
+        Search character pose using a name substring.
+
+        Args:
+            - `lookupSubstr : str`
+                - The susbtring to search by. Case-insensitive and ignores non-alphanumeric characters when comparing.
+                - When substring matches multiple poses, returns the one with the lowest length difference.
+
+        Returns:
+            The ID of the pose. If the pose isn't found, returns -1.
+        """
         keyToFind = self._poseLookupKey(lookupSubstr)
 
         bestI = -1
@@ -174,23 +188,27 @@ class Character(_PostAsset):
             if bestI == -1 or lengthDifference < bestLengthDifference:
                 bestI = i
                 bestLengthDifference = lengthDifference
+        
+        if bestI > -1:
+            return self.poses[bestI]['id']
+        else:
+            return -1
 
-        return self.poses[bestI]['id']
+    def getPose(self, name: str) -> int:
+        """
+        Get character pose by its exact name.
 
-    def getPose(
-        self,
-        name: Optional[str] = None,
-        idleImageUrl: Optional[str] = None,
-        speakImageUrl: Optional[str] = None,
-        iconUrl: Optional[str] = None,
-    ) -> int:
+        Args:
+            - `name : str`
+                - The pose's name. Must exactly match the pose name string.
+
+        Returns:
+            The ID of the pose. If the pose isn't found, returns -1.
+        """
         for pose in self.poses:
-            for key in ('name', 'idleImageUrl', 'speakImageUrl', 'iconUrl'):
-                if key is None:
-                    continue
-                if pose[key] != eval(key):
-                    continue
-                return pose['id']
+            if pose['name'] != name:
+                continue
+            return pose['id']
         return -1
 
 
