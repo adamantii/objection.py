@@ -1,18 +1,19 @@
 from setuptools import setup, find_packages
 import pathlib
+from objectionpy import _version
 
 here = pathlib.Path(__file__).parent.resolve()
 
 setup(
     name="objectionpy",
-    version="0.0.3",
+    version=_version.__version__,
     author="Adamanti",
     author_email="adam@sallome.com",
     url="https://github.com/adamantii/objection.py",
     description="A modular python library for creating objection.lol projects",
     long_description=(here / "README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
-    packages=find_packages("objectionpy"),
+    packages=["objectionpy"],
     keywords=["objection.lol", "objection", "generator", "case", "scene"],
     install_requires=["requests"],
     classifiers=[
