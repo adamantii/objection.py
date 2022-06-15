@@ -43,7 +43,7 @@ pip install objectionpy
 
 # Documentation
 
-[View the project's wiki page](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+[View the documentation page](https://adamantii.github.io/objection.py/)
 
 ## TODO
 
