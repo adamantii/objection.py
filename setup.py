@@ -22,6 +22,7 @@ setup(
         "License :: OSI Approved :: MIT License",
     ],
     project_urls={
+        "Documentation": "https://adamantii.github.io/objection.py/",
         "Bug Reports": "https://github.com/adamantii/objection.py/issues",
         "Source": "https://github.com/adamantii/objection.py/",
     },
