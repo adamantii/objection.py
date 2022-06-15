@@ -41,7 +41,7 @@ Installing objection.py with pip:
 pip install objectionpy
 ```
 
-# Documentation
+## Documentation
 
 [View the documentation page](https://adamantii.github.io/objection.py/)
 
