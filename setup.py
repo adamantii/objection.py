@@ -11,8 +11,9 @@ setup(
     url="https://github.com/adamantii/objection.py",
     description="A modular python library for creating objection.lol projects",
     long_description=(here / "README.md").read_text(encoding="utf-8"),
+    long_description_content_type="text/markdown",
     packages=find_packages("objectionpy"),
-    keywords=['objection.lol', 'objection', 'generator', 'case', 'scene'],
+    keywords=["objection.lol", "objection", "generator", "case", "scene"],
     install_requires=["requests"],
     classifiers=[
         "Development Status :: 4 - Beta",
