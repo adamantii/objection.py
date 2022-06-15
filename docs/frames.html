@@ -50,102 +50,6 @@ class Color:
         return self.string
 
 
-
-@dataclass
-class FrameCharacter:
-    &#34;&#34;&#34;
-    Specifies the attributes of a displayed character.
-    
-    Attributes:
-        - `character : assets.Character`
-            - The character to display.
-        - `poseId : Optional[int]`
-            - The ID of the displayed pose. Must be in this character&#39;s pose list. Either poseId or poseSubstr must be set.
-        - `poseSubstr : Optional[str]`
-            - A substring to identify this character&#39;s pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.
-        - `flip : bool`
-            - Whether this character is flipped.
-        - `pairOffset : tuple[int, int]`
-            - On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)
-        - `isActive : Optional[bool]`
-            - Whether this is the character that acts in the frame. Only applies when character is paired with another.
-        - `isFront : Optional[bool]`
-            - Whether this character displayed is in front of the other. Only applies when character is paired with another.
-    &#34;&#34;&#34;
-    character: assets.Character
-    poseId: Optional[int] = None
-    poseSubstr: Optional[str] = None
-    flip: bool = False
-    pairOffset: tuple[int, int] = (0, 0)
-    isActive: Optional[bool] = None
-    isFront: Optional[bool] = None
-
-    def __post_init__(self):
-        if self.poseId is None:
-            if self.poseSubstr is not None:
-                self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
-            else:
-                raise AttributeError(&#39;Either poseId or poseSubstr must be set to identify the pose in a FrameCharacter.&#39;)
-
-    @property
-    def isNone(self) -&gt; bool:
-        return self.character.id is None and self.poseId is None
-
-    def _getIndividualValue(self, value) -&gt; int:
-        if value is False or self.isNone:
-            return -1
-        elif value is True:
-            return 1
-        else:
-            return 0
-
-
-@dataclass
-class Fade:
-    &#34;&#34;&#34;
-    Fade a target.
-    
-    Color attribute doesn&#39;t apply to character targets.
-    Target attribute doesn&#39;t apply to OUT_IN direction.
-    &#34;&#34;&#34;
-    direction: enums.FadeDirection
-    target: enums.FadeTarget
-    duration: int
-    easing: enums.Easing = enums.Easing.LINEAR
-    color: Optional[Color] = None
-
-
-@dataclass
-class Filter:
-    &#34;&#34;&#34;
-    Color filter to a specific target.
-    
-    Amount attribute doesn&#39;t apply to INVERT and SEPIA types.
-    &#34;&#34;&#34;
-    type: enums.FilterType
-    target: enums.FilterTarget
-    amount: int = 100
-
-
-@dataclass
-class Transition:
-    &#34;&#34;&#34;Camera transition on wide backgrounds.&#34;&#34;&#34;
-    duration: int
-    easing: enums.Easing = enums.Easing.LINEAR
-
-
-@dataclass
-class GalleryModifier:
-    &#34;&#34;&#34;Specify characters for each gallery location.
-    
-    Any location set to None remains unchanged. (Custom characters not yet supported)&#34;&#34;&#34;
-    defense: Optional[assets.Character] = None
-    prosecution:  Optional[assets.Character] = None
-    counsel: Optional[assets.Character] = None
-    witness: Optional[assets.Character] = None
-    judge: Optional[assets.Character] = None
-
-
 @dataclass
 class CursorRect:
     &#34;&#34;&#34;An area targettable by the cursor in the &#34;point to an area&#34; case action.&#34;&#34;&#34;
@@ -153,28 +57,6 @@ class CursorRect:
     top: int
     width: int
     height: int
-
-
-@dataclass
-class OptionModifiers:
-    &#34;&#34;&#34;
-    Specify values for setting objection options affecting future frames.
-
-    Any option set to None remains unchanged.
-    &#34;&#34;&#34;
-    autoplaySpeed: Optional[int] = None
-    dialogueBox: Optional[enums.PresetDialogueBox] = None
-    dialogueBoxVisible: Optional[bool] = None
-    galleryAssign: GalleryModifier = field(default_factory=GalleryModifier)
-    galleryRemove: list[enums.CharacterLocation] = field(default_factory=list)
-    defaultTextSpeed: Optional[int] = None
-    blipFrequency: Optional[int] = None
-    frameSkip: Optional[bool] = None
-
-    def __post_init__(self):
-        for character in self.galleryAssign.__dict__.values():
-            if character and not character.isPreset:
-                raise FutureWarning(&#39;Gallery assign modifiers not yet implemented to work for custom characters&#39;)
 
 
 class CaseActions:
@@ -332,7 +214,7 @@ class CaseActions:
 
         choices: list[
             tuple[
-                CursorRect,
+                &#39;CursorRect&#39;,
                 Union[str, &#39;Frame&#39;]
             ]
         ] = field(default_factory=list)
@@ -365,6 +247,123 @@ class CaseActions:
         expression: str
         trueFrame: Union[str, &#39;Frame&#39;]
         falseFrame: Union[str, &#39;Frame&#39;]
+
+
+@dataclass
+class Fade:
+    &#34;&#34;&#34;
+    Fade a target.
+    
+    Color attribute doesn&#39;t apply to character targets.
+    Target attribute doesn&#39;t apply to OUT_IN direction.
+    &#34;&#34;&#34;
+    direction: enums.FadeDirection
+    target: enums.FadeTarget
+    duration: int
+    easing: enums.Easing = enums.Easing.LINEAR
+    color: Optional[Color] = None
+
+
+@dataclass
+class Filter:
+    &#34;&#34;&#34;
+    Color filter to a specific target.
+    
+    Amount attribute doesn&#39;t apply to INVERT and SEPIA types.
+    &#34;&#34;&#34;
+    type: enums.FilterType
+    target: enums.FilterTarget
+    amount: int = 100
+
+
+@dataclass
+class FrameCharacter:
+    &#34;&#34;&#34;
+    Specifies the attributes of a displayed character.
+    
+    Attributes:
+        - `character : assets.Character`
+            - The character to display.
+        - `poseId : Optional[int]`
+            - The ID of the displayed pose. Must be in this character&#39;s pose list. Either poseId or poseSubstr must be set.
+        - `poseSubstr : Optional[str]`
+            - A substring to identify this character&#39;s pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.
+        - `flip : bool`
+            - Whether this character is flipped.
+        - `pairOffset : tuple[int, int]`
+            - On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)
+        - `isActive : Optional[bool]`
+            - Whether this is the character that acts in the frame. Only applies when character is paired with another.
+        - `isFront : Optional[bool]`
+            - Whether this character displayed is in front of the other. Only applies when character is paired with another.
+    &#34;&#34;&#34;
+    character: assets.Character
+    poseId: Optional[int] = None
+    poseSubstr: Optional[str] = None
+    flip: bool = False
+    pairOffset: tuple[int, int] = (0, 0)
+    isActive: Optional[bool] = None
+    isFront: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.poseId is None:
+            if self.poseSubstr is not None:
+                self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
+            else:
+                raise AttributeError(&#39;Either poseId or poseSubstr must be set to identify the pose in a FrameCharacter.&#39;)
+
+    @property
+    def isNone(self) -&gt; bool:
+        return self.character.id is None and self.poseId is None
+
+    def _getIndividualValue(self, value) -&gt; int:
+        if value is False or self.isNone:
+            return -1
+        elif value is True:
+            return 1
+        else:
+            return 0
+
+
+@dataclass
+class GalleryModifier:
+    &#34;&#34;&#34;Specify characters for each gallery location.
+    
+    Any location set to None remains unchanged. (Custom characters not yet supported)&#34;&#34;&#34;
+    defense: Optional[assets.Character] = None
+    prosecution:  Optional[assets.Character] = None
+    counsel: Optional[assets.Character] = None
+    witness: Optional[assets.Character] = None
+    judge: Optional[assets.Character] = None
+
+
+@dataclass
+class OptionModifiers:
+    &#34;&#34;&#34;
+    Specify values for setting objection options affecting future frames.
+
+    Any option set to None remains unchanged.
+    &#34;&#34;&#34;
+    autoplaySpeed: Optional[int] = None
+    dialogueBox: Optional[enums.PresetDialogueBox] = None
+    dialogueBoxVisible: Optional[bool] = None
+    galleryAssign: GalleryModifier = field(default_factory=GalleryModifier)
+    galleryRemove: list[enums.CharacterLocation] = field(default_factory=list)
+    defaultTextSpeed: Optional[int] = None
+    blipFrequency: Optional[int] = None
+    frameSkip: Optional[bool] = None
+
+    def __post_init__(self):
+        for character in self.galleryAssign.__dict__.values():
+            if character and not character.isPreset:
+                raise FutureWarning(&#39;Gallery assign modifiers not yet implemented to work for custom characters&#39;)
+
+
+@dataclass
+class Transition:
+    &#34;&#34;&#34;Camera transition on wide backgrounds.&#34;&#34;&#34;
+    duration: int
+    easing: enums.Easing = enums.Easing.LINEAR
 
 
 @dataclass
@@ -546,209 +545,63 @@ noneCharacter = FrameCharacter(
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="objectionpy.frames.CEFrame"><code class="flex name class">
-<span>class <span class="ident">CEFrame</span></span>
-<span>(</span><span>char: Optional[<a title="objectionpy.frames.FrameCharacter" href="#objectionpy.frames.FrameCharacter">FrameCharacter</a>], pairChar: Optional[<a title="objectionpy.frames.FrameCharacter" href="#objectionpy.frames.FrameCharacter">FrameCharacter</a>] = None, text: str = '', customName: Optional[str] = None, bubble: Optional[int] = None, background: Optional[<a title="objectionpy.assets.Background" href="assets.html#objectionpy.assets.Background">Background</a>] = None, backgroundFlip: Optional[bool] = None, wideX: Optional[float] = None, popup: Optional[<a title="objectionpy.assets.Popup" href="assets.html#objectionpy.assets.Popup">Popup</a>] = None, talk: bool = True, poseAnim: bool = True, goNext: bool = False, merge: bool = False, offScreen: bool = False, centerText: bool = False, presetPopup: Optional[<a title="objectionpy.enums.PresetPopup" href="enums.html#objectionpy.enums.PresetPopup">PresetPopup</a>] = None, presetBlip: Optional[<a title="objectionpy.enums.PresetBlip" href="enums.html#objectionpy.enums.PresetBlip">PresetBlip</a>] = None, fade: Optional[<a title="objectionpy.frames.Fade" href="#objectionpy.frames.Fade">Fade</a>] = None, filter: Optional[<a title="objectionpy.frames.Filter" href="#objectionpy.frames.Filter">Filter</a>] = None, transition: Optional[<a title="objectionpy.frames.Transition" href="#objectionpy.frames.Transition">Transition</a>] = None, options: <a title="objectionpy.frames.OptionModifiers" href="#objectionpy.frames.OptionModifiers">OptionModifiers</a> = &lt;factory&gt;, hidden: bool = False, caseTag: Optional[str] = None, caseAction: Optional[objectionpy.frames.CaseActions._CaseAction] = None, onCompile: Optional[Callable[[dict], dict]] = None, pressSequence: list = &lt;factory&gt;, contradictions: list = &lt;factory&gt;)</span>
+<dt id="objectionpy.frames.Color"><code class="flex name class">
+<span>class <span class="ident">Color</span></span>
+<span>(</span><span>string: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A special frame representing a cross-examination testimony statement in a CEGroup.</p>
-<h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>char : Optional[FrameCharacter]</code><ul>
-<li>Displayed character.</li>
-</ul>
-</li>
-<li><code>pairChar : Optional[FrameCharacter]</code><ul>
-<li>An optional second character. The talking and acting character is determined by the FrameCharacter.active attribute.</li>
-</ul>
-</li>
-<li><code>text : str</code><ul>
-<li>Displayed text. Defaults to empty, implying no effect on textbox.</li>
-</ul>
-</li>
-<li><code>customName : Optional[str]</code><ul>
-<li>The name displayed in the dialogue box's nameplate.</li>
-</ul>
-</li>
-<li><code>bubble : Optional[int]</code><ul>
-<li>ID of a speech bubble to be played. Must be in the character's speech bubble list. Preset characters always use 1-3, sometimes 4 and 5.</li>
-</ul>
-</li>
-<li><code>background : Optional[assets.Background]</code><ul>
-<li>Displayed background.</li>
-</ul>
-</li>
-<li><code>backgroundFlip : Optional[bool]</code><ul>
-<li>Whether the background is flipped.</li>
-</ul>
-</li>
-<li><code>wideX : Optional[float]</code><ul>
-<li>Percentage of the background's width to offset the camera by, from 0 to 1. Only applies to wide backgrounds.</li>
-</ul>
-</li>
-<li><code>popup : Optional[assets.Popup]</code><ul>
-<li>Displayed custom pop-up. (Use presetPopup for preset pop-ups)</li>
-</ul>
-</li>
-<li><code>talk : bool</code><ul>
-<li>Whether the talking character's talking animation is displayed. Defaults to True.</li>
-</ul>
-</li>
-<li><code>poseAnim : bool</code><ul>
-<li>Whether the active character's pose animation is displayed. Defaults to True.</li>
-</ul>
-</li>
-<li><code>goNext : bool</code><ul>
-<li>Moves to the next frame instantly and without requiring the user to continue. Defaults to False.</li>
-</ul>
-</li>
-<li><code>merge : bool</code><ul>
-<li>Does not reset the text in the textbox before the next frame. Defaults to False.</li>
-</ul>
-</li>
-<li><code>offScreen : bool</code><ul>
-<li>If True, the frame's character, text and popup are not displayed, only their speech bubble. Defaults to False.</li>
-</ul>
-</li>
-<li><code>centerText : bool</code><ul>
-<li>Whether the text in the dialogue box is centered. Defaults to False.</li>
-</ul>
-</li>
-<li><code>presetPopup : Optional[enums.PresetPopup]</code><ul>
-<li>Displayed pre-set pop-up.</li>
-</ul>
-</li>
-<li><code>presetBlip : Optional[enums.PresetBlip]</code><ul>
-<li>The speech blip played during character talking. If None, uses the character's default blip.</li>
-</ul>
-</li>
-<li><code>fade : Optional[Fade]</code><ul>
-<li>The frame's fade.</li>
-</ul>
-</li>
-<li><code>filter : Optional[Filter]</code><ul>
-<li>The frame's filter.</li>
-</ul>
-</li>
-<li><code>transition : Optional[Transition]</code><ul>
-<li>The frame's transition.</li>
-<li>Only applies to wide backgrounds, when the previous frame's background is unchanged.</li>
-</ul>
-</li>
-<li><code>options : OptionModifiers</code><ul>
-<li>Can be used to modify objection options affecting future frames.</li>
-</ul>
-</li>
-<li><code>hidden : bool</code><ul>
-<li>Whether the frame is hidden by default. Only useful in cases. Defaults to False.</li>
-</ul>
-</li>
-<li><code>caseTag : Optional[str]</code><ul>
-<li>A unique tag used to identify the frame in case actions. (A direct reference to the frame object works too)</li>
-</ul>
-</li>
-<li><code>caseAction : Optional[CaseActions._CaseAction]</code><ul>
-<li>The frame's case action.</li>
-</ul>
-</li>
-<li><code>onCompile : Optional[Callable[[dict], dict]]</code><ul>
-<li>A callback for if it's absolutely necessary to access the frame's raw JSON dict upon compilation.</li>
-</ul>
-</li>
-<li><code>pressSequence : list[Frame]</code><ul>
-<li>A sequence of frames played when the testimony statement is pressed.</li>
-</ul>
-</li>
-<li><code>contradictions : list[tuple[RecordItem, &lt;Frame Target&gt;]]</code><ul>
-<li>List of tuples mapping evidence and profiles to present to caseTags/frame references.</li>
-</ul>
-</li>
-</ul></div>
+<div class="desc"><p>Color.</p>
+<p>Must use hex format, either #aaa or #ababab. Case-insensitive.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Color:
+    &#34;&#34;&#34;Color.
+    
+    Must use hex format, either #aaa or #ababab. Case-insensitive.&#34;&#34;&#34;
+    def __init__(self, string: str) -&gt; None:
+        if (fullmatch(&#39;#[a-fA-F0-9]{3}&#39;, string)): string = &#39;#&#39; + string[1] + string[1] + string[2] + string[2] + string[3] + string[3]
+        if (not fullmatch(&#39;#[a-fA-F0-9]{6}&#39;, string)): raise ValueError(&#39;Invalid color &#39; + string + &#39;, must be in hex #aaa or #ababab format&#39;)
+        self.string = string.upper()
+    
+    def __repr__(self) -&gt; str:
+        return self.string</code></pre>
+</details>
+</dd>
+<dt id="objectionpy.frames.CursorRect"><code class="flex name class">
+<span>class <span class="ident">CursorRect</span></span>
+<span>(</span><span>left: int, top: int, width: int, height: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An area targettable by the cursor in the "point to an area" case action.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
-class CEFrame(Frame):
-    &#34;&#34;&#34;
-    A special frame representing a cross-examination testimony statement in a CEGroup.
-
-    Attributes:
-        - `char : Optional[FrameCharacter]`
-            - Displayed character.
-        - `pairChar : Optional[FrameCharacter]`
-            - An optional second character. The talking and acting character is determined by the FrameCharacter.active attribute.
-        - `text : str`
-            - Displayed text. Defaults to empty, implying no effect on textbox.
-        - `customName : Optional[str]`
-            - The name displayed in the dialogue box&#39;s nameplate.
-        - `bubble : Optional[int]`
-            - ID of a speech bubble to be played. Must be in the character&#39;s speech bubble list. Preset characters always use 1-3, sometimes 4 and 5.
-        - `background : Optional[assets.Background]`
-            - Displayed background.
-        - `backgroundFlip : Optional[bool]`
-            - Whether the background is flipped.
-        - `wideX : Optional[float]`
-            - Percentage of the background&#39;s width to offset the camera by, from 0 to 1. Only applies to wide backgrounds.
-        - `popup : Optional[assets.Popup]`
-            - Displayed custom pop-up. (Use presetPopup for preset pop-ups)
-        - `talk : bool`
-            - Whether the talking character&#39;s talking animation is displayed. Defaults to True.
-        - `poseAnim : bool`
-            - Whether the active character&#39;s pose animation is displayed. Defaults to True.
-        - `goNext : bool`
-            - Moves to the next frame instantly and without requiring the user to continue. Defaults to False.
-        - `merge : bool`
-            - Does not reset the text in the textbox before the next frame. Defaults to False.
-        - `offScreen : bool`
-            - If True, the frame&#39;s character, text and popup are not displayed, only their speech bubble. Defaults to False.
-        - `centerText : bool`
-            - Whether the text in the dialogue box is centered. Defaults to False.
-        - `presetPopup : Optional[enums.PresetPopup]`
-            - Displayed pre-set pop-up.
-        - `presetBlip : Optional[enums.PresetBlip]`
-            - The speech blip played during character talking. If None, uses the character&#39;s default blip.
-        - `fade : Optional[Fade]`
-            - The frame&#39;s fade.
-        - `filter : Optional[Filter]`
-            - The frame&#39;s filter.
-        - `transition : Optional[Transition]`
-            - The frame&#39;s transition.
-            - Only applies to wide backgrounds, when the previous frame&#39;s background is unchanged.
-        - `options : OptionModifiers`
-            - Can be used to modify objection options affecting future frames.
-        - `hidden : bool`
-            - Whether the frame is hidden by default. Only useful in cases. Defaults to False.
-        - `caseTag : Optional[str]`
-            - A unique tag used to identify the frame in case actions. (A direct reference to the frame object works too)
-        - `caseAction : Optional[CaseActions._CaseAction]`
-            - The frame&#39;s case action.
-        - `onCompile : Optional[Callable[[dict], dict]]`
-            - A callback for if it&#39;s absolutely necessary to access the frame&#39;s raw JSON dict upon compilation.
-        - `pressSequence : list[Frame]`
-            - A sequence of frames played when the testimony statement is pressed.
-        - `contradictions : list[tuple[RecordItem, &lt;Frame Target&gt;]]`
-            - List of tuples mapping evidence and profiles to present to caseTags/frame references.
-    &#34;&#34;&#34;
-    pressSequence: list[Frame] = field(default_factory=list)
-    contradictions: list[
-            tuple[
-                &#39;Case.RecordItem&#39;,
-                Union[str, &#39;Frame&#39;]
-            ]
-        ] = field(default_factory=list)</code></pre>
+class CursorRect:
+    &#34;&#34;&#34;An area targettable by the cursor in the &#34;point to an area&#34; case action.&#34;&#34;&#34;
+    left: int
+    top: int
+    width: int
+    height: int</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="objectionpy.frames.Frame" href="#objectionpy.frames.Frame">Frame</a></li>
-</ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.frames.CEFrame.contradictions"><code class="name">var <span class="ident">contradictions</span> : list</code></dt>
+<dt id="objectionpy.frames.CursorRect.left"><code class="name">var <span class="ident">left</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.CEFrame.pressSequence"><code class="name">var <span class="ident">pressSequence</span> : list</code></dt>
+<dt id="objectionpy.frames.CursorRect.top"><code class="name">var <span class="ident">top</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.CursorRect.width"><code class="name">var <span class="ident">width</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.CursorRect.height"><code class="name">var <span class="ident">height</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -918,7 +771,7 @@ class CEFrame(Frame):
 
         choices: list[
             tuple[
-                CursorRect,
+                &#39;CursorRect&#39;,
                 Union[str, &#39;Frame&#39;]
             ]
         ] = field(default_factory=list)
@@ -954,16 +807,20 @@ class CEFrame(Frame):
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.frames.CaseActions.EndGame"><code class="name">var <span class="ident">EndGame</span></code></dt>
+<dt id="objectionpy.frames.CaseActions.ToggleEvidence"><code class="name">var <span class="ident">ToggleEvidence</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>ToggleEvidence(show: list = <factory>, hide: list = <factory>)</p></div>
 </dd>
-<dt id="objectionpy.frames.CaseActions.FlashingHealth"><code class="name">var <span class="ident">FlashingHealth</span></code></dt>
+<dt id="objectionpy.frames.CaseActions.ToggleFrames"><code class="name">var <span class="ident">ToggleFrames</span></code></dt>
 <dd>
 <div class="desc"><h2 id="attributes">Attributes</h2>
 <ul>
-<li><code>amount : float</code><ul>
-<li>Fraction of the max health to start flashing, from 0 to 1.</li>
+<li><code>show : list[&lt;Frame Target&gt;]</code><ul>
+<li>List of references or caseTags of frames to show.</li>
+</ul>
+</li>
+<li><code>hide : list[&lt;Frame Target&gt;]</code><ul>
+<li>List of references or caseTags of frames to hide.</li>
 </ul>
 </li>
 </ul></div>
@@ -974,6 +831,30 @@ class CEFrame(Frame):
 <ul>
 <li><code>frame : &lt;Frame Target&gt;</code><ul>
 <li>Reference or caseTag of a frame to jump to.</li>
+</ul>
+</li>
+</ul></div>
+</dd>
+<dt id="objectionpy.frames.CaseActions.SetGameOverGroup"><code class="name">var <span class="ident">SetGameOverGroup</span></code></dt>
+<dd>
+<div class="desc"><h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>group : &lt;Group Target&gt;</code><ul>
+<li>Reference or caseTag of the target group.</li>
+</ul>
+</li>
+</ul></div>
+</dd>
+<dt id="objectionpy.frames.CaseActions.EndGame"><code class="name">var <span class="ident">EndGame</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.CaseActions.HealthSet"><code class="name">var <span class="ident">HealthSet</span></code></dt>
+<dd>
+<div class="desc"><h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>amount : float</code><ul>
+<li>Fraction of the max health to set the health to, from 0 to 1.</li>
 </ul>
 </li>
 </ul></div>
@@ -998,14 +879,30 @@ class CEFrame(Frame):
 </li>
 </ul></div>
 </dd>
-<dt id="objectionpy.frames.CaseActions.HealthSet"><code class="name">var <span class="ident">HealthSet</span></code></dt>
+<dt id="objectionpy.frames.CaseActions.FlashingHealth"><code class="name">var <span class="ident">FlashingHealth</span></code></dt>
 <dd>
 <div class="desc"><h2 id="attributes">Attributes</h2>
 <ul>
 <li><code>amount : float</code><ul>
-<li>Fraction of the max health to set the health to, from 0 to 1.</li>
+<li>Fraction of the max health to start flashing, from 0 to 1.</li>
 </ul>
 </li>
+</ul></div>
+</dd>
+<dt id="objectionpy.frames.CaseActions.PromptPresent"><code class="name">var <span class="ident">PromptPresent</span></code></dt>
+<dd>
+<div class="desc"><h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>failFrame : &lt;Frame Target&gt;</code><ul>
+<li>Reference or caseTag of a frame to display upon presenting the wrong item.</li>
+</ul>
+</li>
+<li><code>choices : list[tuple[RecordItem, &lt;Frame Target&gt;]]</code><ul>
+<li>List of tuples mapping evidence and profiles to present to caseTags/frame references.</li>
+</ul>
+</li>
+<li><code>presentEvidence : bool</code></li>
+<li><code>presentProfiles : bool</code></li>
 </ul></div>
 </dd>
 <dt id="objectionpy.frames.CaseActions.PromptChoice"><code class="name">var <span class="ident">PromptChoice</span></code></dt>
@@ -1017,6 +914,14 @@ class CEFrame(Frame):
 </ul>
 </li>
 </ul></div>
+</dd>
+<dt id="objectionpy.frames.CaseActions.PromptInt"><code class="name">var <span class="ident">PromptInt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.CaseActions.PromptStr"><code class="name">var <span class="ident">PromptStr</span></code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt id="objectionpy.frames.CaseActions.PromptCursor"><code class="name">var <span class="ident">PromptCursor</span></code></dt>
 <dd>
@@ -1044,57 +949,9 @@ class CEFrame(Frame):
 </li>
 </ul></div>
 </dd>
-<dt id="objectionpy.frames.CaseActions.PromptInt"><code class="name">var <span class="ident">PromptInt</span></code></dt>
+<dt id="objectionpy.frames.CaseActions.VarSet"><code class="name">var <span class="ident">VarSet</span></code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.CaseActions.PromptPresent"><code class="name">var <span class="ident">PromptPresent</span></code></dt>
-<dd>
-<div class="desc"><h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>failFrame : &lt;Frame Target&gt;</code><ul>
-<li>Reference or caseTag of a frame to display upon presenting the wrong item.</li>
-</ul>
-</li>
-<li><code>choices : list[tuple[RecordItem, &lt;Frame Target&gt;]]</code><ul>
-<li>List of tuples mapping evidence and profiles to present to caseTags/frame references.</li>
-</ul>
-</li>
-<li><code>presentEvidence : bool</code></li>
-<li><code>presentProfiles : bool</code></li>
-</ul></div>
-</dd>
-<dt id="objectionpy.frames.CaseActions.PromptStr"><code class="name">var <span class="ident">PromptStr</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.CaseActions.SetGameOverGroup"><code class="name">var <span class="ident">SetGameOverGroup</span></code></dt>
-<dd>
-<div class="desc"><h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>group : &lt;Group Target&gt;</code><ul>
-<li>Reference or caseTag of the target group.</li>
-</ul>
-</li>
-</ul></div>
-</dd>
-<dt id="objectionpy.frames.CaseActions.ToggleEvidence"><code class="name">var <span class="ident">ToggleEvidence</span></code></dt>
-<dd>
-<div class="desc"><p>ToggleEvidence(show: list = <factory>, hide: list = <factory>)</p></div>
-</dd>
-<dt id="objectionpy.frames.CaseActions.ToggleFrames"><code class="name">var <span class="ident">ToggleFrames</span></code></dt>
-<dd>
-<div class="desc"><h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>show : list[&lt;Frame Target&gt;]</code><ul>
-<li>List of references or caseTags of frames to show.</li>
-</ul>
-</li>
-<li><code>hide : list[&lt;Frame Target&gt;]</code><ul>
-<li>List of references or caseTags of frames to hide.</li>
-</ul>
-</li>
-</ul></div>
 </dd>
 <dt id="objectionpy.frames.CaseActions.VarAdd"><code class="name">var <span class="ident">VarAdd</span></code></dt>
 <dd>
@@ -1123,72 +980,6 @@ class CEFrame(Frame):
 </ul>
 </li>
 </ul></div>
-</dd>
-<dt id="objectionpy.frames.CaseActions.VarSet"><code class="name">var <span class="ident">VarSet</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.frames.Color"><code class="flex name class">
-<span>class <span class="ident">Color</span></span>
-<span>(</span><span>string: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Color.</p>
-<p>Must use hex format, either #aaa or #ababab. Case-insensitive.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Color:
-    &#34;&#34;&#34;Color.
-    
-    Must use hex format, either #aaa or #ababab. Case-insensitive.&#34;&#34;&#34;
-    def __init__(self, string: str) -&gt; None:
-        if (fullmatch(&#39;#[a-fA-F0-9]{3}&#39;, string)): string = &#39;#&#39; + string[1] + string[1] + string[2] + string[2] + string[3] + string[3]
-        if (not fullmatch(&#39;#[a-fA-F0-9]{6}&#39;, string)): raise ValueError(&#39;Invalid color &#39; + string + &#39;, must be in hex #aaa or #ababab format&#39;)
-        self.string = string.upper()
-    
-    def __repr__(self) -&gt; str:
-        return self.string</code></pre>
-</details>
-</dd>
-<dt id="objectionpy.frames.CursorRect"><code class="flex name class">
-<span>class <span class="ident">CursorRect</span></span>
-<span>(</span><span>left: int, top: int, width: int, height: int)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>An area targettable by the cursor in the "point to an area" case action.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@dataclass
-class CursorRect:
-    &#34;&#34;&#34;An area targettable by the cursor in the &#34;point to an area&#34; case action.&#34;&#34;&#34;
-    left: int
-    top: int
-    width: int
-    height: int</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.frames.CursorRect.height"><code class="name">var <span class="ident">height</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.CursorRect.left"><code class="name">var <span class="ident">left</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.CursorRect.top"><code class="name">var <span class="ident">top</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.CursorRect.width"><code class="name">var <span class="ident">width</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
 </dd>
 </dl>
 </dd>
@@ -1220,11 +1011,11 @@ class Fade:
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.frames.Fade.color"><code class="name">var <span class="ident">color</span> : Optional[<a title="objectionpy.frames.Color" href="#objectionpy.frames.Color">Color</a>]</code></dt>
+<dt id="objectionpy.frames.Fade.direction"><code class="name">var <span class="ident">direction</span> : <a title="objectionpy.enums.FadeDirection" href="enums.html#objectionpy.enums.FadeDirection">FadeDirection</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.Fade.direction"><code class="name">var <span class="ident">direction</span> : <a title="objectionpy.enums.FadeDirection" href="enums.html#objectionpy.enums.FadeDirection">FadeDirection</a></code></dt>
+<dt id="objectionpy.frames.Fade.target"><code class="name">var <span class="ident">target</span> : <a title="objectionpy.enums.FadeTarget" href="enums.html#objectionpy.enums.FadeTarget">FadeTarget</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1236,7 +1027,7 @@ class Fade:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.Fade.target"><code class="name">var <span class="ident">target</span> : <a title="objectionpy.enums.FadeTarget" href="enums.html#objectionpy.enums.FadeTarget">FadeTarget</a></code></dt>
+<dt id="objectionpy.frames.Fade.color"><code class="name">var <span class="ident">color</span> : Optional[<a title="objectionpy.frames.Color" href="#objectionpy.frames.Color">Color</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1266,7 +1057,7 @@ class Filter:
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.frames.Filter.amount"><code class="name">var <span class="ident">amount</span> : int</code></dt>
+<dt id="objectionpy.frames.Filter.type"><code class="name">var <span class="ident">type</span> : <a title="objectionpy.enums.FilterType" href="enums.html#objectionpy.enums.FilterType">FilterType</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1274,7 +1065,285 @@ class Filter:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.Filter.type"><code class="name">var <span class="ident">type</span> : <a title="objectionpy.enums.FilterType" href="enums.html#objectionpy.enums.FilterType">FilterType</a></code></dt>
+<dt id="objectionpy.frames.Filter.amount"><code class="name">var <span class="ident">amount</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter"><code class="flex name class">
+<span>class <span class="ident">FrameCharacter</span></span>
+<span>(</span><span>character: <a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>, poseId: Optional[int] = None, poseSubstr: Optional[str] = None, flip: bool = False, pairOffset: tuple = (0, 0), isActive: Optional[bool] = None, isFront: Optional[bool] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Specifies the attributes of a displayed character.</p>
+<h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>character : assets.Character</code><ul>
+<li>The character to display.</li>
+</ul>
+</li>
+<li><code>poseId : Optional[int]</code><ul>
+<li>The ID of the displayed pose. Must be in this character's pose list. Either poseId or poseSubstr must be set.</li>
+</ul>
+</li>
+<li><code>poseSubstr : Optional[str]</code><ul>
+<li>A substring to identify this character's pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.</li>
+</ul>
+</li>
+<li><code>flip : bool</code><ul>
+<li>Whether this character is flipped.</li>
+</ul>
+</li>
+<li><code>pairOffset : tuple[int, int]</code><ul>
+<li>On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)</li>
+</ul>
+</li>
+<li><code>isActive : Optional[bool]</code><ul>
+<li>Whether this is the character that acts in the frame. Only applies when character is paired with another.</li>
+</ul>
+</li>
+<li><code>isFront : Optional[bool]</code><ul>
+<li>Whether this character displayed is in front of the other. Only applies when character is paired with another.</li>
+</ul>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class FrameCharacter:
+    &#34;&#34;&#34;
+    Specifies the attributes of a displayed character.
+    
+    Attributes:
+        - `character : assets.Character`
+            - The character to display.
+        - `poseId : Optional[int]`
+            - The ID of the displayed pose. Must be in this character&#39;s pose list. Either poseId or poseSubstr must be set.
+        - `poseSubstr : Optional[str]`
+            - A substring to identify this character&#39;s pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.
+        - `flip : bool`
+            - Whether this character is flipped.
+        - `pairOffset : tuple[int, int]`
+            - On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)
+        - `isActive : Optional[bool]`
+            - Whether this is the character that acts in the frame. Only applies when character is paired with another.
+        - `isFront : Optional[bool]`
+            - Whether this character displayed is in front of the other. Only applies when character is paired with another.
+    &#34;&#34;&#34;
+    character: assets.Character
+    poseId: Optional[int] = None
+    poseSubstr: Optional[str] = None
+    flip: bool = False
+    pairOffset: tuple[int, int] = (0, 0)
+    isActive: Optional[bool] = None
+    isFront: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.poseId is None:
+            if self.poseSubstr is not None:
+                self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
+            else:
+                raise AttributeError(&#39;Either poseId or poseSubstr must be set to identify the pose in a FrameCharacter.&#39;)
+
+    @property
+    def isNone(self) -&gt; bool:
+        return self.character.id is None and self.poseId is None
+
+    def _getIndividualValue(self, value) -&gt; int:
+        if value is False or self.isNone:
+            return -1
+        elif value is True:
+            return 1
+        else:
+            return 0</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.frames.FrameCharacter.character"><code class="name">var <span class="ident">character</span> : <a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter.poseId"><code class="name">var <span class="ident">poseId</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter.poseSubstr"><code class="name">var <span class="ident">poseSubstr</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter.flip"><code class="name">var <span class="ident">flip</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter.pairOffset"><code class="name">var <span class="ident">pairOffset</span> : tuple</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter.isActive"><code class="name">var <span class="ident">isActive</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.FrameCharacter.isFront"><code class="name">var <span class="ident">isFront</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="objectionpy.frames.FrameCharacter.isNone"><code class="name">var <span class="ident">isNone</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def isNone(self) -&gt; bool:
+    return self.character.id is None and self.poseId is None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.frames.GalleryModifier"><code class="flex name class">
+<span>class <span class="ident">GalleryModifier</span></span>
+<span>(</span><span>defense: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, prosecution: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, counsel: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, witness: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, judge: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Specify characters for each gallery location.</p>
+<p>Any location set to None remains unchanged. (Custom characters not yet supported)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class GalleryModifier:
+    &#34;&#34;&#34;Specify characters for each gallery location.
+    
+    Any location set to None remains unchanged. (Custom characters not yet supported)&#34;&#34;&#34;
+    defense: Optional[assets.Character] = None
+    prosecution:  Optional[assets.Character] = None
+    counsel: Optional[assets.Character] = None
+    witness: Optional[assets.Character] = None
+    judge: Optional[assets.Character] = None</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.frames.GalleryModifier.defense"><code class="name">var <span class="ident">defense</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.GalleryModifier.prosecution"><code class="name">var <span class="ident">prosecution</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.GalleryModifier.counsel"><code class="name">var <span class="ident">counsel</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.GalleryModifier.witness"><code class="name">var <span class="ident">witness</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.GalleryModifier.judge"><code class="name">var <span class="ident">judge</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers"><code class="flex name class">
+<span>class <span class="ident">OptionModifiers</span></span>
+<span>(</span><span>autoplaySpeed: Optional[int] = None, dialogueBox: Optional[<a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a>] = None, dialogueBoxVisible: Optional[bool] = None, galleryAssign: <a title="objectionpy.frames.GalleryModifier" href="#objectionpy.frames.GalleryModifier">GalleryModifier</a> = &lt;factory&gt;, galleryRemove: list = &lt;factory&gt;, defaultTextSpeed: Optional[int] = None, blipFrequency: Optional[int] = None, frameSkip: Optional[bool] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Specify values for setting objection options affecting future frames.</p>
+<p>Any option set to None remains unchanged.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class OptionModifiers:
+    &#34;&#34;&#34;
+    Specify values for setting objection options affecting future frames.
+
+    Any option set to None remains unchanged.
+    &#34;&#34;&#34;
+    autoplaySpeed: Optional[int] = None
+    dialogueBox: Optional[enums.PresetDialogueBox] = None
+    dialogueBoxVisible: Optional[bool] = None
+    galleryAssign: GalleryModifier = field(default_factory=GalleryModifier)
+    galleryRemove: list[enums.CharacterLocation] = field(default_factory=list)
+    defaultTextSpeed: Optional[int] = None
+    blipFrequency: Optional[int] = None
+    frameSkip: Optional[bool] = None
+
+    def __post_init__(self):
+        for character in self.galleryAssign.__dict__.values():
+            if character and not character.isPreset:
+                raise FutureWarning(&#39;Gallery assign modifiers not yet implemented to work for custom characters&#39;)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.frames.OptionModifiers.galleryAssign"><code class="name">var <span class="ident">galleryAssign</span> : <a title="objectionpy.frames.GalleryModifier" href="#objectionpy.frames.GalleryModifier">GalleryModifier</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.galleryRemove"><code class="name">var <span class="ident">galleryRemove</span> : list</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.autoplaySpeed"><code class="name">var <span class="ident">autoplaySpeed</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.dialogueBox"><code class="name">var <span class="ident">dialogueBox</span> : Optional[<a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.dialogueBoxVisible"><code class="name">var <span class="ident">dialogueBoxVisible</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.defaultTextSpeed"><code class="name">var <span class="ident">defaultTextSpeed</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.blipFrequency"><code class="name">var <span class="ident">blipFrequency</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.OptionModifiers.frameSkip"><code class="name">var <span class="ident">frameSkip</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.frames.Transition"><code class="flex name class">
+<span>class <span class="ident">Transition</span></span>
+<span>(</span><span>duration: int, easing: <a title="objectionpy.enums.Easing" href="enums.html#objectionpy.enums.Easing">Easing</a> = Easing.LINEAR)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Camera transition on wide backgrounds.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class Transition:
+    &#34;&#34;&#34;Camera transition on wide backgrounds.&#34;&#34;&#34;
+    duration: int
+    easing: enums.Easing = enums.Easing.LINEAR</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.frames.Transition.duration"><code class="name">var <span class="ident">duration</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Transition.easing"><code class="name">var <span class="ident">easing</span> : <a title="objectionpy.enums.Easing" href="enums.html#objectionpy.enums.Easing">Easing</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1489,63 +1558,7 @@ class Frame:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.frames.Frame.background"><code class="name">var <span class="ident">background</span> : Optional[<a title="objectionpy.assets.Background" href="assets.html#objectionpy.assets.Background">Background</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.backgroundFlip"><code class="name">var <span class="ident">backgroundFlip</span> : Optional[bool]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.bubble"><code class="name">var <span class="ident">bubble</span> : Optional[int]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.caseAction"><code class="name">var <span class="ident">caseAction</span> : Optional[objectionpy.frames.CaseActions._CaseAction]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.caseTag"><code class="name">var <span class="ident">caseTag</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.centerText"><code class="name">var <span class="ident">centerText</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.frames.Frame.char"><code class="name">var <span class="ident">char</span> : Optional[<a title="objectionpy.frames.FrameCharacter" href="#objectionpy.frames.FrameCharacter">FrameCharacter</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.customName"><code class="name">var <span class="ident">customName</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.fade"><code class="name">var <span class="ident">fade</span> : Optional[<a title="objectionpy.frames.Fade" href="#objectionpy.frames.Fade">Fade</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.filter"><code class="name">var <span class="ident">filter</span> : Optional[<a title="objectionpy.frames.Filter" href="#objectionpy.frames.Filter">Filter</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.goNext"><code class="name">var <span class="ident">goNext</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.hidden"><code class="name">var <span class="ident">hidden</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.merge"><code class="name">var <span class="ident">merge</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.offScreen"><code class="name">var <span class="ident">offScreen</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.onCompile"><code class="name">var <span class="ident">onCompile</span> : Optional[Callable[[dict], dict]]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1557,31 +1570,23 @@ class Frame:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.Frame.popup"><code class="name">var <span class="ident">popup</span> : Optional[<a title="objectionpy.assets.Popup" href="assets.html#objectionpy.assets.Popup">Popup</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.poseAnim"><code class="name">var <span class="ident">poseAnim</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.presetBlip"><code class="name">var <span class="ident">presetBlip</span> : Optional[<a title="objectionpy.enums.PresetBlip" href="enums.html#objectionpy.enums.PresetBlip">PresetBlip</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.presetPopup"><code class="name">var <span class="ident">presetPopup</span> : Optional[<a title="objectionpy.enums.PresetPopup" href="enums.html#objectionpy.enums.PresetPopup">PresetPopup</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Frame.talk"><code class="name">var <span class="ident">talk</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.frames.Frame.text"><code class="name">var <span class="ident">text</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.Frame.transition"><code class="name">var <span class="ident">transition</span> : Optional[<a title="objectionpy.frames.Transition" href="#objectionpy.frames.Transition">Transition</a>]</code></dt>
+<dt id="objectionpy.frames.Frame.customName"><code class="name">var <span class="ident">customName</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.bubble"><code class="name">var <span class="ident">bubble</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.background"><code class="name">var <span class="ident">background</span> : Optional[<a title="objectionpy.assets.Background" href="assets.html#objectionpy.assets.Background">Background</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.backgroundFlip"><code class="name">var <span class="ident">backgroundFlip</span> : Optional[bool]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1589,42 +1594,187 @@ class Frame:
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="objectionpy.frames.Frame.popup"><code class="name">var <span class="ident">popup</span> : Optional[<a title="objectionpy.assets.Popup" href="assets.html#objectionpy.assets.Popup">Popup</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.talk"><code class="name">var <span class="ident">talk</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.poseAnim"><code class="name">var <span class="ident">poseAnim</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.goNext"><code class="name">var <span class="ident">goNext</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.merge"><code class="name">var <span class="ident">merge</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.offScreen"><code class="name">var <span class="ident">offScreen</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.centerText"><code class="name">var <span class="ident">centerText</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.presetPopup"><code class="name">var <span class="ident">presetPopup</span> : Optional[<a title="objectionpy.enums.PresetPopup" href="enums.html#objectionpy.enums.PresetPopup">PresetPopup</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.presetBlip"><code class="name">var <span class="ident">presetBlip</span> : Optional[<a title="objectionpy.enums.PresetBlip" href="enums.html#objectionpy.enums.PresetBlip">PresetBlip</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.fade"><code class="name">var <span class="ident">fade</span> : Optional[<a title="objectionpy.frames.Fade" href="#objectionpy.frames.Fade">Fade</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.filter"><code class="name">var <span class="ident">filter</span> : Optional[<a title="objectionpy.frames.Filter" href="#objectionpy.frames.Filter">Filter</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.transition"><code class="name">var <span class="ident">transition</span> : Optional[<a title="objectionpy.frames.Transition" href="#objectionpy.frames.Transition">Transition</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.hidden"><code class="name">var <span class="ident">hidden</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.caseTag"><code class="name">var <span class="ident">caseTag</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.caseAction"><code class="name">var <span class="ident">caseAction</span> : Optional[objectionpy.frames.CaseActions._CaseAction]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.frames.Frame.onCompile"><code class="name">var <span class="ident">onCompile</span> : Optional[Callable[[dict], dict]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
-<dt id="objectionpy.frames.FrameCharacter"><code class="flex name class">
-<span>class <span class="ident">FrameCharacter</span></span>
-<span>(</span><span>character: <a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>, poseId: Optional[int] = None, poseSubstr: Optional[str] = None, flip: bool = False, pairOffset: tuple = (0, 0), isActive: Optional[bool] = None, isFront: Optional[bool] = None)</span>
+<dt id="objectionpy.frames.CEFrame"><code class="flex name class">
+<span>class <span class="ident">CEFrame</span></span>
+<span>(</span><span>char: Optional[<a title="objectionpy.frames.FrameCharacter" href="#objectionpy.frames.FrameCharacter">FrameCharacter</a>], pairChar: Optional[<a title="objectionpy.frames.FrameCharacter" href="#objectionpy.frames.FrameCharacter">FrameCharacter</a>] = None, text: str = '', customName: Optional[str] = None, bubble: Optional[int] = None, background: Optional[<a title="objectionpy.assets.Background" href="assets.html#objectionpy.assets.Background">Background</a>] = None, backgroundFlip: Optional[bool] = None, wideX: Optional[float] = None, popup: Optional[<a title="objectionpy.assets.Popup" href="assets.html#objectionpy.assets.Popup">Popup</a>] = None, talk: bool = True, poseAnim: bool = True, goNext: bool = False, merge: bool = False, offScreen: bool = False, centerText: bool = False, presetPopup: Optional[<a title="objectionpy.enums.PresetPopup" href="enums.html#objectionpy.enums.PresetPopup">PresetPopup</a>] = None, presetBlip: Optional[<a title="objectionpy.enums.PresetBlip" href="enums.html#objectionpy.enums.PresetBlip">PresetBlip</a>] = None, fade: Optional[<a title="objectionpy.frames.Fade" href="#objectionpy.frames.Fade">Fade</a>] = None, filter: Optional[<a title="objectionpy.frames.Filter" href="#objectionpy.frames.Filter">Filter</a>] = None, transition: Optional[<a title="objectionpy.frames.Transition" href="#objectionpy.frames.Transition">Transition</a>] = None, options: <a title="objectionpy.frames.OptionModifiers" href="#objectionpy.frames.OptionModifiers">OptionModifiers</a> = &lt;factory&gt;, hidden: bool = False, caseTag: Optional[str] = None, caseAction: Optional[objectionpy.frames.CaseActions._CaseAction] = None, onCompile: Optional[Callable[[dict], dict]] = None, pressSequence: list = &lt;factory&gt;, contradictions: list = &lt;factory&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Specifies the attributes of a displayed character.</p>
+<div class="desc"><p>A special frame representing a cross-examination testimony statement in a CEGroup.</p>
 <h2 id="attributes">Attributes</h2>
 <ul>
-<li><code>character : assets.Character</code><ul>
-<li>The character to display.</li>
+<li><code>char : Optional[FrameCharacter]</code><ul>
+<li>Displayed character.</li>
 </ul>
 </li>
-<li><code>poseId : Optional[int]</code><ul>
-<li>The ID of the displayed pose. Must be in this character's pose list. Either poseId or poseSubstr must be set.</li>
+<li><code>pairChar : Optional[FrameCharacter]</code><ul>
+<li>An optional second character. The talking and acting character is determined by the FrameCharacter.active attribute.</li>
 </ul>
 </li>
-<li><code>poseSubstr : Optional[str]</code><ul>
-<li>A substring to identify this character's pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.</li>
+<li><code>text : str</code><ul>
+<li>Displayed text. Defaults to empty, implying no effect on textbox.</li>
 </ul>
 </li>
-<li><code>flip : bool</code><ul>
-<li>Whether this character is flipped.</li>
+<li><code>customName : Optional[str]</code><ul>
+<li>The name displayed in the dialogue box's nameplate.</li>
 </ul>
 </li>
-<li><code>pairOffset : tuple[int, int]</code><ul>
-<li>On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)</li>
+<li><code>bubble : Optional[int]</code><ul>
+<li>ID of a speech bubble to be played. Must be in the character's speech bubble list. Preset characters always use 1-3, sometimes 4 and 5.</li>
 </ul>
 </li>
-<li><code>isActive : Optional[bool]</code><ul>
-<li>Whether this is the character that acts in the frame. Only applies when character is paired with another.</li>
+<li><code>background : Optional[assets.Background]</code><ul>
+<li>Displayed background.</li>
 </ul>
 </li>
-<li><code>isFront : Optional[bool]</code><ul>
-<li>Whether this character displayed is in front of the other. Only applies when character is paired with another.</li>
+<li><code>backgroundFlip : Optional[bool]</code><ul>
+<li>Whether the background is flipped.</li>
+</ul>
+</li>
+<li><code>wideX : Optional[float]</code><ul>
+<li>Percentage of the background's width to offset the camera by, from 0 to 1. Only applies to wide backgrounds.</li>
+</ul>
+</li>
+<li><code>popup : Optional[assets.Popup]</code><ul>
+<li>Displayed custom pop-up. (Use presetPopup for preset pop-ups)</li>
+</ul>
+</li>
+<li><code>talk : bool</code><ul>
+<li>Whether the talking character's talking animation is displayed. Defaults to True.</li>
+</ul>
+</li>
+<li><code>poseAnim : bool</code><ul>
+<li>Whether the active character's pose animation is displayed. Defaults to True.</li>
+</ul>
+</li>
+<li><code>goNext : bool</code><ul>
+<li>Moves to the next frame instantly and without requiring the user to continue. Defaults to False.</li>
+</ul>
+</li>
+<li><code>merge : bool</code><ul>
+<li>Does not reset the text in the textbox before the next frame. Defaults to False.</li>
+</ul>
+</li>
+<li><code>offScreen : bool</code><ul>
+<li>If True, the frame's character, text and popup are not displayed, only their speech bubble. Defaults to False.</li>
+</ul>
+</li>
+<li><code>centerText : bool</code><ul>
+<li>Whether the text in the dialogue box is centered. Defaults to False.</li>
+</ul>
+</li>
+<li><code>presetPopup : Optional[enums.PresetPopup]</code><ul>
+<li>Displayed pre-set pop-up.</li>
+</ul>
+</li>
+<li><code>presetBlip : Optional[enums.PresetBlip]</code><ul>
+<li>The speech blip played during character talking. If None, uses the character's default blip.</li>
+</ul>
+</li>
+<li><code>fade : Optional[Fade]</code><ul>
+<li>The frame's fade.</li>
+</ul>
+</li>
+<li><code>filter : Optional[Filter]</code><ul>
+<li>The frame's filter.</li>
+</ul>
+</li>
+<li><code>transition : Optional[Transition]</code><ul>
+<li>The frame's transition.</li>
+<li>Only applies to wide backgrounds, when the previous frame's background is unchanged.</li>
+</ul>
+</li>
+<li><code>options : OptionModifiers</code><ul>
+<li>Can be used to modify objection options affecting future frames.</li>
+</ul>
+</li>
+<li><code>hidden : bool</code><ul>
+<li>Whether the frame is hidden by default. Only useful in cases. Defaults to False.</li>
+</ul>
+</li>
+<li><code>caseTag : Optional[str]</code><ul>
+<li>A unique tag used to identify the frame in case actions. (A direct reference to the frame object works too)</li>
+</ul>
+</li>
+<li><code>caseAction : Optional[CaseActions._CaseAction]</code><ul>
+<li>The frame's case action.</li>
+</ul>
+</li>
+<li><code>onCompile : Optional[Callable[[dict], dict]]</code><ul>
+<li>A callback for if it's absolutely necessary to access the frame's raw JSON dict upon compilation.</li>
+</ul>
+</li>
+<li><code>pressSequence : list[Frame]</code><ul>
+<li>A sequence of frames played when the testimony statement is pressed.</li>
+</ul>
+</li>
+<li><code>contradictions : list[tuple[RecordItem, &lt;Frame Target&gt;]]</code><ul>
+<li>List of tuples mapping evidence and profiles to present to caseTags/frame references.</li>
 </ul>
 </li>
 </ul></div>
@@ -1633,237 +1783,86 @@ class Frame:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
-class FrameCharacter:
+class CEFrame(Frame):
     &#34;&#34;&#34;
-    Specifies the attributes of a displayed character.
-    
+    A special frame representing a cross-examination testimony statement in a CEGroup.
+
     Attributes:
-        - `character : assets.Character`
-            - The character to display.
-        - `poseId : Optional[int]`
-            - The ID of the displayed pose. Must be in this character&#39;s pose list. Either poseId or poseSubstr must be set.
-        - `poseSubstr : Optional[str]`
-            - A substring to identify this character&#39;s pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.
-        - `flip : bool`
-            - Whether this character is flipped.
-        - `pairOffset : tuple[int, int]`
-            - On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)
-        - `isActive : Optional[bool]`
-            - Whether this is the character that acts in the frame. Only applies when character is paired with another.
-        - `isFront : Optional[bool]`
-            - Whether this character displayed is in front of the other. Only applies when character is paired with another.
+        - `char : Optional[FrameCharacter]`
+            - Displayed character.
+        - `pairChar : Optional[FrameCharacter]`
+            - An optional second character. The talking and acting character is determined by the FrameCharacter.active attribute.
+        - `text : str`
+            - Displayed text. Defaults to empty, implying no effect on textbox.
+        - `customName : Optional[str]`
+            - The name displayed in the dialogue box&#39;s nameplate.
+        - `bubble : Optional[int]`
+            - ID of a speech bubble to be played. Must be in the character&#39;s speech bubble list. Preset characters always use 1-3, sometimes 4 and 5.
+        - `background : Optional[assets.Background]`
+            - Displayed background.
+        - `backgroundFlip : Optional[bool]`
+            - Whether the background is flipped.
+        - `wideX : Optional[float]`
+            - Percentage of the background&#39;s width to offset the camera by, from 0 to 1. Only applies to wide backgrounds.
+        - `popup : Optional[assets.Popup]`
+            - Displayed custom pop-up. (Use presetPopup for preset pop-ups)
+        - `talk : bool`
+            - Whether the talking character&#39;s talking animation is displayed. Defaults to True.
+        - `poseAnim : bool`
+            - Whether the active character&#39;s pose animation is displayed. Defaults to True.
+        - `goNext : bool`
+            - Moves to the next frame instantly and without requiring the user to continue. Defaults to False.
+        - `merge : bool`
+            - Does not reset the text in the textbox before the next frame. Defaults to False.
+        - `offScreen : bool`
+            - If True, the frame&#39;s character, text and popup are not displayed, only their speech bubble. Defaults to False.
+        - `centerText : bool`
+            - Whether the text in the dialogue box is centered. Defaults to False.
+        - `presetPopup : Optional[enums.PresetPopup]`
+            - Displayed pre-set pop-up.
+        - `presetBlip : Optional[enums.PresetBlip]`
+            - The speech blip played during character talking. If None, uses the character&#39;s default blip.
+        - `fade : Optional[Fade]`
+            - The frame&#39;s fade.
+        - `filter : Optional[Filter]`
+            - The frame&#39;s filter.
+        - `transition : Optional[Transition]`
+            - The frame&#39;s transition.
+            - Only applies to wide backgrounds, when the previous frame&#39;s background is unchanged.
+        - `options : OptionModifiers`
+            - Can be used to modify objection options affecting future frames.
+        - `hidden : bool`
+            - Whether the frame is hidden by default. Only useful in cases. Defaults to False.
+        - `caseTag : Optional[str]`
+            - A unique tag used to identify the frame in case actions. (A direct reference to the frame object works too)
+        - `caseAction : Optional[CaseActions._CaseAction]`
+            - The frame&#39;s case action.
+        - `onCompile : Optional[Callable[[dict], dict]]`
+            - A callback for if it&#39;s absolutely necessary to access the frame&#39;s raw JSON dict upon compilation.
+        - `pressSequence : list[Frame]`
+            - A sequence of frames played when the testimony statement is pressed.
+        - `contradictions : list[tuple[RecordItem, &lt;Frame Target&gt;]]`
+            - List of tuples mapping evidence and profiles to present to caseTags/frame references.
     &#34;&#34;&#34;
-    character: assets.Character
-    poseId: Optional[int] = None
-    poseSubstr: Optional[str] = None
-    flip: bool = False
-    pairOffset: tuple[int, int] = (0, 0)
-    isActive: Optional[bool] = None
-    isFront: Optional[bool] = None
-
-    def __post_init__(self):
-        if self.poseId is None:
-            if self.poseSubstr is not None:
-                self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
-            else:
-                raise AttributeError(&#39;Either poseId or poseSubstr must be set to identify the pose in a FrameCharacter.&#39;)
-
-    @property
-    def isNone(self) -&gt; bool:
-        return self.character.id is None and self.poseId is None
-
-    def _getIndividualValue(self, value) -&gt; int:
-        if value is False or self.isNone:
-            return -1
-        elif value is True:
-            return 1
-        else:
-            return 0</code></pre>
+    pressSequence: list[Frame] = field(default_factory=list)
+    contradictions: list[
+            tuple[
+                &#39;Case.RecordItem&#39;,
+                Union[str, &#39;Frame&#39;]
+            ]
+        ] = field(default_factory=list)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="objectionpy.frames.Frame" href="#objectionpy.frames.Frame">Frame</a></li>
+</ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.frames.FrameCharacter.character"><code class="name">var <span class="ident">character</span> : <a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a></code></dt>
+<dt id="objectionpy.frames.CEFrame.pressSequence"><code class="name">var <span class="ident">pressSequence</span> : list</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.frames.FrameCharacter.flip"><code class="name">var <span class="ident">flip</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.FrameCharacter.isActive"><code class="name">var <span class="ident">isActive</span> : Optional[bool]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.FrameCharacter.isFront"><code class="name">var <span class="ident">isFront</span> : Optional[bool]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.FrameCharacter.pairOffset"><code class="name">var <span class="ident">pairOffset</span> : tuple</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.FrameCharacter.poseId"><code class="name">var <span class="ident">poseId</span> : Optional[int]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.FrameCharacter.poseSubstr"><code class="name">var <span class="ident">poseSubstr</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Instance variables</h3>
-<dl>
-<dt id="objectionpy.frames.FrameCharacter.isNone"><code class="name">var <span class="ident">isNone</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def isNone(self) -&gt; bool:
-    return self.character.id is None and self.poseId is None</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.frames.GalleryModifier"><code class="flex name class">
-<span>class <span class="ident">GalleryModifier</span></span>
-<span>(</span><span>defense: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, prosecution: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, counsel: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, witness: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None, judge: Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>] = None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Specify characters for each gallery location.</p>
-<p>Any location set to None remains unchanged. (Custom characters not yet supported)</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@dataclass
-class GalleryModifier:
-    &#34;&#34;&#34;Specify characters for each gallery location.
-    
-    Any location set to None remains unchanged. (Custom characters not yet supported)&#34;&#34;&#34;
-    defense: Optional[assets.Character] = None
-    prosecution:  Optional[assets.Character] = None
-    counsel: Optional[assets.Character] = None
-    witness: Optional[assets.Character] = None
-    judge: Optional[assets.Character] = None</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.frames.GalleryModifier.counsel"><code class="name">var <span class="ident">counsel</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.GalleryModifier.defense"><code class="name">var <span class="ident">defense</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.GalleryModifier.judge"><code class="name">var <span class="ident">judge</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.GalleryModifier.prosecution"><code class="name">var <span class="ident">prosecution</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.GalleryModifier.witness"><code class="name">var <span class="ident">witness</span> : Optional[<a title="objectionpy.assets.Character" href="assets.html#objectionpy.assets.Character">Character</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers"><code class="flex name class">
-<span>class <span class="ident">OptionModifiers</span></span>
-<span>(</span><span>autoplaySpeed: Optional[int] = None, dialogueBox: Optional[<a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a>] = None, dialogueBoxVisible: Optional[bool] = None, galleryAssign: <a title="objectionpy.frames.GalleryModifier" href="#objectionpy.frames.GalleryModifier">GalleryModifier</a> = &lt;factory&gt;, galleryRemove: list = &lt;factory&gt;, defaultTextSpeed: Optional[int] = None, blipFrequency: Optional[int] = None, frameSkip: Optional[bool] = None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Specify values for setting objection options affecting future frames.</p>
-<p>Any option set to None remains unchanged.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@dataclass
-class OptionModifiers:
-    &#34;&#34;&#34;
-    Specify values for setting objection options affecting future frames.
-
-    Any option set to None remains unchanged.
-    &#34;&#34;&#34;
-    autoplaySpeed: Optional[int] = None
-    dialogueBox: Optional[enums.PresetDialogueBox] = None
-    dialogueBoxVisible: Optional[bool] = None
-    galleryAssign: GalleryModifier = field(default_factory=GalleryModifier)
-    galleryRemove: list[enums.CharacterLocation] = field(default_factory=list)
-    defaultTextSpeed: Optional[int] = None
-    blipFrequency: Optional[int] = None
-    frameSkip: Optional[bool] = None
-
-    def __post_init__(self):
-        for character in self.galleryAssign.__dict__.values():
-            if character and not character.isPreset:
-                raise FutureWarning(&#39;Gallery assign modifiers not yet implemented to work for custom characters&#39;)</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.frames.OptionModifiers.autoplaySpeed"><code class="name">var <span class="ident">autoplaySpeed</span> : Optional[int]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.blipFrequency"><code class="name">var <span class="ident">blipFrequency</span> : Optional[int]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.defaultTextSpeed"><code class="name">var <span class="ident">defaultTextSpeed</span> : Optional[int]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.dialogueBox"><code class="name">var <span class="ident">dialogueBox</span> : Optional[<a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a>]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.dialogueBoxVisible"><code class="name">var <span class="ident">dialogueBoxVisible</span> : Optional[bool]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.frameSkip"><code class="name">var <span class="ident">frameSkip</span> : Optional[bool]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.galleryAssign"><code class="name">var <span class="ident">galleryAssign</span> : <a title="objectionpy.frames.GalleryModifier" href="#objectionpy.frames.GalleryModifier">GalleryModifier</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.OptionModifiers.galleryRemove"><code class="name">var <span class="ident">galleryRemove</span> : list</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.frames.Transition"><code class="flex name class">
-<span>class <span class="ident">Transition</span></span>
-<span>(</span><span>duration: int, easing: <a title="objectionpy.enums.Easing" href="enums.html#objectionpy.enums.Easing">Easing</a> = Easing.LINEAR)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Camera transition on wide backgrounds.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@dataclass
-class Transition:
-    &#34;&#34;&#34;Camera transition on wide backgrounds.&#34;&#34;&#34;
-    duration: int
-    easing: enums.Easing = enums.Easing.LINEAR</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.frames.Transition.duration"><code class="name">var <span class="ident">duration</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.frames.Transition.easing"><code class="name">var <span class="ident">easing</span> : <a title="objectionpy.enums.Easing" href="enums.html#objectionpy.enums.Easing">Easing</a></code></dt>
+<dt id="objectionpy.frames.CEFrame.contradictions"><code class="name">var <span class="ident">contradictions</span> : list</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1886,128 +1885,91 @@ class Transition:
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="objectionpy.frames.CEFrame" href="#objectionpy.frames.CEFrame">CEFrame</a></code></h4>
-<ul class="">
-<li><code><a title="objectionpy.frames.CEFrame.contradictions" href="#objectionpy.frames.CEFrame.contradictions">contradictions</a></code></li>
-<li><code><a title="objectionpy.frames.CEFrame.pressSequence" href="#objectionpy.frames.CEFrame.pressSequence">pressSequence</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="objectionpy.frames.CaseActions" href="#objectionpy.frames.CaseActions">CaseActions</a></code></h4>
-<ul class="two-column">
-<li><code><a title="objectionpy.frames.CaseActions.EndGame" href="#objectionpy.frames.CaseActions.EndGame">EndGame</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.FlashingHealth" href="#objectionpy.frames.CaseActions.FlashingHealth">FlashingHealth</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.GoToFrame" href="#objectionpy.frames.CaseActions.GoToFrame">GoToFrame</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.HealthAdd" href="#objectionpy.frames.CaseActions.HealthAdd">HealthAdd</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.HealthRemove" href="#objectionpy.frames.CaseActions.HealthRemove">HealthRemove</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.HealthSet" href="#objectionpy.frames.CaseActions.HealthSet">HealthSet</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.PromptChoice" href="#objectionpy.frames.CaseActions.PromptChoice">PromptChoice</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.PromptCursor" href="#objectionpy.frames.CaseActions.PromptCursor">PromptCursor</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.PromptInt" href="#objectionpy.frames.CaseActions.PromptInt">PromptInt</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.PromptPresent" href="#objectionpy.frames.CaseActions.PromptPresent">PromptPresent</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.PromptStr" href="#objectionpy.frames.CaseActions.PromptStr">PromptStr</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.SetGameOverGroup" href="#objectionpy.frames.CaseActions.SetGameOverGroup">SetGameOverGroup</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.ToggleEvidence" href="#objectionpy.frames.CaseActions.ToggleEvidence">ToggleEvidence</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.ToggleFrames" href="#objectionpy.frames.CaseActions.ToggleFrames">ToggleFrames</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.VarAdd" href="#objectionpy.frames.CaseActions.VarAdd">VarAdd</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.VarEval" href="#objectionpy.frames.CaseActions.VarEval">VarEval</a></code></li>
-<li><code><a title="objectionpy.frames.CaseActions.VarSet" href="#objectionpy.frames.CaseActions.VarSet">VarSet</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="objectionpy.frames.Color" href="#objectionpy.frames.Color">Color</a></code></h4>
 </li>
 <li>
 <h4><code><a title="objectionpy.frames.CursorRect" href="#objectionpy.frames.CursorRect">CursorRect</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.frames.CursorRect.height" href="#objectionpy.frames.CursorRect.height">height</a></code></li>
 <li><code><a title="objectionpy.frames.CursorRect.left" href="#objectionpy.frames.CursorRect.left">left</a></code></li>
 <li><code><a title="objectionpy.frames.CursorRect.top" href="#objectionpy.frames.CursorRect.top">top</a></code></li>
 <li><code><a title="objectionpy.frames.CursorRect.width" href="#objectionpy.frames.CursorRect.width">width</a></code></li>
+<li><code><a title="objectionpy.frames.CursorRect.height" href="#objectionpy.frames.CursorRect.height">height</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.frames.CaseActions" href="#objectionpy.frames.CaseActions">CaseActions</a></code></h4>
+<ul class="two-column">
+<li><code><a title="objectionpy.frames.CaseActions.ToggleEvidence" href="#objectionpy.frames.CaseActions.ToggleEvidence">ToggleEvidence</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.ToggleFrames" href="#objectionpy.frames.CaseActions.ToggleFrames">ToggleFrames</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.GoToFrame" href="#objectionpy.frames.CaseActions.GoToFrame">GoToFrame</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.SetGameOverGroup" href="#objectionpy.frames.CaseActions.SetGameOverGroup">SetGameOverGroup</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.EndGame" href="#objectionpy.frames.CaseActions.EndGame">EndGame</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.HealthSet" href="#objectionpy.frames.CaseActions.HealthSet">HealthSet</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.HealthAdd" href="#objectionpy.frames.CaseActions.HealthAdd">HealthAdd</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.HealthRemove" href="#objectionpy.frames.CaseActions.HealthRemove">HealthRemove</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.FlashingHealth" href="#objectionpy.frames.CaseActions.FlashingHealth">FlashingHealth</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.PromptPresent" href="#objectionpy.frames.CaseActions.PromptPresent">PromptPresent</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.PromptChoice" href="#objectionpy.frames.CaseActions.PromptChoice">PromptChoice</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.PromptInt" href="#objectionpy.frames.CaseActions.PromptInt">PromptInt</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.PromptStr" href="#objectionpy.frames.CaseActions.PromptStr">PromptStr</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.PromptCursor" href="#objectionpy.frames.CaseActions.PromptCursor">PromptCursor</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.VarSet" href="#objectionpy.frames.CaseActions.VarSet">VarSet</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.VarAdd" href="#objectionpy.frames.CaseActions.VarAdd">VarAdd</a></code></li>
+<li><code><a title="objectionpy.frames.CaseActions.VarEval" href="#objectionpy.frames.CaseActions.VarEval">VarEval</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.frames.Fade" href="#objectionpy.frames.Fade">Fade</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.frames.Fade.color" href="#objectionpy.frames.Fade.color">color</a></code></li>
 <li><code><a title="objectionpy.frames.Fade.direction" href="#objectionpy.frames.Fade.direction">direction</a></code></li>
+<li><code><a title="objectionpy.frames.Fade.target" href="#objectionpy.frames.Fade.target">target</a></code></li>
 <li><code><a title="objectionpy.frames.Fade.duration" href="#objectionpy.frames.Fade.duration">duration</a></code></li>
 <li><code><a title="objectionpy.frames.Fade.easing" href="#objectionpy.frames.Fade.easing">easing</a></code></li>
-<li><code><a title="objectionpy.frames.Fade.target" href="#objectionpy.frames.Fade.target">target</a></code></li>
+<li><code><a title="objectionpy.frames.Fade.color" href="#objectionpy.frames.Fade.color">color</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.frames.Filter" href="#objectionpy.frames.Filter">Filter</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.frames.Filter.amount" href="#objectionpy.frames.Filter.amount">amount</a></code></li>
-<li><code><a title="objectionpy.frames.Filter.target" href="#objectionpy.frames.Filter.target">target</a></code></li>
 <li><code><a title="objectionpy.frames.Filter.type" href="#objectionpy.frames.Filter.type">type</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="objectionpy.frames.Frame" href="#objectionpy.frames.Frame">Frame</a></code></h4>
-<ul class="two-column">
-<li><code><a title="objectionpy.frames.Frame.background" href="#objectionpy.frames.Frame.background">background</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.backgroundFlip" href="#objectionpy.frames.Frame.backgroundFlip">backgroundFlip</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.bubble" href="#objectionpy.frames.Frame.bubble">bubble</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.caseAction" href="#objectionpy.frames.Frame.caseAction">caseAction</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.caseTag" href="#objectionpy.frames.Frame.caseTag">caseTag</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.centerText" href="#objectionpy.frames.Frame.centerText">centerText</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.char" href="#objectionpy.frames.Frame.char">char</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.customName" href="#objectionpy.frames.Frame.customName">customName</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.fade" href="#objectionpy.frames.Frame.fade">fade</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.filter" href="#objectionpy.frames.Frame.filter">filter</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.goNext" href="#objectionpy.frames.Frame.goNext">goNext</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.hidden" href="#objectionpy.frames.Frame.hidden">hidden</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.merge" href="#objectionpy.frames.Frame.merge">merge</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.offScreen" href="#objectionpy.frames.Frame.offScreen">offScreen</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.onCompile" href="#objectionpy.frames.Frame.onCompile">onCompile</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.options" href="#objectionpy.frames.Frame.options">options</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.pairChar" href="#objectionpy.frames.Frame.pairChar">pairChar</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.popup" href="#objectionpy.frames.Frame.popup">popup</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.poseAnim" href="#objectionpy.frames.Frame.poseAnim">poseAnim</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.presetBlip" href="#objectionpy.frames.Frame.presetBlip">presetBlip</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.presetPopup" href="#objectionpy.frames.Frame.presetPopup">presetPopup</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.talk" href="#objectionpy.frames.Frame.talk">talk</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.text" href="#objectionpy.frames.Frame.text">text</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.transition" href="#objectionpy.frames.Frame.transition">transition</a></code></li>
-<li><code><a title="objectionpy.frames.Frame.wideX" href="#objectionpy.frames.Frame.wideX">wideX</a></code></li>
+<li><code><a title="objectionpy.frames.Filter.target" href="#objectionpy.frames.Filter.target">target</a></code></li>
+<li><code><a title="objectionpy.frames.Filter.amount" href="#objectionpy.frames.Filter.amount">amount</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.frames.FrameCharacter" href="#objectionpy.frames.FrameCharacter">FrameCharacter</a></code></h4>
 <ul class="two-column">
-<li><code><a title="objectionpy.frames.FrameCharacter.character" href="#objectionpy.frames.FrameCharacter.character">character</a></code></li>
-<li><code><a title="objectionpy.frames.FrameCharacter.flip" href="#objectionpy.frames.FrameCharacter.flip">flip</a></code></li>
-<li><code><a title="objectionpy.frames.FrameCharacter.isActive" href="#objectionpy.frames.FrameCharacter.isActive">isActive</a></code></li>
-<li><code><a title="objectionpy.frames.FrameCharacter.isFront" href="#objectionpy.frames.FrameCharacter.isFront">isFront</a></code></li>
 <li><code><a title="objectionpy.frames.FrameCharacter.isNone" href="#objectionpy.frames.FrameCharacter.isNone">isNone</a></code></li>
-<li><code><a title="objectionpy.frames.FrameCharacter.pairOffset" href="#objectionpy.frames.FrameCharacter.pairOffset">pairOffset</a></code></li>
+<li><code><a title="objectionpy.frames.FrameCharacter.character" href="#objectionpy.frames.FrameCharacter.character">character</a></code></li>
 <li><code><a title="objectionpy.frames.FrameCharacter.poseId" href="#objectionpy.frames.FrameCharacter.poseId">poseId</a></code></li>
 <li><code><a title="objectionpy.frames.FrameCharacter.poseSubstr" href="#objectionpy.frames.FrameCharacter.poseSubstr">poseSubstr</a></code></li>
+<li><code><a title="objectionpy.frames.FrameCharacter.flip" href="#objectionpy.frames.FrameCharacter.flip">flip</a></code></li>
+<li><code><a title="objectionpy.frames.FrameCharacter.pairOffset" href="#objectionpy.frames.FrameCharacter.pairOffset">pairOffset</a></code></li>
+<li><code><a title="objectionpy.frames.FrameCharacter.isActive" href="#objectionpy.frames.FrameCharacter.isActive">isActive</a></code></li>
+<li><code><a title="objectionpy.frames.FrameCharacter.isFront" href="#objectionpy.frames.FrameCharacter.isFront">isFront</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.frames.GalleryModifier" href="#objectionpy.frames.GalleryModifier">GalleryModifier</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.frames.GalleryModifier.counsel" href="#objectionpy.frames.GalleryModifier.counsel">counsel</a></code></li>
 <li><code><a title="objectionpy.frames.GalleryModifier.defense" href="#objectionpy.frames.GalleryModifier.defense">defense</a></code></li>
-<li><code><a title="objectionpy.frames.GalleryModifier.judge" href="#objectionpy.frames.GalleryModifier.judge">judge</a></code></li>
 <li><code><a title="objectionpy.frames.GalleryModifier.prosecution" href="#objectionpy.frames.GalleryModifier.prosecution">prosecution</a></code></li>
+<li><code><a title="objectionpy.frames.GalleryModifier.counsel" href="#objectionpy.frames.GalleryModifier.counsel">counsel</a></code></li>
 <li><code><a title="objectionpy.frames.GalleryModifier.witness" href="#objectionpy.frames.GalleryModifier.witness">witness</a></code></li>
+<li><code><a title="objectionpy.frames.GalleryModifier.judge" href="#objectionpy.frames.GalleryModifier.judge">judge</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.frames.OptionModifiers" href="#objectionpy.frames.OptionModifiers">OptionModifiers</a></code></h4>
 <ul class="two-column">
-<li><code><a title="objectionpy.frames.OptionModifiers.autoplaySpeed" href="#objectionpy.frames.OptionModifiers.autoplaySpeed">autoplaySpeed</a></code></li>
-<li><code><a title="objectionpy.frames.OptionModifiers.blipFrequency" href="#objectionpy.frames.OptionModifiers.blipFrequency">blipFrequency</a></code></li>
-<li><code><a title="objectionpy.frames.OptionModifiers.defaultTextSpeed" href="#objectionpy.frames.OptionModifiers.defaultTextSpeed">defaultTextSpeed</a></code></li>
-<li><code><a title="objectionpy.frames.OptionModifiers.dialogueBox" href="#objectionpy.frames.OptionModifiers.dialogueBox">dialogueBox</a></code></li>
-<li><code><a title="objectionpy.frames.OptionModifiers.dialogueBoxVisible" href="#objectionpy.frames.OptionModifiers.dialogueBoxVisible">dialogueBoxVisible</a></code></li>
-<li><code><a title="objectionpy.frames.OptionModifiers.frameSkip" href="#objectionpy.frames.OptionModifiers.frameSkip">frameSkip</a></code></li>
 <li><code><a title="objectionpy.frames.OptionModifiers.galleryAssign" href="#objectionpy.frames.OptionModifiers.galleryAssign">galleryAssign</a></code></li>
 <li><code><a title="objectionpy.frames.OptionModifiers.galleryRemove" href="#objectionpy.frames.OptionModifiers.galleryRemove">galleryRemove</a></code></li>
+<li><code><a title="objectionpy.frames.OptionModifiers.autoplaySpeed" href="#objectionpy.frames.OptionModifiers.autoplaySpeed">autoplaySpeed</a></code></li>
+<li><code><a title="objectionpy.frames.OptionModifiers.dialogueBox" href="#objectionpy.frames.OptionModifiers.dialogueBox">dialogueBox</a></code></li>
+<li><code><a title="objectionpy.frames.OptionModifiers.dialogueBoxVisible" href="#objectionpy.frames.OptionModifiers.dialogueBoxVisible">dialogueBoxVisible</a></code></li>
+<li><code><a title="objectionpy.frames.OptionModifiers.defaultTextSpeed" href="#objectionpy.frames.OptionModifiers.defaultTextSpeed">defaultTextSpeed</a></code></li>
+<li><code><a title="objectionpy.frames.OptionModifiers.blipFrequency" href="#objectionpy.frames.OptionModifiers.blipFrequency">blipFrequency</a></code></li>
+<li><code><a title="objectionpy.frames.OptionModifiers.frameSkip" href="#objectionpy.frames.OptionModifiers.frameSkip">frameSkip</a></code></li>
 </ul>
 </li>
 <li>
@@ -2015,6 +1977,43 @@ class Transition:
 <ul class="">
 <li><code><a title="objectionpy.frames.Transition.duration" href="#objectionpy.frames.Transition.duration">duration</a></code></li>
 <li><code><a title="objectionpy.frames.Transition.easing" href="#objectionpy.frames.Transition.easing">easing</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.frames.Frame" href="#objectionpy.frames.Frame">Frame</a></code></h4>
+<ul class="two-column">
+<li><code><a title="objectionpy.frames.Frame.char" href="#objectionpy.frames.Frame.char">char</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.options" href="#objectionpy.frames.Frame.options">options</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.pairChar" href="#objectionpy.frames.Frame.pairChar">pairChar</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.text" href="#objectionpy.frames.Frame.text">text</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.customName" href="#objectionpy.frames.Frame.customName">customName</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.bubble" href="#objectionpy.frames.Frame.bubble">bubble</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.background" href="#objectionpy.frames.Frame.background">background</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.backgroundFlip" href="#objectionpy.frames.Frame.backgroundFlip">backgroundFlip</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.wideX" href="#objectionpy.frames.Frame.wideX">wideX</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.popup" href="#objectionpy.frames.Frame.popup">popup</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.talk" href="#objectionpy.frames.Frame.talk">talk</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.poseAnim" href="#objectionpy.frames.Frame.poseAnim">poseAnim</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.goNext" href="#objectionpy.frames.Frame.goNext">goNext</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.merge" href="#objectionpy.frames.Frame.merge">merge</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.offScreen" href="#objectionpy.frames.Frame.offScreen">offScreen</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.centerText" href="#objectionpy.frames.Frame.centerText">centerText</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.presetPopup" href="#objectionpy.frames.Frame.presetPopup">presetPopup</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.presetBlip" href="#objectionpy.frames.Frame.presetBlip">presetBlip</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.fade" href="#objectionpy.frames.Frame.fade">fade</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.filter" href="#objectionpy.frames.Frame.filter">filter</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.transition" href="#objectionpy.frames.Frame.transition">transition</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.hidden" href="#objectionpy.frames.Frame.hidden">hidden</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.caseTag" href="#objectionpy.frames.Frame.caseTag">caseTag</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.caseAction" href="#objectionpy.frames.Frame.caseAction">caseAction</a></code></li>
+<li><code><a title="objectionpy.frames.Frame.onCompile" href="#objectionpy.frames.Frame.onCompile">onCompile</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.frames.CEFrame" href="#objectionpy.frames.CEFrame">CEFrame</a></code></h4>
+<ul class="">
+<li><code><a title="objectionpy.frames.CEFrame.pressSequence" href="#objectionpy.frames.CEFrame.pressSequence">pressSequence</a></code></li>
+<li><code><a title="objectionpy.frames.CEFrame.contradictions" href="#objectionpy.frames.CEFrame.contradictions">contradictions</a></code></li>
 </ul>
 </li>
 </ul>

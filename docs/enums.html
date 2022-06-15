@@ -32,19 +32,6 @@
 from enum import Enum
 
 
-class ObjectionType(Enum):
-    &#34;&#34;&#34;&#34;&#34;&#34;
-    SCENE = 0
-    CASE = 1
-
-
-class GroupType(Enum):
-    &#34;&#34;&#34;&#34;&#34;&#34;
-    NORMAL = &#34;n&#34;
-    CE = &#34;ce&#34;
-    GAME_OVER = &#34;go&#34;
-
-
 class CharacterLocation(Enum):
     &#34;&#34;&#34;&#34;&#34;&#34;
     DEFENSE = &#39;defense&#39;
@@ -53,23 +40,6 @@ class CharacterLocation(Enum):
     WITNESS = &#39;witness&#39;
     JUDGE = &#39;judge&#39;
     GALLERY = &#39;gallery&#39;
-
-
-class FadeDirection(Enum):
-    &#34;&#34;&#34;&#34;&#34;&#34;
-    OUT = 0
-    IN = 1
-    OUT_IN = 2
-
-
-class FadeTarget(Enum):
-    &#34;&#34;&#34;&#34;&#34;&#34;
-    BACKGROUND = 0
-    CHARACTER = 1
-    SCENE = 2
-    EVERYTHING = 3
-    PAIRED_CHARACTER = 4
-    CHARACTERS = 5
 
 
 class Easing(Enum):
@@ -103,6 +73,23 @@ class Easing(Enum):
     EASE_IN_OUT_CIRCULAR = &#34;ease-in-out-circular&#34;
 
 
+class FadeDirection(Enum):
+    &#34;&#34;&#34;&#34;&#34;&#34;
+    OUT = 0
+    IN = 1
+    OUT_IN = 2
+
+
+class FadeTarget(Enum):
+    &#34;&#34;&#34;&#34;&#34;&#34;
+    BACKGROUND = 0
+    CHARACTER = 1
+    SCENE = 2
+    EVERYTHING = 3
+    PAIRED_CHARACTER = 4
+    CHARACTERS = 5
+
+
 class FilterType(Enum):
     &#34;&#34;&#34;&#34;&#34;&#34;
     GRAYSCALE = &#39;grayscale&#39;
@@ -118,14 +105,17 @@ class FilterTarget(Enum):
     EVERYTHING = 2
 
 
-class PresetPopup(Enum):
+class GroupType(Enum):
     &#34;&#34;&#34;&#34;&#34;&#34;
-    WITNESS_TESTIMONY = 1
-    CROSS_EXAMINATION = 2
-    TESTIMONY_LABEL = 3
-    GUILTY = 4
-    NOT_GUILTY = 5
-    TESTIMONY_LABEL_HIDE = -1
+    NORMAL = &#34;n&#34;
+    CE = &#34;ce&#34;
+    GAME_OVER = &#34;go&#34;
+
+
+class ObjectionType(Enum):
+    &#34;&#34;&#34;&#34;&#34;&#34;
+    SCENE = 0
+    CASE = 1
 
 
 class PresetBlip(Enum):
@@ -146,6 +136,17 @@ class PresetDialogueBox(Enum):
     AJ = 2
     THE_GREAT_ACE_ATTORNEY = 3
     TGAA = 3
+
+
+class PresetPopup(Enum):
+    &#34;&#34;&#34;&#34;&#34;&#34;
+    WITNESS_TESTIMONY = 1
+    CROSS_EXAMINATION = 2
+    TESTIMONY_LABEL = 3
+    GUILTY = 4
+    NOT_GUILTY = 5
+    TESTIMONY_LABEL_HIDE = -1
+
 
 class RecordType(Enum):
     &#34;&#34;&#34;&#34;&#34;&#34;
@@ -187,19 +188,7 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.enums.CharacterLocation.COUNSEL"><code class="name">var <span class="ident">COUNSEL</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.enums.CharacterLocation.DEFENSE"><code class="name">var <span class="ident">DEFENSE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.CharacterLocation.GALLERY"><code class="name">var <span class="ident">GALLERY</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.CharacterLocation.JUDGE"><code class="name">var <span class="ident">JUDGE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -207,7 +196,19 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="objectionpy.enums.CharacterLocation.COUNSEL"><code class="name">var <span class="ident">COUNSEL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.enums.CharacterLocation.WITNESS"><code class="name">var <span class="ident">WITNESS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.CharacterLocation.JUDGE"><code class="name">var <span class="ident">JUDGE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.CharacterLocation.GALLERY"><code class="name">var <span class="ident">GALLERY</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -259,6 +260,14 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="objectionpy.enums.Easing.LINEAR"><code class="name">var <span class="ident">LINEAR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.Easing.SPRING"><code class="name">var <span class="ident">SPRING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.enums.Easing.EASE"><code class="name">var <span class="ident">EASE</span></code></dt>
 <dd>
 <div class="desc"></div>
@@ -267,15 +276,7 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_CIRCULAR"><code class="name">var <span class="ident">EASE_IN_CIRCULAR</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_CUBIC"><code class="name">var <span class="ident">EASE_IN_CUBIC</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_EXPONENTIAL"><code class="name">var <span class="ident">EASE_IN_EXPONENTIAL</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_OUT"><code class="name">var <span class="ident">EASE_OUT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -283,27 +284,11 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_OUT_CIRCULAR"><code class="name">var <span class="ident">EASE_IN_OUT_CIRCULAR</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_SINE"><code class="name">var <span class="ident">EASE_IN_SINE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_OUT_CUBIC"><code class="name">var <span class="ident">EASE_IN_OUT_CUBIC</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_OUT_EXPONENTIAL"><code class="name">var <span class="ident">EASE_IN_OUT_EXPONENTIAL</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_OUT_QUAD"><code class="name">var <span class="ident">EASE_IN_OUT_QUAD</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_OUT_QUART"><code class="name">var <span class="ident">EASE_IN_OUT_QUART</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_OUT_QUINT"><code class="name">var <span class="ident">EASE_IN_OUT_QUINT</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_OUT_SINE"><code class="name">var <span class="ident">EASE_OUT_SINE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -315,23 +300,15 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_QUART"><code class="name">var <span class="ident">EASE_IN_QUART</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_OUT_QUAD"><code class="name">var <span class="ident">EASE_OUT_QUAD</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_QUINT"><code class="name">var <span class="ident">EASE_IN_QUINT</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_OUT_QUAD"><code class="name">var <span class="ident">EASE_IN_OUT_QUAD</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_IN_SINE"><code class="name">var <span class="ident">EASE_IN_SINE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_OUT"><code class="name">var <span class="ident">EASE_OUT</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.Easing.EASE_OUT_CIRCULAR"><code class="name">var <span class="ident">EASE_OUT_CIRCULAR</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_CUBIC"><code class="name">var <span class="ident">EASE_IN_CUBIC</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -339,11 +316,11 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_OUT_EXPONENTIAL"><code class="name">var <span class="ident">EASE_OUT_EXPONENTIAL</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_OUT_CUBIC"><code class="name">var <span class="ident">EASE_IN_OUT_CUBIC</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_OUT_QUAD"><code class="name">var <span class="ident">EASE_OUT_QUAD</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_QUART"><code class="name">var <span class="ident">EASE_IN_QUART</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -351,19 +328,43 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="objectionpy.enums.Easing.EASE_IN_OUT_QUART"><code class="name">var <span class="ident">EASE_IN_OUT_QUART</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.Easing.EASE_IN_QUINT"><code class="name">var <span class="ident">EASE_IN_QUINT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.enums.Easing.EASE_OUT_QUINT"><code class="name">var <span class="ident">EASE_OUT_QUINT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.EASE_OUT_SINE"><code class="name">var <span class="ident">EASE_OUT_SINE</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_OUT_QUINT"><code class="name">var <span class="ident">EASE_IN_OUT_QUINT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.LINEAR"><code class="name">var <span class="ident">LINEAR</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_IN_EXPONENTIAL"><code class="name">var <span class="ident">EASE_IN_EXPONENTIAL</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.Easing.SPRING"><code class="name">var <span class="ident">SPRING</span></code></dt>
+<dt id="objectionpy.enums.Easing.EASE_OUT_EXPONENTIAL"><code class="name">var <span class="ident">EASE_OUT_EXPONENTIAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.Easing.EASE_IN_OUT_EXPONENTIAL"><code class="name">var <span class="ident">EASE_IN_OUT_EXPONENTIAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.Easing.EASE_IN_CIRCULAR"><code class="name">var <span class="ident">EASE_IN_CIRCULAR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.Easing.EASE_OUT_CIRCULAR"><code class="name">var <span class="ident">EASE_OUT_CIRCULAR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.Easing.EASE_IN_OUT_CIRCULAR"><code class="name">var <span class="ident">EASE_IN_OUT_CIRCULAR</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -391,11 +392,11 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.enums.FadeDirection.IN"><code class="name">var <span class="ident">IN</span></code></dt>
+<dt id="objectionpy.enums.FadeDirection.OUT"><code class="name">var <span class="ident">OUT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.FadeDirection.OUT"><code class="name">var <span class="ident">OUT</span></code></dt>
+<dt id="objectionpy.enums.FadeDirection.IN"><code class="name">var <span class="ident">IN</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -438,7 +439,7 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.FadeTarget.CHARACTERS"><code class="name">var <span class="ident">CHARACTERS</span></code></dt>
+<dt id="objectionpy.enums.FadeTarget.SCENE"><code class="name">var <span class="ident">SCENE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -450,7 +451,48 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.FadeTarget.SCENE"><code class="name">var <span class="ident">SCENE</span></code></dt>
+<dt id="objectionpy.enums.FadeTarget.CHARACTERS"><code class="name">var <span class="ident">CHARACTERS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.enums.FilterType"><code class="flex name class">
+<span>class <span class="ident">FilterType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FilterType(Enum):
+    &#34;&#34;&#34;&#34;&#34;&#34;
+    GRAYSCALE = &#39;grayscale&#39;
+    INVERT = &#39;invert&#39;
+    SEPIA = &#39;sepia&#39;
+    HUE_ROTATE = &#39;hue-rotate&#39;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.enums.FilterType.GRAYSCALE"><code class="name">var <span class="ident">GRAYSCALE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.FilterType.INVERT"><code class="name">var <span class="ident">INVERT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.FilterType.SEPIA"><code class="name">var <span class="ident">SEPIA</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.FilterType.HUE_ROTATE"><code class="name">var <span class="ident">HUE_ROTATE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -492,47 +534,6 @@ class RecordType(Enum):
 </dd>
 </dl>
 </dd>
-<dt id="objectionpy.enums.FilterType"><code class="flex name class">
-<span>class <span class="ident">FilterType</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class FilterType(Enum):
-    &#34;&#34;&#34;&#34;&#34;&#34;
-    GRAYSCALE = &#39;grayscale&#39;
-    INVERT = &#39;invert&#39;
-    SEPIA = &#39;sepia&#39;
-    HUE_ROTATE = &#39;hue-rotate&#39;</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.enums.FilterType.GRAYSCALE"><code class="name">var <span class="ident">GRAYSCALE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.FilterType.HUE_ROTATE"><code class="name">var <span class="ident">HUE_ROTATE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.FilterType.INVERT"><code class="name">var <span class="ident">INVERT</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.FilterType.SEPIA"><code class="name">var <span class="ident">SEPIA</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
 <dt id="objectionpy.enums.GroupType"><code class="flex name class">
 <span>class <span class="ident">GroupType</span></span>
 <span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
@@ -555,15 +556,15 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="objectionpy.enums.GroupType.NORMAL"><code class="name">var <span class="ident">NORMAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.enums.GroupType.CE"><code class="name">var <span class="ident">CE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="objectionpy.enums.GroupType.GAME_OVER"><code class="name">var <span class="ident">GAME_OVER</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.GroupType.NORMAL"><code class="name">var <span class="ident">NORMAL</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -590,11 +591,11 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.enums.ObjectionType.CASE"><code class="name">var <span class="ident">CASE</span></code></dt>
+<dt id="objectionpy.enums.ObjectionType.SCENE"><code class="name">var <span class="ident">SCENE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.ObjectionType.SCENE"><code class="name">var <span class="ident">SCENE</span></code></dt>
+<dt id="objectionpy.enums.ObjectionType.CASE"><code class="name">var <span class="ident">CASE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -625,7 +626,7 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.enums.PresetBlip.ECHOING"><code class="name">var <span class="ident">ECHOING</span></code></dt>
+<dt id="objectionpy.enums.PresetBlip.MALE"><code class="name">var <span class="ident">MALE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -633,19 +634,19 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="objectionpy.enums.PresetBlip.TYPEWRITER"><code class="name">var <span class="ident">TYPEWRITER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.PresetBlip.ECHOING"><code class="name">var <span class="ident">ECHOING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.enums.PresetBlip.KATONK"><code class="name">var <span class="ident">KATONK</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.PresetBlip.MALE"><code class="name">var <span class="ident">MALE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.enums.PresetBlip.MUTE"><code class="name">var <span class="ident">MUTE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.PresetBlip.TYPEWRITER"><code class="name">var <span class="ident">TYPEWRITER</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -676,7 +677,11 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.enums.PresetDialogueBox.AJ"><code class="name">var <span class="ident">AJ</span></code></dt>
+<dt id="objectionpy.enums.PresetDialogueBox.CLASSIC"><code class="name">var <span class="ident">CLASSIC</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.PresetDialogueBox.TRILOGY"><code class="name">var <span class="ident">TRILOGY</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -684,11 +689,7 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.PresetDialogueBox.CLASSIC"><code class="name">var <span class="ident">CLASSIC</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.PresetDialogueBox.TGAA"><code class="name">var <span class="ident">TGAA</span></code></dt>
+<dt id="objectionpy.enums.PresetDialogueBox.AJ"><code class="name">var <span class="ident">AJ</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -696,7 +697,7 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.PresetDialogueBox.TRILOGY"><code class="name">var <span class="ident">TRILOGY</span></code></dt>
+<dt id="objectionpy.enums.PresetDialogueBox.TGAA"><code class="name">var <span class="ident">TGAA</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -727,7 +728,15 @@ class RecordType(Enum):
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="objectionpy.enums.PresetPopup.WITNESS_TESTIMONY"><code class="name">var <span class="ident">WITNESS_TESTIMONY</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.enums.PresetPopup.CROSS_EXAMINATION"><code class="name">var <span class="ident">CROSS_EXAMINATION</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.enums.PresetPopup.TESTIMONY_LABEL"><code class="name">var <span class="ident">TESTIMONY_LABEL</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -739,15 +748,7 @@ class RecordType(Enum):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.enums.PresetPopup.TESTIMONY_LABEL"><code class="name">var <span class="ident">TESTIMONY_LABEL</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.enums.PresetPopup.TESTIMONY_LABEL_HIDE"><code class="name">var <span class="ident">TESTIMONY_LABEL_HIDE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.enums.PresetPopup.WITNESS_TESTIMONY"><code class="name">var <span class="ident">WITNESS_TESTIMONY</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -803,51 +804,51 @@ class RecordType(Enum):
 <li>
 <h4><code><a title="objectionpy.enums.CharacterLocation" href="#objectionpy.enums.CharacterLocation">CharacterLocation</a></code></h4>
 <ul class="two-column">
-<li><code><a title="objectionpy.enums.CharacterLocation.COUNSEL" href="#objectionpy.enums.CharacterLocation.COUNSEL">COUNSEL</a></code></li>
 <li><code><a title="objectionpy.enums.CharacterLocation.DEFENSE" href="#objectionpy.enums.CharacterLocation.DEFENSE">DEFENSE</a></code></li>
-<li><code><a title="objectionpy.enums.CharacterLocation.GALLERY" href="#objectionpy.enums.CharacterLocation.GALLERY">GALLERY</a></code></li>
-<li><code><a title="objectionpy.enums.CharacterLocation.JUDGE" href="#objectionpy.enums.CharacterLocation.JUDGE">JUDGE</a></code></li>
 <li><code><a title="objectionpy.enums.CharacterLocation.PROSECUTION" href="#objectionpy.enums.CharacterLocation.PROSECUTION">PROSECUTION</a></code></li>
+<li><code><a title="objectionpy.enums.CharacterLocation.COUNSEL" href="#objectionpy.enums.CharacterLocation.COUNSEL">COUNSEL</a></code></li>
 <li><code><a title="objectionpy.enums.CharacterLocation.WITNESS" href="#objectionpy.enums.CharacterLocation.WITNESS">WITNESS</a></code></li>
+<li><code><a title="objectionpy.enums.CharacterLocation.JUDGE" href="#objectionpy.enums.CharacterLocation.JUDGE">JUDGE</a></code></li>
+<li><code><a title="objectionpy.enums.CharacterLocation.GALLERY" href="#objectionpy.enums.CharacterLocation.GALLERY">GALLERY</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.enums.Easing" href="#objectionpy.enums.Easing">Easing</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.enums.Easing.EASE" href="#objectionpy.enums.Easing.EASE">EASE</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN" href="#objectionpy.enums.Easing.EASE_IN">EASE_IN</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_CIRCULAR" href="#objectionpy.enums.Easing.EASE_IN_CIRCULAR">EASE_IN_CIRCULAR</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_CUBIC" href="#objectionpy.enums.Easing.EASE_IN_CUBIC">EASE_IN_CUBIC</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_EXPONENTIAL" href="#objectionpy.enums.Easing.EASE_IN_EXPONENTIAL">EASE_IN_EXPONENTIAL</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT" href="#objectionpy.enums.Easing.EASE_IN_OUT">EASE_IN_OUT</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_CIRCULAR" href="#objectionpy.enums.Easing.EASE_IN_OUT_CIRCULAR">EASE_IN_OUT_CIRCULAR</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_CUBIC" href="#objectionpy.enums.Easing.EASE_IN_OUT_CUBIC">EASE_IN_OUT_CUBIC</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_EXPONENTIAL" href="#objectionpy.enums.Easing.EASE_IN_OUT_EXPONENTIAL">EASE_IN_OUT_EXPONENTIAL</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_QUAD" href="#objectionpy.enums.Easing.EASE_IN_OUT_QUAD">EASE_IN_OUT_QUAD</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_QUART" href="#objectionpy.enums.Easing.EASE_IN_OUT_QUART">EASE_IN_OUT_QUART</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_QUINT" href="#objectionpy.enums.Easing.EASE_IN_OUT_QUINT">EASE_IN_OUT_QUINT</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_SINE" href="#objectionpy.enums.Easing.EASE_IN_OUT_SINE">EASE_IN_OUT_SINE</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_QUAD" href="#objectionpy.enums.Easing.EASE_IN_QUAD">EASE_IN_QUAD</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_QUART" href="#objectionpy.enums.Easing.EASE_IN_QUART">EASE_IN_QUART</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_QUINT" href="#objectionpy.enums.Easing.EASE_IN_QUINT">EASE_IN_QUINT</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_IN_SINE" href="#objectionpy.enums.Easing.EASE_IN_SINE">EASE_IN_SINE</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT" href="#objectionpy.enums.Easing.EASE_OUT">EASE_OUT</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_CIRCULAR" href="#objectionpy.enums.Easing.EASE_OUT_CIRCULAR">EASE_OUT_CIRCULAR</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_CUBIC" href="#objectionpy.enums.Easing.EASE_OUT_CUBIC">EASE_OUT_CUBIC</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_EXPONENTIAL" href="#objectionpy.enums.Easing.EASE_OUT_EXPONENTIAL">EASE_OUT_EXPONENTIAL</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_QUAD" href="#objectionpy.enums.Easing.EASE_OUT_QUAD">EASE_OUT_QUAD</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_QUART" href="#objectionpy.enums.Easing.EASE_OUT_QUART">EASE_OUT_QUART</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_QUINT" href="#objectionpy.enums.Easing.EASE_OUT_QUINT">EASE_OUT_QUINT</a></code></li>
-<li><code><a title="objectionpy.enums.Easing.EASE_OUT_SINE" href="#objectionpy.enums.Easing.EASE_OUT_SINE">EASE_OUT_SINE</a></code></li>
 <li><code><a title="objectionpy.enums.Easing.LINEAR" href="#objectionpy.enums.Easing.LINEAR">LINEAR</a></code></li>
 <li><code><a title="objectionpy.enums.Easing.SPRING" href="#objectionpy.enums.Easing.SPRING">SPRING</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE" href="#objectionpy.enums.Easing.EASE">EASE</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN" href="#objectionpy.enums.Easing.EASE_IN">EASE_IN</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT" href="#objectionpy.enums.Easing.EASE_OUT">EASE_OUT</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT" href="#objectionpy.enums.Easing.EASE_IN_OUT">EASE_IN_OUT</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_SINE" href="#objectionpy.enums.Easing.EASE_IN_SINE">EASE_IN_SINE</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_SINE" href="#objectionpy.enums.Easing.EASE_OUT_SINE">EASE_OUT_SINE</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_SINE" href="#objectionpy.enums.Easing.EASE_IN_OUT_SINE">EASE_IN_OUT_SINE</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_QUAD" href="#objectionpy.enums.Easing.EASE_IN_QUAD">EASE_IN_QUAD</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_QUAD" href="#objectionpy.enums.Easing.EASE_OUT_QUAD">EASE_OUT_QUAD</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_QUAD" href="#objectionpy.enums.Easing.EASE_IN_OUT_QUAD">EASE_IN_OUT_QUAD</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_CUBIC" href="#objectionpy.enums.Easing.EASE_IN_CUBIC">EASE_IN_CUBIC</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_CUBIC" href="#objectionpy.enums.Easing.EASE_OUT_CUBIC">EASE_OUT_CUBIC</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_CUBIC" href="#objectionpy.enums.Easing.EASE_IN_OUT_CUBIC">EASE_IN_OUT_CUBIC</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_QUART" href="#objectionpy.enums.Easing.EASE_IN_QUART">EASE_IN_QUART</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_QUART" href="#objectionpy.enums.Easing.EASE_OUT_QUART">EASE_OUT_QUART</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_QUART" href="#objectionpy.enums.Easing.EASE_IN_OUT_QUART">EASE_IN_OUT_QUART</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_QUINT" href="#objectionpy.enums.Easing.EASE_IN_QUINT">EASE_IN_QUINT</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_QUINT" href="#objectionpy.enums.Easing.EASE_OUT_QUINT">EASE_OUT_QUINT</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_QUINT" href="#objectionpy.enums.Easing.EASE_IN_OUT_QUINT">EASE_IN_OUT_QUINT</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_EXPONENTIAL" href="#objectionpy.enums.Easing.EASE_IN_EXPONENTIAL">EASE_IN_EXPONENTIAL</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_EXPONENTIAL" href="#objectionpy.enums.Easing.EASE_OUT_EXPONENTIAL">EASE_OUT_EXPONENTIAL</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_EXPONENTIAL" href="#objectionpy.enums.Easing.EASE_IN_OUT_EXPONENTIAL">EASE_IN_OUT_EXPONENTIAL</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_CIRCULAR" href="#objectionpy.enums.Easing.EASE_IN_CIRCULAR">EASE_IN_CIRCULAR</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_OUT_CIRCULAR" href="#objectionpy.enums.Easing.EASE_OUT_CIRCULAR">EASE_OUT_CIRCULAR</a></code></li>
+<li><code><a title="objectionpy.enums.Easing.EASE_IN_OUT_CIRCULAR" href="#objectionpy.enums.Easing.EASE_IN_OUT_CIRCULAR">EASE_IN_OUT_CIRCULAR</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.enums.FadeDirection" href="#objectionpy.enums.FadeDirection">FadeDirection</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.enums.FadeDirection.IN" href="#objectionpy.enums.FadeDirection.IN">IN</a></code></li>
 <li><code><a title="objectionpy.enums.FadeDirection.OUT" href="#objectionpy.enums.FadeDirection.OUT">OUT</a></code></li>
+<li><code><a title="objectionpy.enums.FadeDirection.IN" href="#objectionpy.enums.FadeDirection.IN">IN</a></code></li>
 <li><code><a title="objectionpy.enums.FadeDirection.OUT_IN" href="#objectionpy.enums.FadeDirection.OUT_IN">OUT_IN</a></code></li>
 </ul>
 </li>
@@ -856,10 +857,19 @@ class RecordType(Enum):
 <ul class="two-column">
 <li><code><a title="objectionpy.enums.FadeTarget.BACKGROUND" href="#objectionpy.enums.FadeTarget.BACKGROUND">BACKGROUND</a></code></li>
 <li><code><a title="objectionpy.enums.FadeTarget.CHARACTER" href="#objectionpy.enums.FadeTarget.CHARACTER">CHARACTER</a></code></li>
-<li><code><a title="objectionpy.enums.FadeTarget.CHARACTERS" href="#objectionpy.enums.FadeTarget.CHARACTERS">CHARACTERS</a></code></li>
+<li><code><a title="objectionpy.enums.FadeTarget.SCENE" href="#objectionpy.enums.FadeTarget.SCENE">SCENE</a></code></li>
 <li><code><a title="objectionpy.enums.FadeTarget.EVERYTHING" href="#objectionpy.enums.FadeTarget.EVERYTHING">EVERYTHING</a></code></li>
 <li><code><a title="objectionpy.enums.FadeTarget.PAIRED_CHARACTER" href="#objectionpy.enums.FadeTarget.PAIRED_CHARACTER">PAIRED_CHARACTER</a></code></li>
-<li><code><a title="objectionpy.enums.FadeTarget.SCENE" href="#objectionpy.enums.FadeTarget.SCENE">SCENE</a></code></li>
+<li><code><a title="objectionpy.enums.FadeTarget.CHARACTERS" href="#objectionpy.enums.FadeTarget.CHARACTERS">CHARACTERS</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.enums.FilterType" href="#objectionpy.enums.FilterType">FilterType</a></code></h4>
+<ul class="">
+<li><code><a title="objectionpy.enums.FilterType.GRAYSCALE" href="#objectionpy.enums.FilterType.GRAYSCALE">GRAYSCALE</a></code></li>
+<li><code><a title="objectionpy.enums.FilterType.INVERT" href="#objectionpy.enums.FilterType.INVERT">INVERT</a></code></li>
+<li><code><a title="objectionpy.enums.FilterType.SEPIA" href="#objectionpy.enums.FilterType.SEPIA">SEPIA</a></code></li>
+<li><code><a title="objectionpy.enums.FilterType.HUE_ROTATE" href="#objectionpy.enums.FilterType.HUE_ROTATE">HUE_ROTATE</a></code></li>
 </ul>
 </li>
 <li>
@@ -871,60 +881,51 @@ class RecordType(Enum):
 </ul>
 </li>
 <li>
-<h4><code><a title="objectionpy.enums.FilterType" href="#objectionpy.enums.FilterType">FilterType</a></code></h4>
-<ul class="">
-<li><code><a title="objectionpy.enums.FilterType.GRAYSCALE" href="#objectionpy.enums.FilterType.GRAYSCALE">GRAYSCALE</a></code></li>
-<li><code><a title="objectionpy.enums.FilterType.HUE_ROTATE" href="#objectionpy.enums.FilterType.HUE_ROTATE">HUE_ROTATE</a></code></li>
-<li><code><a title="objectionpy.enums.FilterType.INVERT" href="#objectionpy.enums.FilterType.INVERT">INVERT</a></code></li>
-<li><code><a title="objectionpy.enums.FilterType.SEPIA" href="#objectionpy.enums.FilterType.SEPIA">SEPIA</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="objectionpy.enums.GroupType" href="#objectionpy.enums.GroupType">GroupType</a></code></h4>
 <ul class="">
+<li><code><a title="objectionpy.enums.GroupType.NORMAL" href="#objectionpy.enums.GroupType.NORMAL">NORMAL</a></code></li>
 <li><code><a title="objectionpy.enums.GroupType.CE" href="#objectionpy.enums.GroupType.CE">CE</a></code></li>
 <li><code><a title="objectionpy.enums.GroupType.GAME_OVER" href="#objectionpy.enums.GroupType.GAME_OVER">GAME_OVER</a></code></li>
-<li><code><a title="objectionpy.enums.GroupType.NORMAL" href="#objectionpy.enums.GroupType.NORMAL">NORMAL</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.enums.ObjectionType" href="#objectionpy.enums.ObjectionType">ObjectionType</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.enums.ObjectionType.CASE" href="#objectionpy.enums.ObjectionType.CASE">CASE</a></code></li>
 <li><code><a title="objectionpy.enums.ObjectionType.SCENE" href="#objectionpy.enums.ObjectionType.SCENE">SCENE</a></code></li>
+<li><code><a title="objectionpy.enums.ObjectionType.CASE" href="#objectionpy.enums.ObjectionType.CASE">CASE</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.enums.PresetBlip" href="#objectionpy.enums.PresetBlip">PresetBlip</a></code></h4>
 <ul class="two-column">
-<li><code><a title="objectionpy.enums.PresetBlip.ECHOING" href="#objectionpy.enums.PresetBlip.ECHOING">ECHOING</a></code></li>
-<li><code><a title="objectionpy.enums.PresetBlip.FEMALE" href="#objectionpy.enums.PresetBlip.FEMALE">FEMALE</a></code></li>
-<li><code><a title="objectionpy.enums.PresetBlip.KATONK" href="#objectionpy.enums.PresetBlip.KATONK">KATONK</a></code></li>
 <li><code><a title="objectionpy.enums.PresetBlip.MALE" href="#objectionpy.enums.PresetBlip.MALE">MALE</a></code></li>
-<li><code><a title="objectionpy.enums.PresetBlip.MUTE" href="#objectionpy.enums.PresetBlip.MUTE">MUTE</a></code></li>
+<li><code><a title="objectionpy.enums.PresetBlip.FEMALE" href="#objectionpy.enums.PresetBlip.FEMALE">FEMALE</a></code></li>
 <li><code><a title="objectionpy.enums.PresetBlip.TYPEWRITER" href="#objectionpy.enums.PresetBlip.TYPEWRITER">TYPEWRITER</a></code></li>
+<li><code><a title="objectionpy.enums.PresetBlip.ECHOING" href="#objectionpy.enums.PresetBlip.ECHOING">ECHOING</a></code></li>
+<li><code><a title="objectionpy.enums.PresetBlip.KATONK" href="#objectionpy.enums.PresetBlip.KATONK">KATONK</a></code></li>
+<li><code><a title="objectionpy.enums.PresetBlip.MUTE" href="#objectionpy.enums.PresetBlip.MUTE">MUTE</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.enums.PresetDialogueBox" href="#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.enums.PresetDialogueBox.AJ" href="#objectionpy.enums.PresetDialogueBox.AJ">AJ</a></code></li>
-<li><code><a title="objectionpy.enums.PresetDialogueBox.APOLLO_JUSTICE" href="#objectionpy.enums.PresetDialogueBox.APOLLO_JUSTICE">APOLLO_JUSTICE</a></code></li>
 <li><code><a title="objectionpy.enums.PresetDialogueBox.CLASSIC" href="#objectionpy.enums.PresetDialogueBox.CLASSIC">CLASSIC</a></code></li>
-<li><code><a title="objectionpy.enums.PresetDialogueBox.TGAA" href="#objectionpy.enums.PresetDialogueBox.TGAA">TGAA</a></code></li>
-<li><code><a title="objectionpy.enums.PresetDialogueBox.THE_GREAT_ACE_ATTORNEY" href="#objectionpy.enums.PresetDialogueBox.THE_GREAT_ACE_ATTORNEY">THE_GREAT_ACE_ATTORNEY</a></code></li>
 <li><code><a title="objectionpy.enums.PresetDialogueBox.TRILOGY" href="#objectionpy.enums.PresetDialogueBox.TRILOGY">TRILOGY</a></code></li>
+<li><code><a title="objectionpy.enums.PresetDialogueBox.APOLLO_JUSTICE" href="#objectionpy.enums.PresetDialogueBox.APOLLO_JUSTICE">APOLLO_JUSTICE</a></code></li>
+<li><code><a title="objectionpy.enums.PresetDialogueBox.AJ" href="#objectionpy.enums.PresetDialogueBox.AJ">AJ</a></code></li>
+<li><code><a title="objectionpy.enums.PresetDialogueBox.THE_GREAT_ACE_ATTORNEY" href="#objectionpy.enums.PresetDialogueBox.THE_GREAT_ACE_ATTORNEY">THE_GREAT_ACE_ATTORNEY</a></code></li>
+<li><code><a title="objectionpy.enums.PresetDialogueBox.TGAA" href="#objectionpy.enums.PresetDialogueBox.TGAA">TGAA</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.enums.PresetPopup" href="#objectionpy.enums.PresetPopup">PresetPopup</a></code></h4>
 <ul class="">
+<li><code><a title="objectionpy.enums.PresetPopup.WITNESS_TESTIMONY" href="#objectionpy.enums.PresetPopup.WITNESS_TESTIMONY">WITNESS_TESTIMONY</a></code></li>
 <li><code><a title="objectionpy.enums.PresetPopup.CROSS_EXAMINATION" href="#objectionpy.enums.PresetPopup.CROSS_EXAMINATION">CROSS_EXAMINATION</a></code></li>
+<li><code><a title="objectionpy.enums.PresetPopup.TESTIMONY_LABEL" href="#objectionpy.enums.PresetPopup.TESTIMONY_LABEL">TESTIMONY_LABEL</a></code></li>
 <li><code><a title="objectionpy.enums.PresetPopup.GUILTY" href="#objectionpy.enums.PresetPopup.GUILTY">GUILTY</a></code></li>
 <li><code><a title="objectionpy.enums.PresetPopup.NOT_GUILTY" href="#objectionpy.enums.PresetPopup.NOT_GUILTY">NOT_GUILTY</a></code></li>
-<li><code><a title="objectionpy.enums.PresetPopup.TESTIMONY_LABEL" href="#objectionpy.enums.PresetPopup.TESTIMONY_LABEL">TESTIMONY_LABEL</a></code></li>
 <li><code><a title="objectionpy.enums.PresetPopup.TESTIMONY_LABEL_HIDE" href="#objectionpy.enums.PresetPopup.TESTIMONY_LABEL_HIDE">TESTIMONY_LABEL_HIDE</a></code></li>
-<li><code><a title="objectionpy.enums.PresetPopup.WITNESS_TESTIMONY" href="#objectionpy.enums.PresetPopup.WITNESS_TESTIMONY">WITNESS_TESTIMONY</a></code></li>
 </ul>
 </li>
 <li>

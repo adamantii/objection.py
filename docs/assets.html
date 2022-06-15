@@ -23,8 +23,7 @@
 </header>
 <section id="section-intro">
 <p>Module for working with objection.lol assets.</p>
-<p>Every asset can be obtained using its id. If any of its properties are accessed, the object requests the asset data using the objection.lol.</p>
-<p>Also home to the AssetBank class - a container for organizing project assets.</p>
+<p>Each asset can be obtained using its id. Also includes the AssetBank class - a container for organizing project assets.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -32,9 +31,7 @@
 <pre><code class="python">&#34;&#34;&#34;
 Module for working with objection.lol assets.
 
-Every asset can be obtained using its id. If any of its properties are accessed, the object requests the asset data using the objection.lol.
-
-Also home to the AssetBank class - a container for organizing project assets.
+Each asset can be obtained using its id. Also includes the AssetBank class - a container for organizing project assets.
 &#34;&#34;&#34;
 
 from functools import cache, lru_cache
@@ -46,7 +43,85 @@ from json import JSONDecodeError
 from . import enums, _utils
 
 
+class AssetBank:
+    &#34;&#34;&#34;Container for organizing project assets.&#34;&#34;&#34;
+    chars: dict[str, &#39;Character&#39;]
+    backgrounds: dict[str, &#39;Background&#39;]
+    music: dict[str, &#39;Music&#39;]
+    sounds: dict[str, &#39;Sound&#39;]
+    popups: dict[str, &#39;Popup&#39;]
+    evidence: dict[str, &#39;Evidence&#39;]
+
+    def __init__(self, assetDict: dict[str, &#39;_Asset&#39;] = {}) -&gt; None:
+        for key in self.__annotations__.keys():
+            setattr(self, key, {})
+        self.loadAssets(assetDict)
+
+    def loadAssets(self, assetDict: dict[str, &#39;_Asset&#39;]):
+        &#34;&#34;&#34;
+        Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
+
+        Args:
+            - `assetDict : dict`
+                - Dictionary of asset objects.
+
+        Raises:
+            TypeError: An object of an invalid type was provided.
+        &#34;&#34;&#34;
+        for name, asset in assetDict.items():
+            if type(asset) is Character:
+                self.chars[name] = asset
+            elif type(asset) is Background:
+                self.backgrounds[name] = asset
+            elif type(asset) is Music:
+                self.music[name] = asset
+            elif type(asset) is Sound:
+                self.sounds[name] = asset
+            elif type(asset) is Popup:
+                self.popups[name] = asset
+            elif type(asset) is Evidence:
+                self.evidence[name] = asset
+            else:
+                raise TypeError(&#39;Unknown asset type &#39; + type(asset).__name__)
+
+    def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
+        &#34;&#34;&#34;
+        Add assets of a single type using IDs into the AssetBank.
+
+        Args:
+            - `assetType : type`
+                - Type of asset to add.
+            - `ids : dict[str, int]`
+                - Dictionary of asset IDs used to automatically get the assets.
+
+        Raises:
+            TypeError: An invalid type was provided.
+        &#34;&#34;&#34;
+        if assetType is Character:
+            targetDict = self.chars
+        elif assetType is Background:
+            targetDict = self.backgrounds
+        elif assetType is Music:
+            targetDict = self.music
+        elif assetType is Sound:
+            targetDict = self.sounds
+        elif assetType is Popup:
+            targetDict = self.popups
+        elif assetType is Evidence:
+            targetDict = self.evidence
+        else:
+            raise TypeError(&#39;Unknown asset type &#39; + assetType.__name__)
+
+        for name, id in ids.items():
+            targetDict[name] = assetType(id)
+
+
 class _Asset:
+    &#34;&#34;&#34;
+    An objection.lol asset, created by ID.
+
+    By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.
+    &#34;&#34;&#34;
     id: int
     exists: bool = True
     _loaded: bool = False
@@ -120,23 +195,6 @@ class _PostAsset(_Asset):
             return False, None
 
 
-class Sound(_GetAsset):
-    _getUrl = &#39;https://api.objection.lol/assets/sound/get?id=&#39;
-    _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;volume&#39;, &#39;fileSize&#39;)
-    _tag = &#39;bgs&#39;
-
-
-class Music(_GetAsset):
-    _getUrl = &#39;https://api.objection.lol/assets/music/get?id=&#39;
-    _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;volume&#39;, &#39;fileSize&#39;)
-    _tag = &#39;bgm&#39;
-
-
-class Popup(_PostAsset):
-    _postUrl = &#39;https://api.objection.lol/assets/popup/getpopups&#39;
-    _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;alignment&#39;, &#39;center&#39;, &#39;posY&#39;, &#39;resize&#39;)
-
-
 class Background(_PostAsset):
     _postUrl = &#39;https://api.objection.lol/assets/background/getbackgrounds&#39;
     _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;deskUrl&#39;, &#39;isWide&#39;)
@@ -194,6 +252,17 @@ class Character(_PostAsset):
         return list(map(lambda pose: self._poseLookupKey(pose[&#39;name&#39;]), self.poses))
 
     def lookupPoseSubstr(self, lookupSubstr: str) -&gt; int:
+        &#34;&#34;&#34;
+        Search character pose using a name substring.
+
+        Args:
+            - `lookupSubstr : str`
+                - The susbtring to search by. Case-insensitive and ignores non-alphanumeric characters when comparing.
+                - When substring matches multiple poses, returns the one with the lowest length difference.
+
+        Returns:
+            The ID of the pose. If the pose isn&#39;t found, returns -1.
+        &#34;&#34;&#34;
         keyToFind = self._poseLookupKey(lookupSubstr)
 
         bestI = -1
@@ -205,23 +274,27 @@ class Character(_PostAsset):
             if bestI == -1 or lengthDifference &lt; bestLengthDifference:
                 bestI = i
                 bestLengthDifference = lengthDifference
+        
+        if bestI &gt; -1:
+            return self.poses[bestI][&#39;id&#39;]
+        else:
+            return -1
 
-        return self.poses[bestI][&#39;id&#39;]
+    def getPose(self, name: str) -&gt; int:
+        &#34;&#34;&#34;
+        Get character pose by its exact name.
 
-    def getPose(
-        self,
-        name: Optional[str] = None,
-        idleImageUrl: Optional[str] = None,
-        speakImageUrl: Optional[str] = None,
-        iconUrl: Optional[str] = None,
-    ) -&gt; int:
+        Args:
+            - `name : str`
+                - The pose&#39;s name. Must exactly match the pose name string.
+
+        Returns:
+            The ID of the pose. If the pose isn&#39;t found, returns -1.
+        &#34;&#34;&#34;
         for pose in self.poses:
-            for key in (&#39;name&#39;, &#39;idleImageUrl&#39;, &#39;speakImageUrl&#39;, &#39;iconUrl&#39;):
-                if key is None:
-                    continue
-                if pose[key] != eval(key):
-                    continue
-                return pose[&#39;id&#39;]
+            if pose[&#39;name&#39;] != name:
+                continue
+            return pose[&#39;id&#39;]
         return -1
 
 
@@ -248,77 +321,21 @@ class Evidence(_Asset):
         self.icon = &#39;[#evdi&#39; + str(self.id) + &#39;]&#39;
 
 
-class AssetBank:
-    &#34;&#34;&#34;Container for organizing project assets.&#34;&#34;&#34;
-    chars: dict[str, Character]
-    backgrounds: dict[str, Background]
-    music: dict[str, Music]
-    sounds: dict[str, Sound]
-    popups: dict[str, Popup]
-    evidence: dict[str, Evidence]
+class Music(_GetAsset):
+    _getUrl = &#39;https://api.objection.lol/assets/music/get?id=&#39;
+    _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;volume&#39;, &#39;fileSize&#39;)
+    _tag = &#39;bgm&#39;
 
-    def __init__(self, assetDict: dict[str, _Asset] = {}) -&gt; None:
-        for key in self.__annotations__.keys():
-            setattr(self, key, {})
-        self.loadAssets(assetDict)
 
-    def loadAssets(self, assetDict: dict[str, _Asset]):
-        &#34;&#34;&#34;
-        Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
+class Popup(_PostAsset):
+    _postUrl = &#39;https://api.objection.lol/assets/popup/getpopups&#39;
+    _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;alignment&#39;, &#39;center&#39;, &#39;posY&#39;, &#39;resize&#39;)
 
-        Args:
-            - `assetDict : dict`
-                - Dictionary of asset objects.
 
-        Raises:
-            TypeError: An object of an invalid type was provided.
-        &#34;&#34;&#34;
-        for name, asset in assetDict.items():
-            if type(asset) is Character:
-                self.chars[name] = asset
-            elif type(asset) is Background:
-                self.backgrounds[name] = asset
-            elif type(asset) is Music:
-                self.music[name] = asset
-            elif type(asset) is Sound:
-                self.sounds[name] = asset
-            elif type(asset) is Popup:
-                self.popups[name] = asset
-            elif type(asset) is Evidence:
-                self.evidence[name] = asset
-            else:
-                raise TypeError(&#39;Unknown asset type &#39; + type(asset).__name__)
-
-    def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
-        &#34;&#34;&#34;
-        Add assets of a single type using IDs into the AssetBank.
-
-        Args:
-            - `assetType : type`
-                - Type of asset to add.
-            - `ids : dict[str, int]`
-                - Dictionary of asset IDs used to automatically get the assets.
-
-        Raises:
-            TypeError: An invalid type was provided.
-        &#34;&#34;&#34;
-        if assetType is Character:
-            targetDict = self.chars
-        elif assetType is Background:
-            targetDict = self.backgrounds
-        elif assetType is Music:
-            targetDict = self.music
-        elif assetType is Sound:
-            targetDict = self.sounds
-        elif assetType is Popup:
-            targetDict = self.popups
-        elif assetType is Evidence:
-            targetDict = self.evidence
-        else:
-            raise TypeError(&#39;Unknown asset type &#39; + assetType.__name__)
-
-        for name, id in ids.items():
-            targetDict[name] = assetType(id)
+class Sound(_GetAsset):
+    _getUrl = &#39;https://api.objection.lol/assets/sound/get?id=&#39;
+    _assetKeys = (&#39;name&#39;, &#39;url&#39;, &#39;volume&#39;, &#39;fileSize&#39;)
+    _tag = &#39;bgs&#39;
 
 
 class AssetWarning(Warning):
@@ -348,19 +365,19 @@ class AssetWarning(Warning):
 </summary>
 <pre><code class="python">class AssetBank:
     &#34;&#34;&#34;Container for organizing project assets.&#34;&#34;&#34;
-    chars: dict[str, Character]
-    backgrounds: dict[str, Background]
-    music: dict[str, Music]
-    sounds: dict[str, Sound]
-    popups: dict[str, Popup]
-    evidence: dict[str, Evidence]
+    chars: dict[str, &#39;Character&#39;]
+    backgrounds: dict[str, &#39;Background&#39;]
+    music: dict[str, &#39;Music&#39;]
+    sounds: dict[str, &#39;Sound&#39;]
+    popups: dict[str, &#39;Popup&#39;]
+    evidence: dict[str, &#39;Evidence&#39;]
 
-    def __init__(self, assetDict: dict[str, _Asset] = {}) -&gt; None:
+    def __init__(self, assetDict: dict[str, &#39;_Asset&#39;] = {}) -&gt; None:
         for key in self.__annotations__.keys():
             setattr(self, key, {})
         self.loadAssets(assetDict)
 
-    def loadAssets(self, assetDict: dict[str, _Asset]):
+    def loadAssets(self, assetDict: dict[str, &#39;_Asset&#39;]):
         &#34;&#34;&#34;
         Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
 
@@ -420,15 +437,11 @@ class AssetWarning(Warning):
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.assets.AssetBank.backgrounds"><code class="name">var <span class="ident">backgrounds</span> : dict</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.assets.AssetBank.chars"><code class="name">var <span class="ident">chars</span> : dict</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.assets.AssetBank.evidence"><code class="name">var <span class="ident">evidence</span> : dict</code></dt>
+<dt id="objectionpy.assets.AssetBank.backgrounds"><code class="name">var <span class="ident">backgrounds</span> : dict</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -436,17 +449,70 @@ class AssetWarning(Warning):
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="objectionpy.assets.AssetBank.sounds"><code class="name">var <span class="ident">sounds</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.assets.AssetBank.popups"><code class="name">var <span class="ident">popups</span> : dict</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.assets.AssetBank.sounds"><code class="name">var <span class="ident">sounds</span> : dict</code></dt>
+<dt id="objectionpy.assets.AssetBank.evidence"><code class="name">var <span class="ident">evidence</span> : dict</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="objectionpy.assets.AssetBank.loadAssets"><code class="name flex">
+<span>def <span class="ident">loadAssets</span></span>(<span>self, assetDict: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a dictionary of asset objects into the AssetBank, automatically distributed by type.</p>
+<h2 id="args">Args</h2>
+<ul>
+<li><code>assetDict : dict</code><ul>
+<li>Dictionary of asset objects.</li>
+</ul>
+</li>
+</ul>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>TypeError</code></dt>
+<dd>An object of an invalid type was provided.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def loadAssets(self, assetDict: dict[str, &#39;_Asset&#39;]):
+    &#34;&#34;&#34;
+    Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
+
+    Args:
+        - `assetDict : dict`
+            - Dictionary of asset objects.
+
+    Raises:
+        TypeError: An object of an invalid type was provided.
+    &#34;&#34;&#34;
+    for name, asset in assetDict.items():
+        if type(asset) is Character:
+            self.chars[name] = asset
+        elif type(asset) is Background:
+            self.backgrounds[name] = asset
+        elif type(asset) is Music:
+            self.music[name] = asset
+        elif type(asset) is Sound:
+            self.sounds[name] = asset
+        elif type(asset) is Popup:
+            self.popups[name] = asset
+        elif type(asset) is Evidence:
+            self.evidence[name] = asset
+        else:
+            raise TypeError(&#39;Unknown asset type &#39; + type(asset).__name__)</code></pre>
+</details>
+</dd>
 <dt id="objectionpy.assets.AssetBank.loadAssetIDs"><code class="name flex">
 <span>def <span class="ident">loadAssetIDs</span></span>(<span>self, assetType: type, ids: dict)</span>
 </code></dt>
@@ -504,94 +570,6 @@ class AssetWarning(Warning):
         targetDict[name] = assetType(id)</code></pre>
 </details>
 </dd>
-<dt id="objectionpy.assets.AssetBank.loadAssets"><code class="name flex">
-<span>def <span class="ident">loadAssets</span></span>(<span>self, assetDict: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a dictionary of asset objects into the AssetBank, automatically distributed by type.</p>
-<h2 id="args">Args</h2>
-<ul>
-<li><code>assetDict : dict</code><ul>
-<li>Dictionary of asset objects.</li>
-</ul>
-</li>
-</ul>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>TypeError</code></dt>
-<dd>An object of an invalid type was provided.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def loadAssets(self, assetDict: dict[str, _Asset]):
-    &#34;&#34;&#34;
-    Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
-
-    Args:
-        - `assetDict : dict`
-            - Dictionary of asset objects.
-
-    Raises:
-        TypeError: An object of an invalid type was provided.
-    &#34;&#34;&#34;
-    for name, asset in assetDict.items():
-        if type(asset) is Character:
-            self.chars[name] = asset
-        elif type(asset) is Background:
-            self.backgrounds[name] = asset
-        elif type(asset) is Music:
-            self.music[name] = asset
-        elif type(asset) is Sound:
-            self.sounds[name] = asset
-        elif type(asset) is Popup:
-            self.popups[name] = asset
-        elif type(asset) is Evidence:
-            self.evidence[name] = asset
-        else:
-            raise TypeError(&#39;Unknown asset type &#39; + type(asset).__name__)</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.assets.AssetWarning"><code class="flex name class">
-<span>class <span class="ident">AssetWarning</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Base class for warning categories.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class AssetWarning(Warning):
-    @classmethod
-    def warn(cls, id):
-        warn(&#39;asset &#39; + str(id) + &#39; not found&#39;, AssetWarning)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Warning</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="objectionpy.assets.AssetWarning.warn"><code class="name flex">
-<span>def <span class="ident">warn</span></span>(<span>id)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def warn(cls, id):
-    warn(&#39;asset &#39; + str(id) + &#39; not found&#39;, AssetWarning)</code></pre>
-</details>
-</dd>
 </dl>
 </dd>
 <dt id="objectionpy.assets.Background"><code class="flex name class">
@@ -599,7 +577,8 @@ def warn(cls, id):
 <span>(</span><span>id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An objection.lol asset, created by ID.</p>
+<p>By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -626,7 +605,8 @@ def warn(cls, id):
 <span>(</span><span>id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An objection.lol asset, created by ID.</p>
+<p>By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -683,6 +663,17 @@ def warn(cls, id):
         return list(map(lambda pose: self._poseLookupKey(pose[&#39;name&#39;]), self.poses))
 
     def lookupPoseSubstr(self, lookupSubstr: str) -&gt; int:
+        &#34;&#34;&#34;
+        Search character pose using a name substring.
+
+        Args:
+            - `lookupSubstr : str`
+                - The susbtring to search by. Case-insensitive and ignores non-alphanumeric characters when comparing.
+                - When substring matches multiple poses, returns the one with the lowest length difference.
+
+        Returns:
+            The ID of the pose. If the pose isn&#39;t found, returns -1.
+        &#34;&#34;&#34;
         keyToFind = self._poseLookupKey(lookupSubstr)
 
         bestI = -1
@@ -694,23 +685,27 @@ def warn(cls, id):
             if bestI == -1 or lengthDifference &lt; bestLengthDifference:
                 bestI = i
                 bestLengthDifference = lengthDifference
+        
+        if bestI &gt; -1:
+            return self.poses[bestI][&#39;id&#39;]
+        else:
+            return -1
 
-        return self.poses[bestI][&#39;id&#39;]
+    def getPose(self, name: str) -&gt; int:
+        &#34;&#34;&#34;
+        Get character pose by its exact name.
 
-    def getPose(
-        self,
-        name: Optional[str] = None,
-        idleImageUrl: Optional[str] = None,
-        speakImageUrl: Optional[str] = None,
-        iconUrl: Optional[str] = None,
-    ) -&gt; int:
+        Args:
+            - `name : str`
+                - The pose&#39;s name. Must exactly match the pose name string.
+
+        Returns:
+            The ID of the pose. If the pose isn&#39;t found, returns -1.
+        &#34;&#34;&#34;
         for pose in self.poses:
-            for key in (&#39;name&#39;, &#39;idleImageUrl&#39;, &#39;speakImageUrl&#39;, &#39;iconUrl&#39;):
-                if key is None:
-                    continue
-                if pose[key] != eval(key):
-                    continue
-                return pose[&#39;id&#39;]
+            if pose[&#39;name&#39;] != name:
+                continue
+            return pose[&#39;id&#39;]
         return -1</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -720,6 +715,18 @@ def warn(cls, id):
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="objectionpy.assets.Character.bubbles"><code class="name">var <span class="ident">bubbles</span> : list</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.assets.Character.poses"><code class="name">var <span class="ident">poses</span> : list</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.assets.Character.id"><code class="name">var <span class="ident">id</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="objectionpy.assets.Character.alignment"><code class="name">var <span class="ident">alignment</span> : Optional[list]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -732,10 +739,6 @@ def warn(cls, id):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.assets.Character.bubbles"><code class="name">var <span class="ident">bubbles</span> : list</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="objectionpy.assets.Character.galleryAJImageUrl"><code class="name">var <span class="ident">galleryAJImageUrl</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -745,10 +748,6 @@ def warn(cls, id):
 <div class="desc"></div>
 </dd>
 <dt id="objectionpy.assets.Character.iconUrl"><code class="name">var <span class="ident">iconUrl</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.assets.Character.id"><code class="name">var <span class="ident">id</span> : Optional[int]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -769,10 +768,6 @@ def warn(cls, id):
 <div class="desc"></div>
 </dd>
 <dt id="objectionpy.assets.Character.offsetY"><code class="name">var <span class="ident">offsetY</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.assets.Character.poses"><code class="name">var <span class="ident">poses</span> : list</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -812,42 +807,37 @@ def isPreset(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="objectionpy.assets.Character.getPose"><code class="name flex">
-<span>def <span class="ident">getPose</span></span>(<span>self, name: Optional[str] = None, idleImageUrl: Optional[str] = None, speakImageUrl: Optional[str] = None, iconUrl: Optional[str] = None) ‑> int</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getPose(
-    self,
-    name: Optional[str] = None,
-    idleImageUrl: Optional[str] = None,
-    speakImageUrl: Optional[str] = None,
-    iconUrl: Optional[str] = None,
-) -&gt; int:
-    for pose in self.poses:
-        for key in (&#39;name&#39;, &#39;idleImageUrl&#39;, &#39;speakImageUrl&#39;, &#39;iconUrl&#39;):
-            if key is None:
-                continue
-            if pose[key] != eval(key):
-                continue
-            return pose[&#39;id&#39;]
-    return -1</code></pre>
-</details>
-</dd>
 <dt id="objectionpy.assets.Character.lookupPoseSubstr"><code class="name flex">
 <span>def <span class="ident">lookupPoseSubstr</span></span>(<span>self, lookupSubstr: str) ‑> int</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Search character pose using a name substring.</p>
+<h2 id="args">Args</h2>
+<ul>
+<li><code>lookupSubstr : str</code><ul>
+<li>The susbtring to search by. Case-insensitive and ignores non-alphanumeric characters when comparing.</li>
+<li>When substring matches multiple poses, returns the one with the lowest length difference.</li>
+</ul>
+</li>
+</ul>
+<h2 id="returns">Returns</h2>
+<p>The ID of the pose. If the pose isn't found, returns -1.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def lookupPoseSubstr(self, lookupSubstr: str) -&gt; int:
+    &#34;&#34;&#34;
+    Search character pose using a name substring.
+
+    Args:
+        - `lookupSubstr : str`
+            - The susbtring to search by. Case-insensitive and ignores non-alphanumeric characters when comparing.
+            - When substring matches multiple poses, returns the one with the lowest length difference.
+
+    Returns:
+        The ID of the pose. If the pose isn&#39;t found, returns -1.
+    &#34;&#34;&#34;
     keyToFind = self._poseLookupKey(lookupSubstr)
 
     bestI = -1
@@ -859,8 +849,47 @@ def isPreset(self):
         if bestI == -1 or lengthDifference &lt; bestLengthDifference:
             bestI = i
             bestLengthDifference = lengthDifference
+    
+    if bestI &gt; -1:
+        return self.poses[bestI][&#39;id&#39;]
+    else:
+        return -1</code></pre>
+</details>
+</dd>
+<dt id="objectionpy.assets.Character.getPose"><code class="name flex">
+<span>def <span class="ident">getPose</span></span>(<span>self, name: str) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get character pose by its exact name.</p>
+<h2 id="args">Args</h2>
+<ul>
+<li><code>name : str</code><ul>
+<li>The pose's name. Must exactly match the pose name string.</li>
+</ul>
+</li>
+</ul>
+<h2 id="returns">Returns</h2>
+<p>The ID of the pose. If the pose isn't found, returns -1.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getPose(self, name: str) -&gt; int:
+    &#34;&#34;&#34;
+    Get character pose by its exact name.
 
-    return self.poses[bestI][&#39;id&#39;]</code></pre>
+    Args:
+        - `name : str`
+            - The pose&#39;s name. Must exactly match the pose name string.
+
+    Returns:
+        The ID of the pose. If the pose isn&#39;t found, returns -1.
+    &#34;&#34;&#34;
+    for pose in self.poses:
+        if pose[&#39;name&#39;] != name:
+            continue
+        return pose[&#39;id&#39;]
+    return -1</code></pre>
 </details>
 </dd>
 </dl>
@@ -870,7 +899,8 @@ def isPreset(self):
 <span>(</span><span>id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An objection.lol asset, created by ID.</p>
+<p>By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -903,11 +933,11 @@ def isPreset(self):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.assets.Evidence.exists"><code class="name">var <span class="ident">exists</span> : bool</code></dt>
+<dt id="objectionpy.assets.Evidence.id"><code class="name">var <span class="ident">id</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="objectionpy.assets.Evidence.id"><code class="name">var <span class="ident">id</span> : int</code></dt>
+<dt id="objectionpy.assets.Evidence.exists"><code class="name">var <span class="ident">exists</span> : bool</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -918,7 +948,8 @@ def isPreset(self):
 <span>(</span><span>id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An objection.lol asset, created by ID.</p>
+<p>By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -950,7 +981,8 @@ def isPreset(self):
 <span>(</span><span>id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An objection.lol asset, created by ID.</p>
+<p>By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -977,7 +1009,8 @@ def isPreset(self):
 <span>(</span><span>id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An objection.lol asset, created by ID.</p>
+<p>By default, it simply acts as a representation. If any of the asset data is accessed, though, it will request it using the objection.lol API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1004,6 +1037,45 @@ def isPreset(self):
 </dd>
 </dl>
 </dd>
+<dt id="objectionpy.assets.AssetWarning"><code class="flex name class">
+<span>class <span class="ident">AssetWarning</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for warning categories.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssetWarning(Warning):
+    @classmethod
+    def warn(cls, id):
+        warn(&#39;asset &#39; + str(id) + &#39; not found&#39;, AssetWarning)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Warning</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="objectionpy.assets.AssetWarning.warn"><code class="name flex">
+<span>def <span class="ident">warn</span></span>(<span>id)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def warn(cls, id):
+    warn(&#39;asset &#39; + str(id) + &#39; not found&#39;, AssetWarning)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -1023,20 +1095,14 @@ def isPreset(self):
 <li>
 <h4><code><a title="objectionpy.assets.AssetBank" href="#objectionpy.assets.AssetBank">AssetBank</a></code></h4>
 <ul class="two-column">
-<li><code><a title="objectionpy.assets.AssetBank.backgrounds" href="#objectionpy.assets.AssetBank.backgrounds">backgrounds</a></code></li>
-<li><code><a title="objectionpy.assets.AssetBank.chars" href="#objectionpy.assets.AssetBank.chars">chars</a></code></li>
-<li><code><a title="objectionpy.assets.AssetBank.evidence" href="#objectionpy.assets.AssetBank.evidence">evidence</a></code></li>
-<li><code><a title="objectionpy.assets.AssetBank.loadAssetIDs" href="#objectionpy.assets.AssetBank.loadAssetIDs">loadAssetIDs</a></code></li>
 <li><code><a title="objectionpy.assets.AssetBank.loadAssets" href="#objectionpy.assets.AssetBank.loadAssets">loadAssets</a></code></li>
+<li><code><a title="objectionpy.assets.AssetBank.loadAssetIDs" href="#objectionpy.assets.AssetBank.loadAssetIDs">loadAssetIDs</a></code></li>
+<li><code><a title="objectionpy.assets.AssetBank.chars" href="#objectionpy.assets.AssetBank.chars">chars</a></code></li>
+<li><code><a title="objectionpy.assets.AssetBank.backgrounds" href="#objectionpy.assets.AssetBank.backgrounds">backgrounds</a></code></li>
 <li><code><a title="objectionpy.assets.AssetBank.music" href="#objectionpy.assets.AssetBank.music">music</a></code></li>
-<li><code><a title="objectionpy.assets.AssetBank.popups" href="#objectionpy.assets.AssetBank.popups">popups</a></code></li>
 <li><code><a title="objectionpy.assets.AssetBank.sounds" href="#objectionpy.assets.AssetBank.sounds">sounds</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="objectionpy.assets.AssetWarning" href="#objectionpy.assets.AssetWarning">AssetWarning</a></code></h4>
-<ul class="">
-<li><code><a title="objectionpy.assets.AssetWarning.warn" href="#objectionpy.assets.AssetWarning.warn">warn</a></code></li>
+<li><code><a title="objectionpy.assets.AssetBank.popups" href="#objectionpy.assets.AssetBank.popups">popups</a></code></li>
+<li><code><a title="objectionpy.assets.AssetBank.evidence" href="#objectionpy.assets.AssetBank.evidence">evidence</a></code></li>
 </ul>
 </li>
 <li>
@@ -1048,32 +1114,32 @@ def isPreset(self):
 <li>
 <h4><code><a title="objectionpy.assets.Character" href="#objectionpy.assets.Character">Character</a></code></h4>
 <ul class="two-column">
-<li><code><a title="objectionpy.assets.Character.alignment" href="#objectionpy.assets.Character.alignment">alignment</a></code></li>
+<li><code><a title="objectionpy.assets.Character.lookupPoseSubstr" href="#objectionpy.assets.Character.lookupPoseSubstr">lookupPoseSubstr</a></code></li>
+<li><code><a title="objectionpy.assets.Character.getPose" href="#objectionpy.assets.Character.getPose">getPose</a></code></li>
 <li><code><a title="objectionpy.assets.Character.background" href="#objectionpy.assets.Character.background">background</a></code></li>
+<li><code><a title="objectionpy.assets.Character.isPreset" href="#objectionpy.assets.Character.isPreset">isPreset</a></code></li>
+<li><code><a title="objectionpy.assets.Character.bubbles" href="#objectionpy.assets.Character.bubbles">bubbles</a></code></li>
+<li><code><a title="objectionpy.assets.Character.poses" href="#objectionpy.assets.Character.poses">poses</a></code></li>
+<li><code><a title="objectionpy.assets.Character.id" href="#objectionpy.assets.Character.id">id</a></code></li>
+<li><code><a title="objectionpy.assets.Character.alignment" href="#objectionpy.assets.Character.alignment">alignment</a></code></li>
 <li><code><a title="objectionpy.assets.Character.backgroundId" href="#objectionpy.assets.Character.backgroundId">backgroundId</a></code></li>
 <li><code><a title="objectionpy.assets.Character.blipUrl" href="#objectionpy.assets.Character.blipUrl">blipUrl</a></code></li>
-<li><code><a title="objectionpy.assets.Character.bubbles" href="#objectionpy.assets.Character.bubbles">bubbles</a></code></li>
 <li><code><a title="objectionpy.assets.Character.galleryAJImageUrl" href="#objectionpy.assets.Character.galleryAJImageUrl">galleryAJImageUrl</a></code></li>
 <li><code><a title="objectionpy.assets.Character.galleryImageUrl" href="#objectionpy.assets.Character.galleryImageUrl">galleryImageUrl</a></code></li>
-<li><code><a title="objectionpy.assets.Character.getPose" href="#objectionpy.assets.Character.getPose">getPose</a></code></li>
 <li><code><a title="objectionpy.assets.Character.iconUrl" href="#objectionpy.assets.Character.iconUrl">iconUrl</a></code></li>
-<li><code><a title="objectionpy.assets.Character.id" href="#objectionpy.assets.Character.id">id</a></code></li>
-<li><code><a title="objectionpy.assets.Character.isPreset" href="#objectionpy.assets.Character.isPreset">isPreset</a></code></li>
 <li><code><a title="objectionpy.assets.Character.limitWidth" href="#objectionpy.assets.Character.limitWidth">limitWidth</a></code></li>
-<li><code><a title="objectionpy.assets.Character.lookupPoseSubstr" href="#objectionpy.assets.Character.lookupPoseSubstr">lookupPoseSubstr</a></code></li>
 <li><code><a title="objectionpy.assets.Character.name" href="#objectionpy.assets.Character.name">name</a></code></li>
 <li><code><a title="objectionpy.assets.Character.namePlate" href="#objectionpy.assets.Character.namePlate">namePlate</a></code></li>
 <li><code><a title="objectionpy.assets.Character.offsetX" href="#objectionpy.assets.Character.offsetX">offsetX</a></code></li>
 <li><code><a title="objectionpy.assets.Character.offsetY" href="#objectionpy.assets.Character.offsetY">offsetY</a></code></li>
-<li><code><a title="objectionpy.assets.Character.poses" href="#objectionpy.assets.Character.poses">poses</a></code></li>
 <li><code><a title="objectionpy.assets.Character.side" href="#objectionpy.assets.Character.side">side</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.assets.Evidence" href="#objectionpy.assets.Evidence">Evidence</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.assets.Evidence.exists" href="#objectionpy.assets.Evidence.exists">exists</a></code></li>
 <li><code><a title="objectionpy.assets.Evidence.id" href="#objectionpy.assets.Evidence.id">id</a></code></li>
+<li><code><a title="objectionpy.assets.Evidence.exists" href="#objectionpy.assets.Evidence.exists">exists</a></code></li>
 </ul>
 </li>
 <li>
@@ -1094,6 +1160,12 @@ def isPreset(self):
 <ul class="">
 <li><code><a title="objectionpy.assets.Sound.name" href="#objectionpy.assets.Sound.name">name</a></code></li>
 <li><code><a title="objectionpy.assets.Sound.url" href="#objectionpy.assets.Sound.url">url</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.assets.AssetWarning" href="#objectionpy.assets.AssetWarning">AssetWarning</a></code></h4>
+<ul class="">
+<li><code><a title="objectionpy.assets.AssetWarning.warn" href="#objectionpy.assets.AssetWarning.warn">warn</a></code></li>
 </ul>
 </li>
 </ul>

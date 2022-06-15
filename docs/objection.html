@@ -49,28 +49,6 @@ Frame = frames.Frame
 
 
 @dataclass
-class Options:
-    &#34;&#34;&#34;
-    The default options of an objection.
-    
-    Most can be modified with OptionModifiers in Frames.
-    &#34;&#34;&#34;
-    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
-    defaultTextSpeed: int = 28
-    blipFrequency: int = 56
-    autoplaySpeed: int = 500
-    continueSoundUrl: str = &#34;/Audio/Case/Continue_Trilogy.wav&#34;
-
-    MAX_PAIRS: int = 100
-    MAX_GROUPS: int = 100
-    MAX_ALIASES: int = 100
-    MAX_GROUP_FRAMES: int = 1000
-    MAX_FRAME_ACTIONS: int = 10
-    MAX_EVIDENCE: int = 50
-    MAX_PROFILES: int = 50
-
-
-@dataclass
 class Group:
     &#34;&#34;&#34;
     Container for frames used in Cases.
@@ -138,6 +116,28 @@ class GameOverGroup(Group):
             - The group&#39;s frame list. May be of type Frame or CEFrame.
     &#34;&#34;&#34;
     _type = enums.GroupType.GAME_OVER
+
+
+@dataclass
+class Options:
+    &#34;&#34;&#34;
+    The default options of an objection.
+    
+    Most can be modified with OptionModifiers in Frames.
+    &#34;&#34;&#34;
+    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
+    defaultTextSpeed: int = 28
+    blipFrequency: int = 56
+    autoplaySpeed: int = 500
+    continueSoundUrl: str = &#34;/Audio/Case/Continue_Trilogy.wav&#34;
+
+    MAX_PAIRS: int = 100
+    MAX_GROUPS: int = 100
+    MAX_ALIASES: int = 100
+    MAX_GROUP_FRAMES: int = 1000
+    MAX_FRAME_ACTIONS: int = 10
+    MAX_EVIDENCE: int = 50
+    MAX_PROFILES: int = 50
 
 
 class _ObjectionBase:
@@ -823,6 +823,7 @@ class LimitWarning(Warning):
             cls.warn(limit, limitTarget, len(lst))
 
 class IOWarning(Warning):
+    &#34;&#34;&#34;Warning for the use cases of IOError.&#34;&#34;&#34;
     pass
 
 class ObjectionError(Exception):
@@ -1225,55 +1226,6 @@ def loadB64(objection: str, suppressWarnings: bool = False) -&gt; Union[Scene, C
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="objectionpy.objection.loadB64"><code class="name flex">
-<span>def <span class="ident">loadB64</span></span>(<span>objection: str, suppressWarnings: bool = False) ‑> Union[<a title="objectionpy.objection.Scene" href="#objectionpy.objection.Scene">Scene</a>, <a title="objectionpy.objection.Case" href="#objectionpy.objection.Case">Case</a>]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Load objectionpy objection from existing .objection in form of base64-encoded JSON.</p>
-<h2 id="args">Args</h2>
-<ul>
-<li><code>objection : str</code><ul>
-<li>Base64-encoded JSON string of an objection.lol .objection</li>
-</ul>
-</li>
-<li><code>suppressWarnings : bool</code><ul>
-<li>Defaults to False.</li>
-</ul>
-</li>
-</ul>
-<h2 id="raises">Raises</h2>
-<ul>
-<li><code>IOError</code><ul>
-<li>A JSON object's type is unknown or unsupported</li>
-</ul>
-</li>
-</ul>
-<h2 id="returns">Returns</h2>
-<p>Scene or case parsed from the .objection JSON.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def loadB64(objection: str, suppressWarnings: bool = False) -&gt; Union[Scene, Case]:
-    &#34;&#34;&#34;
-    Load objectionpy objection from existing .objection in form of base64-encoded JSON.
-
-    Args:
-        - `objection : str`
-            - Base64-encoded JSON string of an objection.lol .objection
-        - `suppressWarnings : bool`
-            - Defaults to False.
-
-    Raises:
-        - `IOError`
-            - A JSON object&#39;s type is unknown or unsupported
-
-    Returns:
-        Scene or case parsed from the .objection JSON.
-    &#34;&#34;&#34;
-    return loadJSONStr(b64decode(objection).decode(&#34;utf-8&#34;))</code></pre>
-</details>
-</dd>
 <dt id="objectionpy.objection.loadJSONDict"><code class="name flex">
 <span>def <span class="ident">loadJSONDict</span></span>(<span>objectionDict: dict, suppressWarnings: bool = False) ‑> Union[<a title="objectionpy.objection.Scene" href="#objectionpy.objection.Scene">Scene</a>, <a title="objectionpy.objection.Case" href="#objectionpy.objection.Case">Case</a>]</span>
 </code></dt>
@@ -1551,11 +1503,141 @@ def loadB64(objection: str, suppressWarnings: bool = False) -&gt; Union[Scene, C
     return loadJSONDict(loads(objection))</code></pre>
 </details>
 </dd>
+<dt id="objectionpy.objection.loadB64"><code class="name flex">
+<span>def <span class="ident">loadB64</span></span>(<span>objection: str, suppressWarnings: bool = False) ‑> Union[<a title="objectionpy.objection.Scene" href="#objectionpy.objection.Scene">Scene</a>, <a title="objectionpy.objection.Case" href="#objectionpy.objection.Case">Case</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load objectionpy objection from existing .objection in form of base64-encoded JSON.</p>
+<h2 id="args">Args</h2>
+<ul>
+<li><code>objection : str</code><ul>
+<li>Base64-encoded JSON string of an objection.lol .objection</li>
+</ul>
+</li>
+<li><code>suppressWarnings : bool</code><ul>
+<li>Defaults to False.</li>
+</ul>
+</li>
+</ul>
+<h2 id="raises">Raises</h2>
+<ul>
+<li><code>IOError</code><ul>
+<li>A JSON object's type is unknown or unsupported</li>
+</ul>
+</li>
+</ul>
+<h2 id="returns">Returns</h2>
+<p>Scene or case parsed from the .objection JSON.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def loadB64(objection: str, suppressWarnings: bool = False) -&gt; Union[Scene, Case]:
+    &#34;&#34;&#34;
+    Load objectionpy objection from existing .objection in form of base64-encoded JSON.
+
+    Args:
+        - `objection : str`
+            - Base64-encoded JSON string of an objection.lol .objection
+        - `suppressWarnings : bool`
+            - Defaults to False.
+
+    Raises:
+        - `IOError`
+            - A JSON object&#39;s type is unknown or unsupported
+
+    Returns:
+        Scene or case parsed from the .objection JSON.
+    &#34;&#34;&#34;
+    return loadJSONStr(b64decode(objection).decode(&#34;utf-8&#34;))</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="objectionpy.objection.Group"><code class="flex name class">
+<span>class <span class="ident">Group</span></span>
+<span>(</span><span>objection: Optional[ForwardRef('_ObjectionBase')] = None, name: Optional[str] = None, caseTag: Optional[str] = None, frames: list = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Container for frames used in Cases.</p>
+<h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>objection : Optional[_ObjectionBase]</code><ul>
+<li>The case to automatically append to on the group's initialization.</li>
+</ul>
+</li>
+<li><code>name : str</code><ul>
+<li>Group name.</li>
+</ul>
+</li>
+<li><code>caseTag : str</code><ul>
+<li>A unique tag used to identify the group in case actions. (A direct reference to the group object works too)</li>
+</ul>
+</li>
+<li><code>frames : list[Frame]</code><ul>
+<li>The group's frame list. May be of type Frame or CEFrame.</li>
+</ul>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class Group:
+    &#34;&#34;&#34;
+    Container for frames used in Cases.
+
+    Attributes:
+        - `objection : Optional[_ObjectionBase]`
+            - The case to automatically append to on the group&#39;s initialization.
+        - `name : str`
+            - Group name.
+        - `caseTag : str`
+            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
+        - `frames : list[Frame]`
+            - The group&#39;s frame list. May be of type Frame or CEFrame.
+    &#34;&#34;&#34;
+    _type: enums.GroupType = field(default=enums.GroupType.NORMAL, init=False)
+    objection: Optional[&#39;_ObjectionBase&#39;] = None
+    name: Optional[str] = None
+    caseTag: Optional[str] = None
+    frames: list[Frame] = field(default_factory=list)
+
+    def __post_init__(self):
+        try:
+            self.objection.groups.append(self) # type: ignore
+        except AttributeError:
+            pass</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="objectionpy.objection.CEGroup" href="#objectionpy.objection.CEGroup">CEGroup</a></li>
+<li><a title="objectionpy.objection.GameOverGroup" href="#objectionpy.objection.GameOverGroup">GameOverGroup</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.objection.Group.frames"><code class="name">var <span class="ident">frames</span> : list</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Group.objection"><code class="name">var <span class="ident">objection</span> : Optional[objectionpy.objection._ObjectionBase]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Group.name"><code class="name">var <span class="ident">name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Group.caseTag"><code class="name">var <span class="ident">caseTag</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="objectionpy.objection.CEGroup"><code class="flex name class">
 <span>class <span class="ident">CEGroup</span></span>
 <span>(</span><span>objection: Optional[ForwardRef('_ObjectionBase')] = None, name: Optional[str] = None, caseTag: Optional[str] = None, frames: list = &lt;factory&gt;)</span>
@@ -1633,6 +1715,289 @@ class CEGroup(Group):
 <dt id="objectionpy.objection.CEGroup.failureSequence"><code class="name">var <span class="ident">failureSequence</span> : list</code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.objection.GameOverGroup"><code class="flex name class">
+<span>class <span class="ident">GameOverGroup</span></span>
+<span>(</span><span>objection: Optional[ForwardRef('_ObjectionBase')] = None, name: Optional[str] = None, caseTag: Optional[str] = None, frames: list = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Special container whose frames are played when the player's health reaches 0.</p>
+<h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>objection : Optional[_ObjectionBase]</code><ul>
+<li>The case to automatically append to on the group's initialization.</li>
+</ul>
+</li>
+<li><code>name : str</code><ul>
+<li>Group name.</li>
+</ul>
+</li>
+<li><code>caseTag : str</code><ul>
+<li>A unique tag used to identify the group in case actions. (A direct reference to the group object works too)</li>
+</ul>
+</li>
+<li><code>frames : list[Frame]</code><ul>
+<li>The group's frame list. May be of type Frame or CEFrame.</li>
+</ul>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GameOverGroup(Group):
+    &#34;&#34;&#34;
+    Special container whose frames are played when the player&#39;s health reaches 0.
+
+    Attributes:
+        - `objection : Optional[_ObjectionBase]`
+            - The case to automatically append to on the group&#39;s initialization.
+        - `name : str`
+            - Group name.
+        - `caseTag : str`
+            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
+        - `frames : list[Frame]`
+            - The group&#39;s frame list. May be of type Frame or CEFrame.
+    &#34;&#34;&#34;
+    _type = enums.GroupType.GAME_OVER</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="objectionpy.objection.Group" href="#objectionpy.objection.Group">Group</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.objection.GameOverGroup.objection"><code class="name">var <span class="ident">objection</span> : Optional[objectionpy.objection._ObjectionBase]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.GameOverGroup.name"><code class="name">var <span class="ident">name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.GameOverGroup.caseTag"><code class="name">var <span class="ident">caseTag</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.GameOverGroup.frames"><code class="name">var <span class="ident">frames</span> : list</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.objection.Options"><code class="flex name class">
+<span>class <span class="ident">Options</span></span>
+<span>(</span><span>dialogueBox: <a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a> = PresetDialogueBox.CLASSIC, defaultTextSpeed: int = 28, blipFrequency: int = 56, autoplaySpeed: int = 500, continueSoundUrl: str = '/Audio/Case/Continue_Trilogy.wav', MAX_PAIRS: int = 100, MAX_GROUPS: int = 100, MAX_ALIASES: int = 100, MAX_GROUP_FRAMES: int = 1000, MAX_FRAME_ACTIONS: int = 10, MAX_EVIDENCE: int = 50, MAX_PROFILES: int = 50)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The default options of an objection.</p>
+<p>Most can be modified with OptionModifiers in Frames.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class Options:
+    &#34;&#34;&#34;
+    The default options of an objection.
+    
+    Most can be modified with OptionModifiers in Frames.
+    &#34;&#34;&#34;
+    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
+    defaultTextSpeed: int = 28
+    blipFrequency: int = 56
+    autoplaySpeed: int = 500
+    continueSoundUrl: str = &#34;/Audio/Case/Continue_Trilogy.wav&#34;
+
+    MAX_PAIRS: int = 100
+    MAX_GROUPS: int = 100
+    MAX_ALIASES: int = 100
+    MAX_GROUP_FRAMES: int = 1000
+    MAX_FRAME_ACTIONS: int = 10
+    MAX_EVIDENCE: int = 50
+    MAX_PROFILES: int = 50</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.objection.Options.dialogueBox"><code class="name">var <span class="ident">dialogueBox</span> : <a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.defaultTextSpeed"><code class="name">var <span class="ident">defaultTextSpeed</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.blipFrequency"><code class="name">var <span class="ident">blipFrequency</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.autoplaySpeed"><code class="name">var <span class="ident">autoplaySpeed</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.continueSoundUrl"><code class="name">var <span class="ident">continueSoundUrl</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_PAIRS"><code class="name">var <span class="ident">MAX_PAIRS</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_GROUPS"><code class="name">var <span class="ident">MAX_GROUPS</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_ALIASES"><code class="name">var <span class="ident">MAX_ALIASES</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_GROUP_FRAMES"><code class="name">var <span class="ident">MAX_GROUP_FRAMES</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_FRAME_ACTIONS"><code class="name">var <span class="ident">MAX_FRAME_ACTIONS</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_EVIDENCE"><code class="name">var <span class="ident">MAX_EVIDENCE</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Options.MAX_PROFILES"><code class="name">var <span class="ident">MAX_PROFILES</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="objectionpy.objection.Scene"><code class="flex name class">
+<span>class <span class="ident">Scene</span></span>
+<span>(</span><span>options: Optional[<a title="objectionpy.objection.Options" href="#objectionpy.objection.Options">Options</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Objection scene - a linear series of frames that can be recorded or played in a browser.</p>
+<p>Primarily modified by editing frames in Scene.frames.</p>
+<h2 id="attributes">Attributes</h2>
+<ul>
+<li><code>options : Options</code><ul>
+<li>Default objection options.</li>
+</ul>
+</li>
+<li><code>aliases : dict[str, str]</code><ul>
+<li>Dictionary of aliases, mapping original name to alias.</li>
+</ul>
+</li>
+<li><code>frames : list[Frames]</code><ul>
+<li>The scene's frame list. Primary way of modifying scenes.</li>
+</ul>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Scene(_ObjectionBase):
+    &#34;&#34;&#34;
+    Objection scene - a linear series of frames that can be recorded or played in a browser.
+    
+    Primarily modified by editing frames in Scene.frames.
+    
+    Attributes:
+        - `options : Options`
+            - Default objection options.
+        - `aliases : dict[str, str]`
+            - Dictionary of aliases, mapping original name to alias.
+        - `frames : list[Frames]`
+            - The scene&#39;s frame list. Primary way of modifying scenes.
+    &#34;&#34;&#34;
+
+    type = enums.ObjectionType.SCENE
+
+    def __init__(self, options: Optional[Options] = None) -&gt; None:
+        super().__init__(options)
+        mainGroup = Group(name=&#39;Main&#39;)
+        self._groups.append(mainGroup)
+
+    @property
+    def frames(self) -&gt; list[Frame]:
+        return self._groups[0].frames
+    
+    def compile(self) -&gt; dict:
+        objectionDict = super().compile()
+
+        compiledFrames = self._groupMap[0][1][&#39;frames&#39;]
+        for frameDict in [*compiledFrames]:
+            if frameDict.get(&#39;hide&#39;):
+                compiledFrames.remove(frameDict)
+
+        return objectionDict</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>objectionpy.objection._ObjectionBase</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="objectionpy.objection.Scene.options"><code class="name">var <span class="ident">options</span> : <a title="objectionpy.objection.Options" href="#objectionpy.objection.Options">Options</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Scene.aliases"><code class="name">var <span class="ident">aliases</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Scene.type"><code class="name">var <span class="ident">type</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="objectionpy.objection.Scene.frames"><code class="name">var <span class="ident">frames</span> : list</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def frames(self) -&gt; list[Frame]:
+    return self._groups[0].frames</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="objectionpy.objection.Scene.compile"><code class="name flex">
+<span>def <span class="ident">compile</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compile objection.</p>
+<h2 id="raises">Raises</h2>
+<ul>
+<li><code><a title="objectionpy.objection.ObjectionError" href="#objectionpy.objection.ObjectionError">ObjectionError</a></code><ul>
+<li>Duplicate case tag was found.</li>
+<li>CEFrame was found in the wrong group.</li>
+</ul>
+</li>
+</ul>
+<h2 id="returns">Returns</h2>
+<p>JSON-serializable dictionary in the .objection format.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def compile(self) -&gt; dict:
+    objectionDict = super().compile()
+
+    compiledFrames = self._groupMap[0][1][&#39;frames&#39;]
+    for frameDict in [*compiledFrames]:
+        if frameDict.get(&#39;hide&#39;):
+            compiledFrames.remove(frameDict)
+
+    return objectionDict</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -1945,10 +2310,6 @@ class CEGroup(Group):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="objectionpy.objection.Case.RecordItem"><code class="name">var <span class="ident">RecordItem</span></code></dt>
-<dd>
-<div class="desc"><p>RecordItem(type: objectionpy.enums.RecordType, name: str, iconUrl: str, checkUrl: str = '', description: str = '', hidden: bool = False)</p></div>
-</dd>
 <dt id="objectionpy.objection.Case.evidence"><code class="name">var <span class="ident">evidence</span> : list</code></dt>
 <dd>
 <div class="desc"></div>
@@ -1960,6 +2321,10 @@ class CEGroup(Group):
 <dt id="objectionpy.objection.Case.type"><code class="name">var <span class="ident">type</span></code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="objectionpy.objection.Case.RecordItem"><code class="name">var <span class="ident">RecordItem</span></code></dt>
+<dd>
+<div class="desc"><p>RecordItem(type: objectionpy.enums.RecordType, name: str, iconUrl: str, checkUrl: str = '', description: str = '', hidden: bool = False)</p></div>
 </dd>
 </dl>
 <h3>Instance variables</h3>
@@ -2036,176 +2401,6 @@ def groups(self) -&gt; list[Group]:
 </dd>
 </dl>
 </dd>
-<dt id="objectionpy.objection.GameOverGroup"><code class="flex name class">
-<span>class <span class="ident">GameOverGroup</span></span>
-<span>(</span><span>objection: Optional[ForwardRef('_ObjectionBase')] = None, name: Optional[str] = None, caseTag: Optional[str] = None, frames: list = &lt;factory&gt;)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Special container whose frames are played when the player's health reaches 0.</p>
-<h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>objection : Optional[_ObjectionBase]</code><ul>
-<li>The case to automatically append to on the group's initialization.</li>
-</ul>
-</li>
-<li><code>name : str</code><ul>
-<li>Group name.</li>
-</ul>
-</li>
-<li><code>caseTag : str</code><ul>
-<li>A unique tag used to identify the group in case actions. (A direct reference to the group object works too)</li>
-</ul>
-</li>
-<li><code>frames : list[Frame]</code><ul>
-<li>The group's frame list. May be of type Frame or CEFrame.</li>
-</ul>
-</li>
-</ul></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class GameOverGroup(Group):
-    &#34;&#34;&#34;
-    Special container whose frames are played when the player&#39;s health reaches 0.
-
-    Attributes:
-        - `objection : Optional[_ObjectionBase]`
-            - The case to automatically append to on the group&#39;s initialization.
-        - `name : str`
-            - Group name.
-        - `caseTag : str`
-            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
-        - `frames : list[Frame]`
-            - The group&#39;s frame list. May be of type Frame or CEFrame.
-    &#34;&#34;&#34;
-    _type = enums.GroupType.GAME_OVER</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="objectionpy.objection.Group" href="#objectionpy.objection.Group">Group</a></li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.objection.GameOverGroup.caseTag"><code class="name">var <span class="ident">caseTag</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.GameOverGroup.frames"><code class="name">var <span class="ident">frames</span> : list</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.GameOverGroup.name"><code class="name">var <span class="ident">name</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.GameOverGroup.objection"><code class="name">var <span class="ident">objection</span> : Optional[objectionpy.objection._ObjectionBase]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.objection.Group"><code class="flex name class">
-<span>class <span class="ident">Group</span></span>
-<span>(</span><span>objection: Optional[ForwardRef('_ObjectionBase')] = None, name: Optional[str] = None, caseTag: Optional[str] = None, frames: list = &lt;factory&gt;)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Container for frames used in Cases.</p>
-<h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>objection : Optional[_ObjectionBase]</code><ul>
-<li>The case to automatically append to on the group's initialization.</li>
-</ul>
-</li>
-<li><code>name : str</code><ul>
-<li>Group name.</li>
-</ul>
-</li>
-<li><code>caseTag : str</code><ul>
-<li>A unique tag used to identify the group in case actions. (A direct reference to the group object works too)</li>
-</ul>
-</li>
-<li><code>frames : list[Frame]</code><ul>
-<li>The group's frame list. May be of type Frame or CEFrame.</li>
-</ul>
-</li>
-</ul></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@dataclass
-class Group:
-    &#34;&#34;&#34;
-    Container for frames used in Cases.
-
-    Attributes:
-        - `objection : Optional[_ObjectionBase]`
-            - The case to automatically append to on the group&#39;s initialization.
-        - `name : str`
-            - Group name.
-        - `caseTag : str`
-            - A unique tag used to identify the group in case actions. (A direct reference to the group object works too)
-        - `frames : list[Frame]`
-            - The group&#39;s frame list. May be of type Frame or CEFrame.
-    &#34;&#34;&#34;
-    _type: enums.GroupType = field(default=enums.GroupType.NORMAL, init=False)
-    objection: Optional[&#39;_ObjectionBase&#39;] = None
-    name: Optional[str] = None
-    caseTag: Optional[str] = None
-    frames: list[Frame] = field(default_factory=list)
-
-    def __post_init__(self):
-        try:
-            self.objection.groups.append(self) # type: ignore
-        except AttributeError:
-            pass</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="objectionpy.objection.CEGroup" href="#objectionpy.objection.CEGroup">CEGroup</a></li>
-<li><a title="objectionpy.objection.GameOverGroup" href="#objectionpy.objection.GameOverGroup">GameOverGroup</a></li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.objection.Group.caseTag"><code class="name">var <span class="ident">caseTag</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Group.frames"><code class="name">var <span class="ident">frames</span> : list</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Group.name"><code class="name">var <span class="ident">name</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Group.objection"><code class="name">var <span class="ident">objection</span> : Optional[objectionpy.objection._ObjectionBase]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.objection.IOWarning"><code class="flex name class">
-<span>class <span class="ident">IOWarning</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Base class for warning categories.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class IOWarning(Warning):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Warning</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
 <dt id="objectionpy.objection.LimitWarning"><code class="flex name class">
 <span>class <span class="ident">LimitWarning</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -2240,21 +2435,6 @@ class Group:
 </ul>
 <h3>Static methods</h3>
 <dl>
-<dt id="objectionpy.objection.LimitWarning.checkList"><code class="name flex">
-<span>def <span class="ident">checkList</span></span>(<span>lst: Sized, limit: Optional[int], limitTarget: str)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def checkList(cls, lst: Sized, limit: Optional[int], limitTarget: str):
-    if limit is not None and len(lst) &gt; limit:
-        cls.warn(limit, limitTarget, len(lst))</code></pre>
-</details>
-</dd>
 <dt id="objectionpy.objection.LimitWarning.warn"><code class="name flex">
 <span>def <span class="ident">warn</span></span>(<span>limit: int, limitTarget: str, value: int)</span>
 </code></dt>
@@ -2270,7 +2450,43 @@ def warn(cls, limit: int, limitTarget: str, value: int):
         f&#39;exceeded limit of {limit} {limitTarget} (at {value}) - objection.lol support is not guaranteed&#39;, LimitWarning)</code></pre>
 </details>
 </dd>
+<dt id="objectionpy.objection.LimitWarning.checkList"><code class="name flex">
+<span>def <span class="ident">checkList</span></span>(<span>lst: Sized, limit: Optional[int], limitTarget: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def checkList(cls, lst: Sized, limit: Optional[int], limitTarget: str):
+    if limit is not None and len(lst) &gt; limit:
+        cls.warn(limit, limitTarget, len(lst))</code></pre>
+</details>
+</dd>
 </dl>
+</dd>
+<dt id="objectionpy.objection.IOWarning"><code class="flex name class">
+<span>class <span class="ident">IOWarning</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Warning for the use cases of IOError.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IOWarning(Warning):
+    &#34;&#34;&#34;Warning for the use cases of IOError.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Warning</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 <dt id="objectionpy.objection.ObjectionError"><code class="flex name class">
 <span>class <span class="ident">ObjectionError</span></span>
@@ -2292,220 +2508,6 @@ def warn(cls, limit: int, limitTarget: str, value: int):
 <li>builtins.BaseException</li>
 </ul>
 </dd>
-<dt id="objectionpy.objection.Options"><code class="flex name class">
-<span>class <span class="ident">Options</span></span>
-<span>(</span><span>dialogueBox: <a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a> = PresetDialogueBox.CLASSIC, defaultTextSpeed: int = 28, blipFrequency: int = 56, autoplaySpeed: int = 500, continueSoundUrl: str = '/Audio/Case/Continue_Trilogy.wav', MAX_PAIRS: int = 100, MAX_GROUPS: int = 100, MAX_ALIASES: int = 100, MAX_GROUP_FRAMES: int = 1000, MAX_FRAME_ACTIONS: int = 10, MAX_EVIDENCE: int = 50, MAX_PROFILES: int = 50)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>The default options of an objection.</p>
-<p>Most can be modified with OptionModifiers in Frames.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@dataclass
-class Options:
-    &#34;&#34;&#34;
-    The default options of an objection.
-    
-    Most can be modified with OptionModifiers in Frames.
-    &#34;&#34;&#34;
-    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
-    defaultTextSpeed: int = 28
-    blipFrequency: int = 56
-    autoplaySpeed: int = 500
-    continueSoundUrl: str = &#34;/Audio/Case/Continue_Trilogy.wav&#34;
-
-    MAX_PAIRS: int = 100
-    MAX_GROUPS: int = 100
-    MAX_ALIASES: int = 100
-    MAX_GROUP_FRAMES: int = 1000
-    MAX_FRAME_ACTIONS: int = 10
-    MAX_EVIDENCE: int = 50
-    MAX_PROFILES: int = 50</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.objection.Options.MAX_ALIASES"><code class="name">var <span class="ident">MAX_ALIASES</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.MAX_EVIDENCE"><code class="name">var <span class="ident">MAX_EVIDENCE</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.MAX_FRAME_ACTIONS"><code class="name">var <span class="ident">MAX_FRAME_ACTIONS</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.MAX_GROUPS"><code class="name">var <span class="ident">MAX_GROUPS</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.MAX_GROUP_FRAMES"><code class="name">var <span class="ident">MAX_GROUP_FRAMES</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.MAX_PAIRS"><code class="name">var <span class="ident">MAX_PAIRS</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.MAX_PROFILES"><code class="name">var <span class="ident">MAX_PROFILES</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.autoplaySpeed"><code class="name">var <span class="ident">autoplaySpeed</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.blipFrequency"><code class="name">var <span class="ident">blipFrequency</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.continueSoundUrl"><code class="name">var <span class="ident">continueSoundUrl</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.defaultTextSpeed"><code class="name">var <span class="ident">defaultTextSpeed</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Options.dialogueBox"><code class="name">var <span class="ident">dialogueBox</span> : <a title="objectionpy.enums.PresetDialogueBox" href="enums.html#objectionpy.enums.PresetDialogueBox">PresetDialogueBox</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="objectionpy.objection.Scene"><code class="flex name class">
-<span>class <span class="ident">Scene</span></span>
-<span>(</span><span>options: Optional[<a title="objectionpy.objection.Options" href="#objectionpy.objection.Options">Options</a>] = None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Objection scene - a linear series of frames that can be recorded or played in a browser.</p>
-<p>Primarily modified by editing frames in Scene.frames.</p>
-<h2 id="attributes">Attributes</h2>
-<ul>
-<li><code>options : Options</code><ul>
-<li>Default objection options.</li>
-</ul>
-</li>
-<li><code>aliases : dict[str, str]</code><ul>
-<li>Dictionary of aliases, mapping original name to alias.</li>
-</ul>
-</li>
-<li><code>frames : list[Frames]</code><ul>
-<li>The scene's frame list. Primary way of modifying scenes.</li>
-</ul>
-</li>
-</ul></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Scene(_ObjectionBase):
-    &#34;&#34;&#34;
-    Objection scene - a linear series of frames that can be recorded or played in a browser.
-    
-    Primarily modified by editing frames in Scene.frames.
-    
-    Attributes:
-        - `options : Options`
-            - Default objection options.
-        - `aliases : dict[str, str]`
-            - Dictionary of aliases, mapping original name to alias.
-        - `frames : list[Frames]`
-            - The scene&#39;s frame list. Primary way of modifying scenes.
-    &#34;&#34;&#34;
-
-    type = enums.ObjectionType.SCENE
-
-    def __init__(self, options: Optional[Options] = None) -&gt; None:
-        super().__init__(options)
-        mainGroup = Group(name=&#39;Main&#39;)
-        self._groups.append(mainGroup)
-
-    @property
-    def frames(self) -&gt; list[Frame]:
-        return self._groups[0].frames
-    
-    def compile(self) -&gt; dict:
-        objectionDict = super().compile()
-
-        compiledFrames = self._groupMap[0][1][&#39;frames&#39;]
-        for frameDict in [*compiledFrames]:
-            if frameDict.get(&#39;hide&#39;):
-                compiledFrames.remove(frameDict)
-
-        return objectionDict</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>objectionpy.objection._ObjectionBase</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="objectionpy.objection.Scene.aliases"><code class="name">var <span class="ident">aliases</span> : dict</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Scene.options"><code class="name">var <span class="ident">options</span> : <a title="objectionpy.objection.Options" href="#objectionpy.objection.Options">Options</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="objectionpy.objection.Scene.type"><code class="name">var <span class="ident">type</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Instance variables</h3>
-<dl>
-<dt id="objectionpy.objection.Scene.frames"><code class="name">var <span class="ident">frames</span> : list</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def frames(self) -&gt; list[Frame]:
-    return self._groups[0].frames</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="objectionpy.objection.Scene.compile"><code class="name flex">
-<span>def <span class="ident">compile</span></span>(<span>self) ‑> dict</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Compile objection.</p>
-<h2 id="raises">Raises</h2>
-<ul>
-<li><code><a title="objectionpy.objection.ObjectionError" href="#objectionpy.objection.ObjectionError">ObjectionError</a></code><ul>
-<li>Duplicate case tag was found.</li>
-<li>CEFrame was found in the wrong group.</li>
-</ul>
-</li>
-</ul>
-<h2 id="returns">Returns</h2>
-<p>JSON-serializable dictionary in the .objection format.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def compile(self) -&gt; dict:
-    objectionDict = super().compile()
-
-    compiledFrames = self._groupMap[0][1][&#39;frames&#39;]
-    for frameDict in [*compiledFrames]:
-        if frameDict.get(&#39;hide&#39;):
-            compiledFrames.remove(frameDict)
-
-    return objectionDict</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 </dl>
 </section>
 </article>
@@ -2522,13 +2524,22 @@ def frames(self) -&gt; list[Frame]:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="objectionpy.objection.loadB64" href="#objectionpy.objection.loadB64">loadB64</a></code></li>
 <li><code><a title="objectionpy.objection.loadJSONDict" href="#objectionpy.objection.loadJSONDict">loadJSONDict</a></code></li>
 <li><code><a title="objectionpy.objection.loadJSONStr" href="#objectionpy.objection.loadJSONStr">loadJSONStr</a></code></li>
+<li><code><a title="objectionpy.objection.loadB64" href="#objectionpy.objection.loadB64">loadB64</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="objectionpy.objection.Group" href="#objectionpy.objection.Group">Group</a></code></h4>
+<ul class="">
+<li><code><a title="objectionpy.objection.Group.frames" href="#objectionpy.objection.Group.frames">frames</a></code></li>
+<li><code><a title="objectionpy.objection.Group.objection" href="#objectionpy.objection.Group.objection">objection</a></code></li>
+<li><code><a title="objectionpy.objection.Group.name" href="#objectionpy.objection.Group.name">name</a></code></li>
+<li><code><a title="objectionpy.objection.Group.caseTag" href="#objectionpy.objection.Group.caseTag">caseTag</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="objectionpy.objection.CEGroup" href="#objectionpy.objection.CEGroup">CEGroup</a></code></h4>
 <ul class="">
@@ -2537,73 +2548,64 @@ def frames(self) -&gt; list[Frame]:
 </ul>
 </li>
 <li>
-<h4><code><a title="objectionpy.objection.Case" href="#objectionpy.objection.Case">Case</a></code></h4>
-<ul class="two-column">
-<li><code><a title="objectionpy.objection.Case.RecordItem" href="#objectionpy.objection.Case.RecordItem">RecordItem</a></code></li>
-<li><code><a title="objectionpy.objection.Case.compile" href="#objectionpy.objection.Case.compile">compile</a></code></li>
-<li><code><a title="objectionpy.objection.Case.evidence" href="#objectionpy.objection.Case.evidence">evidence</a></code></li>
-<li><code><a title="objectionpy.objection.Case.groups" href="#objectionpy.objection.Case.groups">groups</a></code></li>
-<li><code><a title="objectionpy.objection.Case.profiles" href="#objectionpy.objection.Case.profiles">profiles</a></code></li>
-<li><code><a title="objectionpy.objection.Case.type" href="#objectionpy.objection.Case.type">type</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="objectionpy.objection.GameOverGroup" href="#objectionpy.objection.GameOverGroup">GameOverGroup</a></code></h4>
 <ul class="">
+<li><code><a title="objectionpy.objection.GameOverGroup.objection" href="#objectionpy.objection.GameOverGroup.objection">objection</a></code></li>
+<li><code><a title="objectionpy.objection.GameOverGroup.name" href="#objectionpy.objection.GameOverGroup.name">name</a></code></li>
 <li><code><a title="objectionpy.objection.GameOverGroup.caseTag" href="#objectionpy.objection.GameOverGroup.caseTag">caseTag</a></code></li>
 <li><code><a title="objectionpy.objection.GameOverGroup.frames" href="#objectionpy.objection.GameOverGroup.frames">frames</a></code></li>
-<li><code><a title="objectionpy.objection.GameOverGroup.name" href="#objectionpy.objection.GameOverGroup.name">name</a></code></li>
-<li><code><a title="objectionpy.objection.GameOverGroup.objection" href="#objectionpy.objection.GameOverGroup.objection">objection</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="objectionpy.objection.Group" href="#objectionpy.objection.Group">Group</a></code></h4>
+<h4><code><a title="objectionpy.objection.Options" href="#objectionpy.objection.Options">Options</a></code></h4>
+<ul class="two-column">
+<li><code><a title="objectionpy.objection.Options.dialogueBox" href="#objectionpy.objection.Options.dialogueBox">dialogueBox</a></code></li>
+<li><code><a title="objectionpy.objection.Options.defaultTextSpeed" href="#objectionpy.objection.Options.defaultTextSpeed">defaultTextSpeed</a></code></li>
+<li><code><a title="objectionpy.objection.Options.blipFrequency" href="#objectionpy.objection.Options.blipFrequency">blipFrequency</a></code></li>
+<li><code><a title="objectionpy.objection.Options.autoplaySpeed" href="#objectionpy.objection.Options.autoplaySpeed">autoplaySpeed</a></code></li>
+<li><code><a title="objectionpy.objection.Options.continueSoundUrl" href="#objectionpy.objection.Options.continueSoundUrl">continueSoundUrl</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_PAIRS" href="#objectionpy.objection.Options.MAX_PAIRS">MAX_PAIRS</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_GROUPS" href="#objectionpy.objection.Options.MAX_GROUPS">MAX_GROUPS</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_ALIASES" href="#objectionpy.objection.Options.MAX_ALIASES">MAX_ALIASES</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_GROUP_FRAMES" href="#objectionpy.objection.Options.MAX_GROUP_FRAMES">MAX_GROUP_FRAMES</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_FRAME_ACTIONS" href="#objectionpy.objection.Options.MAX_FRAME_ACTIONS">MAX_FRAME_ACTIONS</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_EVIDENCE" href="#objectionpy.objection.Options.MAX_EVIDENCE">MAX_EVIDENCE</a></code></li>
+<li><code><a title="objectionpy.objection.Options.MAX_PROFILES" href="#objectionpy.objection.Options.MAX_PROFILES">MAX_PROFILES</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.objection.Scene" href="#objectionpy.objection.Scene">Scene</a></code></h4>
 <ul class="">
-<li><code><a title="objectionpy.objection.Group.caseTag" href="#objectionpy.objection.Group.caseTag">caseTag</a></code></li>
-<li><code><a title="objectionpy.objection.Group.frames" href="#objectionpy.objection.Group.frames">frames</a></code></li>
-<li><code><a title="objectionpy.objection.Group.name" href="#objectionpy.objection.Group.name">name</a></code></li>
-<li><code><a title="objectionpy.objection.Group.objection" href="#objectionpy.objection.Group.objection">objection</a></code></li>
+<li><code><a title="objectionpy.objection.Scene.compile" href="#objectionpy.objection.Scene.compile">compile</a></code></li>
+<li><code><a title="objectionpy.objection.Scene.frames" href="#objectionpy.objection.Scene.frames">frames</a></code></li>
+<li><code><a title="objectionpy.objection.Scene.options" href="#objectionpy.objection.Scene.options">options</a></code></li>
+<li><code><a title="objectionpy.objection.Scene.aliases" href="#objectionpy.objection.Scene.aliases">aliases</a></code></li>
+<li><code><a title="objectionpy.objection.Scene.type" href="#objectionpy.objection.Scene.type">type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.objection.Case" href="#objectionpy.objection.Case">Case</a></code></h4>
+<ul class="two-column">
+<li><code><a title="objectionpy.objection.Case.compile" href="#objectionpy.objection.Case.compile">compile</a></code></li>
+<li><code><a title="objectionpy.objection.Case.groups" href="#objectionpy.objection.Case.groups">groups</a></code></li>
+<li><code><a title="objectionpy.objection.Case.evidence" href="#objectionpy.objection.Case.evidence">evidence</a></code></li>
+<li><code><a title="objectionpy.objection.Case.profiles" href="#objectionpy.objection.Case.profiles">profiles</a></code></li>
+<li><code><a title="objectionpy.objection.Case.type" href="#objectionpy.objection.Case.type">type</a></code></li>
+<li><code><a title="objectionpy.objection.Case.RecordItem" href="#objectionpy.objection.Case.RecordItem">RecordItem</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="objectionpy.objection.LimitWarning" href="#objectionpy.objection.LimitWarning">LimitWarning</a></code></h4>
+<ul class="">
+<li><code><a title="objectionpy.objection.LimitWarning.warn" href="#objectionpy.objection.LimitWarning.warn">warn</a></code></li>
+<li><code><a title="objectionpy.objection.LimitWarning.checkList" href="#objectionpy.objection.LimitWarning.checkList">checkList</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="objectionpy.objection.IOWarning" href="#objectionpy.objection.IOWarning">IOWarning</a></code></h4>
 </li>
 <li>
-<h4><code><a title="objectionpy.objection.LimitWarning" href="#objectionpy.objection.LimitWarning">LimitWarning</a></code></h4>
-<ul class="">
-<li><code><a title="objectionpy.objection.LimitWarning.checkList" href="#objectionpy.objection.LimitWarning.checkList">checkList</a></code></li>
-<li><code><a title="objectionpy.objection.LimitWarning.warn" href="#objectionpy.objection.LimitWarning.warn">warn</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="objectionpy.objection.ObjectionError" href="#objectionpy.objection.ObjectionError">ObjectionError</a></code></h4>
-</li>
-<li>
-<h4><code><a title="objectionpy.objection.Options" href="#objectionpy.objection.Options">Options</a></code></h4>
-<ul class="two-column">
-<li><code><a title="objectionpy.objection.Options.MAX_ALIASES" href="#objectionpy.objection.Options.MAX_ALIASES">MAX_ALIASES</a></code></li>
-<li><code><a title="objectionpy.objection.Options.MAX_EVIDENCE" href="#objectionpy.objection.Options.MAX_EVIDENCE">MAX_EVIDENCE</a></code></li>
-<li><code><a title="objectionpy.objection.Options.MAX_FRAME_ACTIONS" href="#objectionpy.objection.Options.MAX_FRAME_ACTIONS">MAX_FRAME_ACTIONS</a></code></li>
-<li><code><a title="objectionpy.objection.Options.MAX_GROUPS" href="#objectionpy.objection.Options.MAX_GROUPS">MAX_GROUPS</a></code></li>
-<li><code><a title="objectionpy.objection.Options.MAX_GROUP_FRAMES" href="#objectionpy.objection.Options.MAX_GROUP_FRAMES">MAX_GROUP_FRAMES</a></code></li>
-<li><code><a title="objectionpy.objection.Options.MAX_PAIRS" href="#objectionpy.objection.Options.MAX_PAIRS">MAX_PAIRS</a></code></li>
-<li><code><a title="objectionpy.objection.Options.MAX_PROFILES" href="#objectionpy.objection.Options.MAX_PROFILES">MAX_PROFILES</a></code></li>
-<li><code><a title="objectionpy.objection.Options.autoplaySpeed" href="#objectionpy.objection.Options.autoplaySpeed">autoplaySpeed</a></code></li>
-<li><code><a title="objectionpy.objection.Options.blipFrequency" href="#objectionpy.objection.Options.blipFrequency">blipFrequency</a></code></li>
-<li><code><a title="objectionpy.objection.Options.continueSoundUrl" href="#objectionpy.objection.Options.continueSoundUrl">continueSoundUrl</a></code></li>
-<li><code><a title="objectionpy.objection.Options.defaultTextSpeed" href="#objectionpy.objection.Options.defaultTextSpeed">defaultTextSpeed</a></code></li>
-<li><code><a title="objectionpy.objection.Options.dialogueBox" href="#objectionpy.objection.Options.dialogueBox">dialogueBox</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="objectionpy.objection.Scene" href="#objectionpy.objection.Scene">Scene</a></code></h4>
-<ul class="">
-<li><code><a title="objectionpy.objection.Scene.aliases" href="#objectionpy.objection.Scene.aliases">aliases</a></code></li>
-<li><code><a title="objectionpy.objection.Scene.compile" href="#objectionpy.objection.Scene.compile">compile</a></code></li>
-<li><code><a title="objectionpy.objection.Scene.frames" href="#objectionpy.objection.Scene.frames">frames</a></code></li>
-<li><code><a title="objectionpy.objection.Scene.options" href="#objectionpy.objection.Scene.options">options</a></code></li>
-<li><code><a title="objectionpy.objection.Scene.type" href="#objectionpy.objection.Scene.type">type</a></code></li>
-</ul>
 </li>
 </ul>
 </li>
