@@ -3,19 +3,6 @@
 from enum import Enum
 
 
-class ObjectionType(Enum):
-    """"""
-    SCENE = 0
-    CASE = 1
-
-
-class GroupType(Enum):
-    """"""
-    NORMAL = "n"
-    CE = "ce"
-    GAME_OVER = "go"
-
-
 class CharacterLocation(Enum):
     """"""
     DEFENSE = 'defense'
@@ -24,23 +11,6 @@ class CharacterLocation(Enum):
     WITNESS = 'witness'
     JUDGE = 'judge'
     GALLERY = 'gallery'
-
-
-class FadeDirection(Enum):
-    """"""
-    OUT = 0
-    IN = 1
-    OUT_IN = 2
-
-
-class FadeTarget(Enum):
-    """"""
-    BACKGROUND = 0
-    CHARACTER = 1
-    SCENE = 2
-    EVERYTHING = 3
-    PAIRED_CHARACTER = 4
-    CHARACTERS = 5
 
 
 class Easing(Enum):
@@ -74,6 +44,23 @@ class Easing(Enum):
     EASE_IN_OUT_CIRCULAR = "ease-in-out-circular"
 
 
+class FadeDirection(Enum):
+    """"""
+    OUT = 0
+    IN = 1
+    OUT_IN = 2
+
+
+class FadeTarget(Enum):
+    """"""
+    BACKGROUND = 0
+    CHARACTER = 1
+    SCENE = 2
+    EVERYTHING = 3
+    PAIRED_CHARACTER = 4
+    CHARACTERS = 5
+
+
 class FilterType(Enum):
     """"""
     GRAYSCALE = 'grayscale'
@@ -89,14 +76,17 @@ class FilterTarget(Enum):
     EVERYTHING = 2
 
 
-class PresetPopup(Enum):
+class GroupType(Enum):
     """"""
-    WITNESS_TESTIMONY = 1
-    CROSS_EXAMINATION = 2
-    TESTIMONY_LABEL = 3
-    GUILTY = 4
-    NOT_GUILTY = 5
-    TESTIMONY_LABEL_HIDE = -1
+    NORMAL = "n"
+    CE = "ce"
+    GAME_OVER = "go"
+
+
+class ObjectionType(Enum):
+    """"""
+    SCENE = 0
+    CASE = 1
 
 
 class PresetBlip(Enum):
@@ -117,6 +107,17 @@ class PresetDialogueBox(Enum):
     AJ = 2
     THE_GREAT_ACE_ATTORNEY = 3
     TGAA = 3
+
+
+class PresetPopup(Enum):
+    """"""
+    WITNESS_TESTIMONY = 1
+    CROSS_EXAMINATION = 2
+    TESTIMONY_LABEL = 3
+    GUILTY = 4
+    NOT_GUILTY = 5
+    TESTIMONY_LABEL_HIDE = -1
+
 
 class RecordType(Enum):
     """"""

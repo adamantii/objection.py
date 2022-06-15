@@ -13765,14 +13765,6 @@ class Characters:
         )
 
 
-class SpeechBubbles:
-    Objection = 1
-    HoldIt = 2
-    TakeThat = 3
-    Gotcha = 4
-    Eureka = 5
-
-
 class Backgrounds:
     class Wide:
         PWCourtroom = assets.Background(72269)
@@ -14070,3 +14062,11 @@ class Sound:
     Break2 = assets.Sound(1922)
     Wrap = assets.Sound(10878)
     Deskslam2 = assets.Sound(10879)
+
+
+class SpeechBubbles:
+    Objection = 1
+    HoldIt = 2
+    TakeThat = 3
+    Gotcha = 4
+    Eureka = 5

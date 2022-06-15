@@ -13,6 +13,79 @@ from json import JSONDecodeError
 from . import enums, _utils
 
 
+class AssetBank:
+    """Container for organizing project assets."""
+    chars: dict[str, 'Character']
+    backgrounds: dict[str, 'Background']
+    music: dict[str, 'Music']
+    sounds: dict[str, 'Sound']
+    popups: dict[str, 'Popup']
+    evidence: dict[str, 'Evidence']
+
+    def __init__(self, assetDict: dict[str, '_Asset'] = {}) -> None:
+        for key in self.__annotations__.keys():
+            setattr(self, key, {})
+        self.loadAssets(assetDict)
+
+    def loadAssets(self, assetDict: dict[str, '_Asset']):
+        """
+        Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
+
+        Args:
+            - `assetDict : dict`
+                - Dictionary of asset objects.
+
+        Raises:
+            TypeError: An object of an invalid type was provided.
+        """
+        for name, asset in assetDict.items():
+            if type(asset) is Character:
+                self.chars[name] = asset
+            elif type(asset) is Background:
+                self.backgrounds[name] = asset
+            elif type(asset) is Music:
+                self.music[name] = asset
+            elif type(asset) is Sound:
+                self.sounds[name] = asset
+            elif type(asset) is Popup:
+                self.popups[name] = asset
+            elif type(asset) is Evidence:
+                self.evidence[name] = asset
+            else:
+                raise TypeError('Unknown asset type ' + type(asset).__name__)
+
+    def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
+        """
+        Add assets of a single type using IDs into the AssetBank.
+
+        Args:
+            - `assetType : type`
+                - Type of asset to add.
+            - `ids : dict[str, int]`
+                - Dictionary of asset IDs used to automatically get the assets.
+
+        Raises:
+            TypeError: An invalid type was provided.
+        """
+        if assetType is Character:
+            targetDict = self.chars
+        elif assetType is Background:
+            targetDict = self.backgrounds
+        elif assetType is Music:
+            targetDict = self.music
+        elif assetType is Sound:
+            targetDict = self.sounds
+        elif assetType is Popup:
+            targetDict = self.popups
+        elif assetType is Evidence:
+            targetDict = self.evidence
+        else:
+            raise TypeError('Unknown asset type ' + assetType.__name__)
+
+        for name, id in ids.items():
+            targetDict[name] = assetType(id)
+
+
 class _Asset:
     """
     An objection.lol asset, created by ID.
@@ -90,23 +163,6 @@ class _PostAsset(_Asset):
         except (JSONDecodeError, IndexError):
             AssetWarning.warn(id)
             return False, None
-
-
-class Sound(_GetAsset):
-    _getUrl = 'https://api.objection.lol/assets/sound/get?id='
-    _assetKeys = ('name', 'url', 'volume', 'fileSize')
-    _tag = 'bgs'
-
-
-class Music(_GetAsset):
-    _getUrl = 'https://api.objection.lol/assets/music/get?id='
-    _assetKeys = ('name', 'url', 'volume', 'fileSize')
-    _tag = 'bgm'
-
-
-class Popup(_PostAsset):
-    _postUrl = 'https://api.objection.lol/assets/popup/getpopups'
-    _assetKeys = ('name', 'url', 'alignment', 'center', 'posY', 'resize')
 
 
 class Background(_PostAsset):
@@ -235,77 +291,21 @@ class Evidence(_Asset):
         self.icon = '[#evdi' + str(self.id) + ']'
 
 
-class AssetBank:
-    """Container for organizing project assets."""
-    chars: dict[str, Character]
-    backgrounds: dict[str, Background]
-    music: dict[str, Music]
-    sounds: dict[str, Sound]
-    popups: dict[str, Popup]
-    evidence: dict[str, Evidence]
+class Music(_GetAsset):
+    _getUrl = 'https://api.objection.lol/assets/music/get?id='
+    _assetKeys = ('name', 'url', 'volume', 'fileSize')
+    _tag = 'bgm'
 
-    def __init__(self, assetDict: dict[str, _Asset] = {}) -> None:
-        for key in self.__annotations__.keys():
-            setattr(self, key, {})
-        self.loadAssets(assetDict)
 
-    def loadAssets(self, assetDict: dict[str, _Asset]):
-        """
-        Add a dictionary of asset objects into the AssetBank, automatically distributed by type.
+class Popup(_PostAsset):
+    _postUrl = 'https://api.objection.lol/assets/popup/getpopups'
+    _assetKeys = ('name', 'url', 'alignment', 'center', 'posY', 'resize')
 
-        Args:
-            - `assetDict : dict`
-                - Dictionary of asset objects.
 
-        Raises:
-            TypeError: An object of an invalid type was provided.
-        """
-        for name, asset in assetDict.items():
-            if type(asset) is Character:
-                self.chars[name] = asset
-            elif type(asset) is Background:
-                self.backgrounds[name] = asset
-            elif type(asset) is Music:
-                self.music[name] = asset
-            elif type(asset) is Sound:
-                self.sounds[name] = asset
-            elif type(asset) is Popup:
-                self.popups[name] = asset
-            elif type(asset) is Evidence:
-                self.evidence[name] = asset
-            else:
-                raise TypeError('Unknown asset type ' + type(asset).__name__)
-
-    def loadAssetIDs(self, assetType: type, ids: dict[str, int]):
-        """
-        Add assets of a single type using IDs into the AssetBank.
-
-        Args:
-            - `assetType : type`
-                - Type of asset to add.
-            - `ids : dict[str, int]`
-                - Dictionary of asset IDs used to automatically get the assets.
-
-        Raises:
-            TypeError: An invalid type was provided.
-        """
-        if assetType is Character:
-            targetDict = self.chars
-        elif assetType is Background:
-            targetDict = self.backgrounds
-        elif assetType is Music:
-            targetDict = self.music
-        elif assetType is Sound:
-            targetDict = self.sounds
-        elif assetType is Popup:
-            targetDict = self.popups
-        elif assetType is Evidence:
-            targetDict = self.evidence
-        else:
-            raise TypeError('Unknown asset type ' + assetType.__name__)
-
-        for name, id in ids.items():
-            targetDict[name] = assetType(id)
+class Sound(_GetAsset):
+    _getUrl = 'https://api.objection.lol/assets/sound/get?id='
+    _assetKeys = ('name', 'url', 'volume', 'fileSize')
+    _tag = 'bgs'
 
 
 class AssetWarning(Warning):

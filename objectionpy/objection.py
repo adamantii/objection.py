@@ -20,28 +20,6 @@ Frame = frames.Frame
 
 
 @dataclass
-class Options:
-    """
-    The default options of an objection.
-    
-    Most can be modified with OptionModifiers in Frames.
-    """
-    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
-    defaultTextSpeed: int = 28
-    blipFrequency: int = 56
-    autoplaySpeed: int = 500
-    continueSoundUrl: str = "/Audio/Case/Continue_Trilogy.wav"
-
-    MAX_PAIRS: int = 100
-    MAX_GROUPS: int = 100
-    MAX_ALIASES: int = 100
-    MAX_GROUP_FRAMES: int = 1000
-    MAX_FRAME_ACTIONS: int = 10
-    MAX_EVIDENCE: int = 50
-    MAX_PROFILES: int = 50
-
-
-@dataclass
 class Group:
     """
     Container for frames used in Cases.
@@ -109,6 +87,28 @@ class GameOverGroup(Group):
             - The group's frame list. May be of type Frame or CEFrame.
     """
     _type = enums.GroupType.GAME_OVER
+
+
+@dataclass
+class Options:
+    """
+    The default options of an objection.
+    
+    Most can be modified with OptionModifiers in Frames.
+    """
+    dialogueBox: enums.PresetDialogueBox = enums.PresetDialogueBox.CLASSIC
+    defaultTextSpeed: int = 28
+    blipFrequency: int = 56
+    autoplaySpeed: int = 500
+    continueSoundUrl: str = "/Audio/Case/Continue_Trilogy.wav"
+
+    MAX_PAIRS: int = 100
+    MAX_GROUPS: int = 100
+    MAX_ALIASES: int = 100
+    MAX_GROUP_FRAMES: int = 1000
+    MAX_FRAME_ACTIONS: int = 10
+    MAX_EVIDENCE: int = 50
+    MAX_PROFILES: int = 50
 
 
 class _ObjectionBase:
@@ -794,6 +794,7 @@ class LimitWarning(Warning):
             cls.warn(limit, limitTarget, len(lst))
 
 class IOWarning(Warning):
+    """Warning for the use cases of IOError."""
     pass
 
 class ObjectionError(Exception):

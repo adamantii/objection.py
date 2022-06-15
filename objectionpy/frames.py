@@ -21,102 +21,6 @@ class Color:
         return self.string
 
 
-
-@dataclass
-class FrameCharacter:
-    """
-    Specifies the attributes of a displayed character.
-    
-    Attributes:
-        - `character : assets.Character`
-            - The character to display.
-        - `poseId : Optional[int]`
-            - The ID of the displayed pose. Must be in this character's pose list. Either poseId or poseSubstr must be set.
-        - `poseSubstr : Optional[str]`
-            - A substring to identify this character's pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.
-        - `flip : bool`
-            - Whether this character is flipped.
-        - `pairOffset : tuple[int, int]`
-            - On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)
-        - `isActive : Optional[bool]`
-            - Whether this is the character that acts in the frame. Only applies when character is paired with another.
-        - `isFront : Optional[bool]`
-            - Whether this character displayed is in front of the other. Only applies when character is paired with another.
-    """
-    character: assets.Character
-    poseId: Optional[int] = None
-    poseSubstr: Optional[str] = None
-    flip: bool = False
-    pairOffset: tuple[int, int] = (0, 0)
-    isActive: Optional[bool] = None
-    isFront: Optional[bool] = None
-
-    def __post_init__(self):
-        if self.poseId is None:
-            if self.poseSubstr is not None:
-                self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
-            else:
-                raise AttributeError('Either poseId or poseSubstr must be set to identify the pose in a FrameCharacter.')
-
-    @property
-    def isNone(self) -> bool:
-        return self.character.id is None and self.poseId is None
-
-    def _getIndividualValue(self, value) -> int:
-        if value is False or self.isNone:
-            return -1
-        elif value is True:
-            return 1
-        else:
-            return 0
-
-
-@dataclass
-class Fade:
-    """
-    Fade a target.
-    
-    Color attribute doesn't apply to character targets.
-    Target attribute doesn't apply to OUT_IN direction.
-    """
-    direction: enums.FadeDirection
-    target: enums.FadeTarget
-    duration: int
-    easing: enums.Easing = enums.Easing.LINEAR
-    color: Optional[Color] = None
-
-
-@dataclass
-class Filter:
-    """
-    Color filter to a specific target.
-    
-    Amount attribute doesn't apply to INVERT and SEPIA types.
-    """
-    type: enums.FilterType
-    target: enums.FilterTarget
-    amount: int = 100
-
-
-@dataclass
-class Transition:
-    """Camera transition on wide backgrounds."""
-    duration: int
-    easing: enums.Easing = enums.Easing.LINEAR
-
-
-@dataclass
-class GalleryModifier:
-    """Specify characters for each gallery location.
-    
-    Any location set to None remains unchanged. (Custom characters not yet supported)"""
-    defense: Optional[assets.Character] = None
-    prosecution:  Optional[assets.Character] = None
-    counsel: Optional[assets.Character] = None
-    witness: Optional[assets.Character] = None
-    judge: Optional[assets.Character] = None
-
-
 @dataclass
 class CursorRect:
     """An area targettable by the cursor in the "point to an area" case action."""
@@ -124,28 +28,6 @@ class CursorRect:
     top: int
     width: int
     height: int
-
-
-@dataclass
-class OptionModifiers:
-    """
-    Specify values for setting objection options affecting future frames.
-
-    Any option set to None remains unchanged.
-    """
-    autoplaySpeed: Optional[int] = None
-    dialogueBox: Optional[enums.PresetDialogueBox] = None
-    dialogueBoxVisible: Optional[bool] = None
-    galleryAssign: GalleryModifier = field(default_factory=GalleryModifier)
-    galleryRemove: list[enums.CharacterLocation] = field(default_factory=list)
-    defaultTextSpeed: Optional[int] = None
-    blipFrequency: Optional[int] = None
-    frameSkip: Optional[bool] = None
-
-    def __post_init__(self):
-        for character in self.galleryAssign.__dict__.values():
-            if character and not character.isPreset:
-                raise FutureWarning('Gallery assign modifiers not yet implemented to work for custom characters')
 
 
 class CaseActions:
@@ -303,7 +185,7 @@ class CaseActions:
 
         choices: list[
             tuple[
-                CursorRect,
+                'CursorRect',
                 Union[str, 'Frame']
             ]
         ] = field(default_factory=list)
@@ -336,6 +218,123 @@ class CaseActions:
         expression: str
         trueFrame: Union[str, 'Frame']
         falseFrame: Union[str, 'Frame']
+
+
+@dataclass
+class Fade:
+    """
+    Fade a target.
+    
+    Color attribute doesn't apply to character targets.
+    Target attribute doesn't apply to OUT_IN direction.
+    """
+    direction: enums.FadeDirection
+    target: enums.FadeTarget
+    duration: int
+    easing: enums.Easing = enums.Easing.LINEAR
+    color: Optional[Color] = None
+
+
+@dataclass
+class Filter:
+    """
+    Color filter to a specific target.
+    
+    Amount attribute doesn't apply to INVERT and SEPIA types.
+    """
+    type: enums.FilterType
+    target: enums.FilterTarget
+    amount: int = 100
+
+
+@dataclass
+class FrameCharacter:
+    """
+    Specifies the attributes of a displayed character.
+    
+    Attributes:
+        - `character : assets.Character`
+            - The character to display.
+        - `poseId : Optional[int]`
+            - The ID of the displayed pose. Must be in this character's pose list. Either poseId or poseSubstr must be set.
+        - `poseSubstr : Optional[str]`
+            - A substring to identify this character's pose by using Character.lookupPoseSubstr. Either poseId or poseSubstr must be set.
+        - `flip : bool`
+            - Whether this character is flipped.
+        - `pairOffset : tuple[int, int]`
+            - On compilation, automatically generates a pair group to set the offset. (Duplicate pair groups are avoided.)
+        - `isActive : Optional[bool]`
+            - Whether this is the character that acts in the frame. Only applies when character is paired with another.
+        - `isFront : Optional[bool]`
+            - Whether this character displayed is in front of the other. Only applies when character is paired with another.
+    """
+    character: assets.Character
+    poseId: Optional[int] = None
+    poseSubstr: Optional[str] = None
+    flip: bool = False
+    pairOffset: tuple[int, int] = (0, 0)
+    isActive: Optional[bool] = None
+    isFront: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.poseId is None:
+            if self.poseSubstr is not None:
+                self.poseId = self.character.lookupPoseSubstr(self.poseSubstr)
+            else:
+                raise AttributeError('Either poseId or poseSubstr must be set to identify the pose in a FrameCharacter.')
+
+    @property
+    def isNone(self) -> bool:
+        return self.character.id is None and self.poseId is None
+
+    def _getIndividualValue(self, value) -> int:
+        if value is False or self.isNone:
+            return -1
+        elif value is True:
+            return 1
+        else:
+            return 0
+
+
+@dataclass
+class GalleryModifier:
+    """Specify characters for each gallery location.
+    
+    Any location set to None remains unchanged. (Custom characters not yet supported)"""
+    defense: Optional[assets.Character] = None
+    prosecution:  Optional[assets.Character] = None
+    counsel: Optional[assets.Character] = None
+    witness: Optional[assets.Character] = None
+    judge: Optional[assets.Character] = None
+
+
+@dataclass
+class OptionModifiers:
+    """
+    Specify values for setting objection options affecting future frames.
+
+    Any option set to None remains unchanged.
+    """
+    autoplaySpeed: Optional[int] = None
+    dialogueBox: Optional[enums.PresetDialogueBox] = None
+    dialogueBoxVisible: Optional[bool] = None
+    galleryAssign: GalleryModifier = field(default_factory=GalleryModifier)
+    galleryRemove: list[enums.CharacterLocation] = field(default_factory=list)
+    defaultTextSpeed: Optional[int] = None
+    blipFrequency: Optional[int] = None
+    frameSkip: Optional[bool] = None
+
+    def __post_init__(self):
+        for character in self.galleryAssign.__dict__.values():
+            if character and not character.isPreset:
+                raise FutureWarning('Gallery assign modifiers not yet implemented to work for custom characters')
+
+
+@dataclass
+class Transition:
+    """Camera transition on wide backgrounds."""
+    duration: int
+    easing: enums.Easing = enums.Easing.LINEAR
 
 
 @dataclass
