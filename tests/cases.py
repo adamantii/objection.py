@@ -207,7 +207,7 @@ mainGroup.frames.append(Frame(
         prompt="Point at the item that's not meant to be there.",
         failFrame="cursor-fail",
         choices=[
-            (CursorRect(50, 24, 14, 20), 'cursor-failnt')
+            (CursorRect(24, 50, 14, 20), 'cursor-failnt')
         ]
     )
 ))
