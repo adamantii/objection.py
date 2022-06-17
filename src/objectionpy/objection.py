@@ -569,7 +569,7 @@ class Scene(_ObjectionBase):
             - The scene's frame list. Primary way of modifying scenes.
     """
 
-    type = enums.ObjectionType.SCENE
+    _type = enums.ObjectionType.SCENE
 
     def __init__(self, options: Optional[Options] = None) -> None:
         super().__init__(options)
@@ -606,7 +606,7 @@ class Case(_ObjectionBase):
             - The case's group list. Primary way of modifying cases.
     """
 
-    type = enums.ObjectionType.CASE
+    _type = enums.ObjectionType.CASE
 
     @dataclass
     class RecordItem:
