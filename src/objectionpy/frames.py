@@ -285,7 +285,7 @@ class FrameCharacter:
 
     @property
     def isNone(self) -> bool:
-        return self.character.id is None and self.poseId is None
+        return self.character.id is None and self.poseId == 0
 
     def _getIndividualValue(self, value) -> int:
         if value is False or self.isNone:
