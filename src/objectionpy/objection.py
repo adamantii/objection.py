@@ -1043,17 +1043,17 @@ def _loadJSONFrame(
     frame: Frame = frameClass(
         char=char,
         pairChar=pairChar,
-        text=frameDict["text"],
-        customName=frameDict["username"],
-        bubble=frameDict["bubbleType"],
+        text=frameDict.get("text", ""),
+        customName=frameDict.get("username", None),
+        bubble=frameDict.get("bubbleType", None),
         background=assets.Background(frameDict["backgroundId"])
-        if frameDict["backgroundId"]
+        if type(frameDict.get("backgroundId")) is int
         else None,
         backgroundFlip=bool(int(flipString[0])),
         wideX=frameDict["transition"]["left"] / 100
-        if frameDict["transition"] and "left" in frameDict["transition"]
+        if type(frameDict.get("transition", None)) is dict and "left" in frameDict["transition"]
         else None,
-        popup=assets.Popup(frameDict["popupId"]) if frameDict["popupId"] else None,
+        popup=assets.Popup(frameDict["popupId"]) if type(frameDict.get("popupId", None)) is int else None,
         talk=not frameDict["doNotTalk"],
         poseAnim=frameDict["poseAnimation"],
         goNext=frameDict["goNext"],
@@ -1304,7 +1304,7 @@ def loadJSONDict(
                 if frame in processedList:
                     continue
                 processedList.append(frame)
-                if frameDict["caseAction"]:
+                if type(frameDict.get("caseAction", None)) is dict:
                     id, param = (
                         frameDict["caseAction"]["id"],
                         frameDict["caseAction"]["value"],
