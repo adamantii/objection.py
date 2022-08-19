@@ -1,6 +1,7 @@
 """Main module containing everything related to objection exporting, importing, and structure (except for frame-related components)."""
 
 from copy import deepcopy
+from re import sub
 from dataclasses import dataclass, field
 from functools import cache
 from json import loads, dumps
@@ -17,7 +18,9 @@ if TYPE_CHECKING:
 
 LATEST_OBJECTION_VERSION = 4
 
-Frame = frames.Frame
+MISSING_REFERENCE_TAG = 'exception-missing-reference'
+
+_Frame = frames.Frame
 
 
 @dataclass
@@ -40,7 +43,7 @@ class Group:
     objection: Optional["_ObjectionBase"] = None
     name: Optional[str] = None
     caseTag: Optional[str] = None
-    frames: list[Frame] = field(default_factory=list)
+    frames: list[_Frame] = field(default_factory=list)
 
     def __post_init__(self):
         try:
@@ -72,8 +75,8 @@ class CEGroup(Group):
     """
 
     _type: enums.GroupType = field(default=enums.GroupType.CE, init=False)
-    counselSequence: list[Frame] = field(default_factory=list, init=False)
-    failureSequence: list[Frame] = field(default_factory=list, init=False)
+    counselSequence: list[_Frame] = field(default_factory=list, init=False)
+    failureSequence: list[_Frame] = field(default_factory=list, init=False)
 
 
 class GameOverGroup(Group):
@@ -149,7 +152,7 @@ class _ObjectionBase:
     ) -> frames.FrameCharacter:
         return char if char is not None else frames.noneCharacter
 
-    def _compileFrame(self, frame: Frame, frameList: list[Frame]):
+    def _compileFrame(self, frame: _Frame, frameList: list[_Frame]):
         try:
             _utils._tupleMapGet(self._frameMap, frame)
             frame = deepcopy(frame)  # Makes a copy if map get didn't fail
@@ -178,14 +181,6 @@ class _ObjectionBase:
             )
         ]
 
-        secondaryFlip = "1" if secondaryChar.flip else "0"
-        activeFlip = "1" if activeChar.flip else "0"
-        if frame.backgroundFlip is None:
-            backgroundFlip = "0" if not secondaryChar.isNone else activeFlip
-        else:
-            backgroundFlip = "1" if frame.backgroundFlip else "0"
-        flip = backgroundFlip + activeFlip + secondaryFlip
-
         frameDict = {
             "id": -1,
             "iid": self._nextFrameIID,
@@ -201,8 +196,7 @@ class _ObjectionBase:
             "doNotTalk": not frame.talk,
             "goNext": frame.goNext,
             "poseAnimation": frame.poseAnim,
-            "flipped": flip,
-            "popupId": frame.popup if frame.popup is not None else None,
+            "popupId": frame.popup.id if frame.popup is not None else None,
             "backgroundId": frame.background.id
             if frame.background is not None
             else activeChar.character.backgroundId,
@@ -211,6 +205,7 @@ class _ObjectionBase:
             "frameFades": [],
             "frameActions": [],
             "caseAction": {},
+            "flipped": "000",
             "pairId": None,
         }
         if frame.hidden:
@@ -368,6 +363,9 @@ class _ObjectionBase:
                 else:
                     pass  # TODO make it create new frames before current frame to set custom characters gallery sprites
 
+        activeFlip = "1" if activeChar.flip else "0"
+        secondaryFlip = "0"
+        
         if not secondaryChar.isNone or activeChar.pairOffset != (0, 0):
             pairNeeded = True
         else:
@@ -385,9 +383,20 @@ class _ObjectionBase:
                 pairChars[1].character.id,
                 pairChars[0].pairOffset,
                 pairChars[1].pairOffset,
-                True if chars[0] is frontChar else False,
+                True if pairChars[0] is frontChar else False,
             )
             frameDict["pairId"] = pair["pairId"]
+
+            pairChar0 = activeChar if pair["characterId"] == activeChar.character.id else secondaryChar
+            pairChar1 = secondaryChar if pair["characterId"] == activeChar.character.id else activeChar
+            activeFlip = "1" if pairChar0.flip else "0"
+            secondaryFlip = "1" if pairChar1.flip else "0"
+        
+        if frame.backgroundFlip is None:
+            backgroundFlip = "0" if not secondaryChar.isNone else activeFlip
+        else:
+            backgroundFlip = "1" if frame.backgroundFlip else "0"
+        frameDict["flipped"] = backgroundFlip + activeFlip + secondaryFlip
 
         self._frameMap.append((frame, frameDict))
 
@@ -577,7 +586,7 @@ class Scene(_ObjectionBase):
         self._groups.append(mainGroup)
 
     @property
-    def frames(self) -> list[Frame]:
+    def frames(self) -> list[_Frame]:
         return self._groups[0].frames
 
     def compile(self) -> dict:
@@ -656,7 +665,7 @@ class Case(_ObjectionBase):
             except KeyError:
                 raise KeyError(errorText)
 
-    def _getFrameDict(self, frameParam: Union[str, Frame]) -> dict:
+    def _getFrameDict(self, frameParam: Union[str, _Frame]) -> dict:
         return self._getByTagOrObj(
             frameParam,
             objMap=self._frameMap,
@@ -672,7 +681,7 @@ class Case(_ObjectionBase):
             errorText="Parsed group object wasn' found",
         )
 
-    def _post_process_frame(self, processedList: list, frame: Frame, frameDict: dict):
+    def _post_process_frame(self, processedList: list, frame: _Frame, frameDict: dict):
         if frame in processedList:
             return
         processedList.append(frame)
@@ -892,7 +901,9 @@ class Case(_ObjectionBase):
         objectionDict = super().compile()
         objectionDict["courtRecord"] = courtRecord
 
-        frame: Frame
+        self._frameTags[MISSING_REFERENCE_TAG] = self._frameMap[0][1]
+
+        frame: _Frame
         frameDict: dict
         processedList = []
         for i in range(2):  # Looping twice to process newly-generated press frames too
@@ -934,9 +945,13 @@ class ObjectionError(Exception):
 
 
 def _checkPresetId(characterId: int) -> Optional[int]:
-    if characterId >= 1000:
+    if type(characterId) is int and characterId >= 1000:
         return characterId
     return None
+
+
+def _convertToHyphenCase(string: str) -> str:
+    return sub(r'(?<!^)(?=[A-Z])', '-', string).lower() # type: ignore
 
 
 def _getEnumByValue(enum: "EnumMeta", value: Any, enumType: "EnumT") -> "EnumT":
@@ -976,36 +991,40 @@ def _loadJSONFrame(
     frameMap: list,
     frameIIDs: dict,
     suppressWarnings: bool,
-) -> Frame:
+) -> _Frame:
     pair: Optional[dict] = None
     pairedIs1: bool = False
     for pairDict in pairList:
         if pairDict["pairId"] == frameDict["pairId"]:
             pair = pairDict
-            pairedCharIs1 = frameDict["characterId"] == _checkPresetId(
-                pairDict["characterId2"]
-            )
+            pairedIs1 = frameDict["characterId"] != _checkPresetId(pairDict["characterId2"])
             break
 
     flipString = frameDict["flipped"] if frameDict["flipped"] else "000"
 
-    charAsset = assets.Character(0)
+    charAsset: assets.Character = assets.Character(0)
     if frameDict["characterId"] is None:
-        for char in preset.collectionValues(preset.Characters):
-            for pose in char.poses:
+        presetChar: assets.Character
+        for presetChar in preset.collectionValues(preset.Characters):
+            for pose in presetChar.poses:
                 if pose["id"] == frameDict["poseId"]:
-                    charAsset = char
+                    charAsset = presetChar
                     break
     else:
         charAsset = assets.Character(
             frameDict["characterId"], _loaded=(frameDict["characterId"] is None)
         )
-    char = frames.FrameCharacter(
-        character=charAsset,
-        poseId=frameDict["poseId"],
-        flip=bool(int(flipString[1])),
-        isActive=True,
-    )
+    
+    char: frames.FrameCharacter
+    if charAsset.id == 0:
+        char = frames.noneCharacter
+    else:
+        char = frames.FrameCharacter(
+            character=charAsset,
+            poseId=frameDict["poseId"],
+            flip=bool(int(flipString[1])),
+            isActive=True,
+        )
 
     pairChar = None
     if pair:
@@ -1015,32 +1034,35 @@ def _loadJSONFrame(
             else (pair["offsetX2"], pair["offsetY2"])
         )
         char.isFront = pair["front"] if pairedIs1 else not pair["front"]
+        char.flip = bool(int(flipString[1])) if pairedIs1 else bool(int(flipString[2]))
 
         pairCharId = (
             pair["characterId"]
             if frameDict["characterId"] == _checkPresetId(pair["characterId2"])
             else pair["characterId2"]
         )
-        pairCharAsset = assets.Character(0)
-        if pairCharId >= 1000:
-            pairCharAsset = assets.Character(pairCharId)
-        else:
-            for char in preset.collectionValues(preset.Characters):
-                if char.id == pairCharId:
-                    charAsset = char
-                    break
-        pairChar = frames.FrameCharacter(
-            character=pairCharAsset,
-            poseId=frameDict["pairPoseId"],
-            flip=bool(int(flipString[2])),
-            isActive=False,
-            pairOffset=(pair["offsetX2"], pair["offsetY2"])
-            if pairedIs1
-            else (pair["offsetX"], pair["offsetY"]),
-            isFront=not pair["front"] if pairedIs1 else pair["front"],
-        )
 
-    frame: Frame = frameClass(
+        if pairCharId is not None:
+            pairCharAsset = assets.Character(0)
+            if _checkPresetId(pairCharId) is not None:
+                pairCharAsset = assets.Character(pairCharId)
+            else:
+                for presetChar in preset.collectionValues(preset.Characters):
+                    if presetChar.id == pairCharId:
+                        charAsset = presetChar
+                        break
+            pairChar = frames.FrameCharacter(
+                character=pairCharAsset,
+                poseId=frameDict["pairPoseId"],
+                flip=bool(int(flipString[2])) if pairedIs1 else bool(int(flipString[1])),
+                isActive=False,
+                pairOffset=(pair["offsetX2"], pair["offsetY2"])
+                if pairedIs1
+                else (pair["offsetX"], pair["offsetY"]),
+                isFront=not pair["front"] if pairedIs1 else pair["front"],
+            )
+
+    frame: _Frame = frameClass(
         char=char,
         pairChar=pairChar,
         text=frameDict.get("text", ""),
@@ -1077,7 +1099,7 @@ def _loadJSONFrame(
         fade=frames.Fade(
             direction=_getEnumByValue(
                 enums.FadeDirection,
-                frameDict["frameFades"][0].get("direction"),
+                frameDict["frameFades"][0].get("fade"),
                 enums.FadeDirection.IN,
             ),
             target=_getEnumByValue(
@@ -1088,10 +1110,10 @@ def _loadJSONFrame(
             duration=frameDict["frameFades"][0].get("duration"),
             easing=_getEnumByValue(
                 enums.Easing,
-                frameDict["frameFades"][0].get("easing"),
+                _convertToHyphenCase(frameDict["frameFades"][0].get("easing")),
                 enums.Easing.EASE,
             ),
-            color=frames.Color(frameDict["frameFades"][0].get("color")),
+            color=frames.Color(frameDict["frameFades"][0]["color"]) if "color" in frameDict["frameFades"][0] and type(frameDict["frameFades"][0]["color"]) is str else None,
         )
         if frameDict["frameFades"] and len(frameDict["frameFades"]) > 0
         else None,
@@ -1108,13 +1130,13 @@ def _loadJSONFrame(
             ),
             amount=frameDict["filter"].get("amount"),
         )
-        if frameDict["filter"]
+        if filter in frameDict
         else None,
         transition=frames.Transition(
             duration=frameDict["transition"].get("duration"),
             easing=_getEnumByValue(
-                enums.Easing, frameDict["transition"].get("easing"), enums.Easing.EASE
-            ),
+                enums.Easing, _convertToHyphenCase(frameDict["transition"]["easing"]), enums.Easing.EASE
+            ) if "easing" in frameDict["transition"] and type(frameDict["transition"]["easing"]) is str else enums.Easing.LINEAR,
         )
         if frameDict["transition"]
         else None,
@@ -1122,9 +1144,9 @@ def _loadJSONFrame(
             autoplaySpeed=_getFrameDictAction(frameDict, 15, suppressWarnings),
             dialogueBox=_getEnumByValue(
                 enums.PresetDialogueBox,
-                _getFrameDictAction(frameDict, 12, suppressWarnings),
+                int(_getFrameDictAction(frameDict, 12, suppressWarnings)),
                 enums.PresetDialogueBox.CLASSIC,
-            ),
+            ) if _getFrameDictAction(frameDict, 12, suppressWarnings) else None,
             dialogueBoxVisible=bool(
                 int(_getFrameDictAction(frameDict, 1, suppressWarnings))
             )
@@ -1245,6 +1267,14 @@ def loadJSONDict(
     frameMap = []
     frameIIDs = {}
     groupIIDs = {}
+
+    def _checkFrameReference(param, key = None):
+        default = MISSING_REFERENCE_TAG
+        if key is not None:
+            return frameIIDs[int(param[key])] if key in param and param[key] else default
+        else:
+            return frameIIDs[int(param)] if param else default
+
     for groupDict in objectionDict["groups"]:
         group: Group
         if groupDict["type"] == "n":
@@ -1298,16 +1328,16 @@ def loadJSONDict(
 
     if type(objection) is Case:
         processedList = []
-        frame: Frame
+        frame: _Frame
         for i in range(2):
             for frame, frameDict in frameMap:
                 if frame in processedList:
                     continue
                 processedList.append(frame)
-                if type(frameDict.get("caseAction", None)) is dict:
+                if type(frameDict.get("caseAction", None)) is dict and "id" in frameDict["caseAction"]:
                     id, param = (
                         frameDict["caseAction"]["id"],
-                        frameDict["caseAction"]["value"],
+                        frameDict["caseAction"].get("value", None),
                     )
 
                     if id == 16:
@@ -1322,7 +1352,7 @@ def loadJSONDict(
                         )
                     elif id == 4:
                         frame.caseAction = frames.CaseActions.GoToFrame(
-                            frameIIDs[int(param)]
+                            _checkFrameReference(param)
                         )
                     elif id == 15:
                         frame.caseAction = frames.CaseActions.SetGameOverGroup(
@@ -1333,15 +1363,15 @@ def loadJSONDict(
                     elif id == 6:
                         if param["type"] == 0:
                             frame.caseAction = frames.CaseActions.HealthSet(
-                                param["amount"] / 100
+                                float(param["amount"]) / 100
                             )
                         elif param["type"] == 1:
                             frame.caseAction = frames.CaseActions.HealthAdd(
-                                param["amount"] / 100
+                                float(param["amount"]) / 100
                             )
                         elif param["type"] == 2:
                             frame.caseAction = frames.CaseActions.HealthRemove(
-                                param["amount"] / 100
+                                float(param["amount"]) / 100
                             )
                     elif id == 7:
                         frame.caseAction = frames.CaseActions.FlashingHealth(
@@ -1349,7 +1379,7 @@ def loadJSONDict(
                         )
                     elif id == 8:
                         frame.caseAction = frames.CaseActions.PromptPresent(
-                            failFrame=frameIIDs[int(param["falseFid"])],
+                            failFrame=_checkFrameReference(param, "falseFid"),
                             presentEvidence=param["evidence"],
                             presentProfiles=param["profiles"],
                             choices=[
@@ -1360,7 +1390,7 @@ def loadJSONDict(
                     elif id == 9:
                         frame.caseAction = frames.CaseActions.PromptChoice(
                             [
-                                (choice["text"], frameIIDs[int(choice["fid"])])
+                                (choice["text"], _checkFrameReference(choice, "fid"))
                                 for choice in param
                             ]
                         )
@@ -1377,7 +1407,7 @@ def loadJSONDict(
                             )
                     elif id == 17:
                         frame.caseAction = frames.CaseActions.PromptCursor(
-                            failFrame=frameIIDs[int(param["falseFid"])],
+                            failFrame=_checkFrameReference(param, "falseFid"),
                             previewImageUrl=param["imageUrl"],
                             prompt=param["prompt"],
                             cursorColor=frames.Color(param["color"]),
@@ -1423,7 +1453,7 @@ def loadJSONDict(
                                 f"Unknown variable evaluation operator \"{param['type']}\" at frame {frameDict['iid']} (\"{frameDict['text']}\")"
                             )
                         frame.caseAction = frames.CaseActions.VarEval(
-                            trueFrame=frameIIDs[int(param["trueFid"])],
+                            trueFrame=_checkFrameReference(param, "trueFid"),
                             falseFrame=frameIIDs[int(param["falseFid"])],
                             expression=param["name"] + operator + param["value"],
                         )
@@ -1441,7 +1471,7 @@ def loadJSONDict(
                         for pressDict in frameDict["pressFrames"]:
                             pressFrame = _loadJSONFrame(
                                 pressDict,
-                                Frame,
+                                _Frame,
                                 objectionDict["pairs"],
                                 frameMap,
                                 frameIIDs,
