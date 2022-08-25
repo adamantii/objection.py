@@ -1277,17 +1277,19 @@ def loadJSONDict(
 
     for groupDict in objectionDict["groups"]:
         group: Group
-        if groupDict["type"] == "n":
-            group = Group()
-        elif groupDict["type"] == "ce":
-            group = CEGroup()
-        elif groupDict["type"] == "go":
-            group = GameOverGroup()
+        if type(objection) is Case:
+            if groupDict["type"] == "n":
+                group = Group()
+            elif groupDict["type"] == "ce":
+                group = CEGroup()
+            elif groupDict["type"] == "go":
+                group = GameOverGroup()
+            else:
+                raise IOError('Unknown group type "' + str(groupDict["type"]) + '"')
+            objection._groups.append(group)
+            group.name = groupDict["name"]
         else:
-            raise IOError('Unknown group type "' + str(groupDict["type"]) + '"')
-        objection._groups.append(group)
-        group.name = groupDict["name"]
-        group.frames.append
+            group = objection._groups[0]
 
         groupIIDs[groupDict["iid"]] = group
 
