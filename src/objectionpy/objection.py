@@ -950,10 +950,6 @@ def _checkPresetId(characterId: int) -> Optional[int]:
     return None
 
 
-def _convertToHyphenCase(string: str) -> str:
-    return sub(r'(?<!^)(?=[A-Z])', '-', string).lower() # type: ignore
-
-
 def _getEnumByValue(enum: "EnumMeta", value: Any, enumType: "EnumT") -> "EnumT":
     if value is None:
         return value
@@ -1110,7 +1106,7 @@ def _loadJSONFrame(
             duration=frameDict["frameFades"][0].get("duration"),
             easing=_getEnumByValue(
                 enums.Easing,
-                _convertToHyphenCase(frameDict["frameFades"][0].get("easing")),
+                frameDict["frameFades"][0].get("easing"),
                 enums.Easing.EASE,
             ),
             color=frames.Color(frameDict["frameFades"][0]["color"]) if "color" in frameDict["frameFades"][0] and type(frameDict["frameFades"][0]["color"]) is str else None,
@@ -1135,7 +1131,7 @@ def _loadJSONFrame(
         transition=frames.Transition(
             duration=frameDict["transition"].get("duration"),
             easing=_getEnumByValue(
-                enums.Easing, _convertToHyphenCase(frameDict["transition"]["easing"]), enums.Easing.EASE
+                enums.Easing, frameDict["transition"]["easing"], enums.Easing.EASE
             ) if "easing" in frameDict["transition"] and type(frameDict["transition"]["easing"]) is str else enums.Easing.LINEAR,
         )
         if frameDict["transition"]
